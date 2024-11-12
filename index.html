@@ -1,1 +1,49 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Official Blog</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="content">
+    <div class="main-content">
+      <div class="wrapper">
+        <!-- Blog Title -->
+        <h1 class="latest" id="main-title">Official Blog</h1>
+        
+        <!-- Search Controls -->
+        <div class="controls">
+          <input type="text" id="search-input" placeholder="Search posts..." />
+        </div>
+        
+        <!-- Status Message -->
+        <div id="status-message" style="display: none;"></div>
+        
+        <!-- Latest Grid -->
+        <div class="latest-grid" id="latest-grid">
+          <p>Loading posts...</p>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+        
+        <!-- Storage Info -->
+        <div class="storage-info" id="storage-info"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Suggestion Box for Autocomplete (Optional) -->
+  <div class="suggestion-box" id="suggestion-box" style="display: none;"></div>
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.10/dist/purify.min.js"></script>
+  
+  <!-- Link to external JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
