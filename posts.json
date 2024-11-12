@@ -1,1 +1,21 @@
+[
+  {
+    "id": 1,
+    "Picture": "https://picsum.photos/300/200?random=1",
+    "BgColor": "#FFD700",
+    "Title": "Welcome to My Blog",
+    "Description": "An introduction to my new blog!",
+    "Date": "2024-04-27",
+    "Body": "This is the **first post** on my official blog. I'm excited to share my thoughts and experiences with you all. Stay tuned for more updates!"
+  },
+  {
+    "id": 2,
+    "Picture": "https://picsum.photos/300/200?random=2",
+    "BgColor": "#ADFF2F",
+    "Title": "Understanding JavaScript",
+    "Description": "A deep dive into JavaScript fundamentals.",
+    "Date": "2024-05-05",
+    "Body": "JavaScript is a versatile programming language used primarily for web development. In this post, we'll explore its core concepts and best practices."
+  }
+]
 
