@@ -1,236 +1,224 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kelley Locksmithing & Handyman Services</title>
-  <!-- Font Awesome for Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Space+Mono:400,700|Work+Sans&display=swap" rel="stylesheet">
-  <!-- Link to your custom CSS -->
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deb's Happy Hogs 🐖</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    @keyframes scrollBanner {
+      from {
+        transform: translateX(100%);
+      }
+
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    .scrolling-banner {
+      animation: scrollBanner 15s linear infinite;
+    }
+
+    .hide-scrollbar {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    body {
+      font-family: 'Merriweather', serif;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      margin-top: 0;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+
+    .modal button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: transparent;
+      color: white;
+      border: none;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
+    .modal button:hover {
+      color: #ffcc00;
+    }
+
+    .modal .close-btn {
+      top: 10px;
+      right: 10px;
+      transform: none;
+      background-color: transparent;
+      font-size: 2rem;
+    }
+
+    .modal .prev-btn {
+      left: 10px;
+    }
+
+    .modal .next-btn {
+      right: 10px;
+    }
+  </style>
 </head>
 
-<body>
-  <header>
-    <div class="container">
-      <h1>
-        KELLEY LOCKSMITHING &amp;
-        <span>HANDYMAN SERVICES</span>
-      </h1>
-      <nav>
-        <div class="hamburger">
-          <i class="fa fa-bars"></i>
-          <i class="fa fa-times"></i>
-        </div>
-        <ul class="nav-links">
-          <li>
-            <a href="#residential">Residential Locksmithing</a>
+<body class="font-serif bg-gradient-to-r from-yellow-300 to-yellow-100 text-black">
+  <!-- Top Banner -->
+  <div class="fixed top-0 left-0 w-full bg-yellow-400 overflow-hidden z-50 h-10 shadow-lg">
+    <div class="scrolling-banner font-bold text-lg py-2 whitespace-nowrap text-center">
+      Pre-order your hog today — 10% off for new customers and 15% off for recurring customers!!!
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex min-h-screen pt-10">
+    <div class="bg-yellow-400 p-6 w-60 flex flex-col h-full shadow-lg fixed">
+      <nav class="flex-grow">
+        <ul class="space-y-6 text-lg font-bold leading-relaxed">
+          <li class="hover:underline hover:text-yellow-600 transition duration-300">
+            <a href="#home">🏠 Home</a>
           </li>
-          <li>
-            <a href="#commercial">Commercial Locksmithing</a>
+          <li class="hover:underline hover:text-yellow-600 transition duration-300">
+            <a href="#about">👩‍🌾 About Us</a>
           </li>
-          <li>
-            <a href="#automotive">Automotive</a>
+          <li class="hover:underline hover:text-yellow-600 transition duration-300">
+            <a href="#preorder">🐖 Pre-Order Hogs</a>
           </li>
-          <li>
-            <a href="#handyman">Handyman Services</a>
+          <li class="hover:underline hover:text-yellow-600 transition duration-300">
+            <a href="#farmlife">🌳 Farm Life</a>
           </li>
-          <li>
-            <a href="#contact">Contact</a>
+          <li class="hover:underline hover:text-yellow-600 transition duration-300">
+            <a href="#contact">📬 Contact Us</a>
           </li>
         </ul>
       </nav>
     </div>
-  </header>
+    <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-12 box-border ml-60 bg-white rounded-lg shadow-md">
+      <!-- Home Section -->
+      <section id="home" class="space-y-4">
+        <h1 class="text-4xl font-extrabold sticky top-10 bg-gradient-to-r from-yellow-200 to-yellow-100 p-4 rounded-lg z-10 shadow">
+          Welcome to Joe & Deb’s Happy Heritage Hog Farm!
+        </h1>
+        <p class="text-lg italic leading-relaxed">
+          Pre-order your whole happy Red Wattle hog today! Joe & Deb’s Heritage Hog Farm (J&D Heritage Hog Farm)
+          is a family-owned and operated Red Wattle heritage hog farm located in Mountain Grove, Missouri. Nestled
+          between beautiful mountains and shaded by oak trees, our charming farm provides spacious, well-shaded
+          pastures where our hogs thrive. They enjoy a natural lifestyle—playing in the mud, relaxing in the grass,
+          and munching on acorns, kitchen scraps, and feed.
+        </p>
+      </section>
 
-  <section class="hero">
-    <img src="/assets/images/banner.png" alt="Friendly locksmith with tools" />
-    <div class="hero-text">
-      <h2>Your Trusted Local Locksmith &amp; Handyman</h2>
-      <p>Over 30 years of experience fixing locks and homes with a friendly smile.</p>
-      <a href="#contact" class="button">Get in Touch</a>
-    </div>
-  </section>
-
-  <section class="gallery">
-    <h2>Our Work &amp; Inspiration</h2>
-    <div class="image-grid">
-      <img src="https://images.pexels.com/photos/7641991/pexels-photo-7641991.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Key duplication by Kelley" />
-      <img src="https://images.pexels.com/photos/11543858/pexels-photo-11543858.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Key close-up on table with tools" />
-      <img src="https://images.pexels.com/photos/333837/pexels-photo-333837.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Keyhole close-up showing craftsmanship" />
-      <img src="https://images.pexels.com/photos/114741/pexels-photo-114741.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Hand inserting key into lock" />
-      <img src="https://images.pexels.com/photos/333838/pexels-photo-333838.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Locksmith tools spread out" />
-      <img src="https://images.pexels.com/photos/29372725/pexels-photo-29372725/free-photo-of-woman-locking-wooden-door-with-key-for-security.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Woman locking door with Kelley's help" />
-      <img src="https://images.pexels.com/photos/29458505/pexels-photo-29458505/free-photo-of-front-view-of-white-car-by-brick-wall.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Car outside serviced by Kelley" />
-      <img src="https://images.pexels.com/photos/29449059/pexels-photo-29449059/free-photo-of-sleek-black-car-parked-by-urban-building.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Black car parked after service" />
-    </div>
-  </section>
-
-  <section id="residential">
-    <div class="container">
-      <h2>Residential Locksmithing Services</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Service</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Remove old lock and replace with a new lock on door</td>
-            <td>$20</td>
-          </tr>
-          <tr>
-            <td>New lock installation (includes drilling new hole)</td>
-            <td>$50</td>
-          </tr>
-          <tr>
-            <td>Repair existing lock (if repairable)</td>
-            <td>$20</td>
-          </tr>
-          <tr>
-            <td>Rekey (1 lock)</td>
-            <td>$18</td>
-          </tr>
-          <tr>
-            <td>Rekey (up to 5 locks)</td>
-            <td>$75</td>
-          </tr>
-          <tr>
-            <td>Antique Lock Repair</td>
-            <td>$75</td>
-          </tr>
-        </tbody>
-      </table>
-      <p>*Parts not included.</p>
-    </div>
-  </section>
-
-  <section id="commercial">
-    <div class="container">
-      <h2>Commercial Locksmithing Services</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Service</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Lock Rekey / Key Replacement</td>
-            <td>$20</td>
-          </tr>
-          <tr>
-            <td>Rim &amp; Mortise Lock Installation</td>
-            <td>Call for Estimate</td>
-          </tr>
-          <tr>
-            <td>Schlage Level 1+ High Security (Primus), cut [1]</td>
-            <td>$15</td>
-          </tr>
-          <tr>
-            <td>Schlage Primus Cylinders, Locks, and Padlocks [1]</td>
-            <td>$25</td>
-          </tr>
-        </tbody>
-      </table>
-      <p>[1] Schlage keys must be keyed by a professional locksmith to ensure duplication is impossible.</p>
-    </div>
-  </section>
-
-  <section id="automotive">
-    <div class="container">
-      <h2>Emergency Automotive Opening</h2>
-      <p>Locked your keys in your car? Don't worry, give Kelley a call!</p>
-      <ul>
-        <li>$85 during business hours (includes trip charge)</li>
-        <li>Call for after-hours service (after 10:00pm)</li>
-      </ul>
-      <p>Call or text: (262) 745-1628</p>
-    </div>
-  </section>
-
-  <section id="handyman">
-    <div class="container">
-      <h2>Home Maintenance and Repair</h2>
-      <p>Need a hand around the house? Let Kelley handle it!</p>
-      <p>From fixing leaks to hanging shelves, we've got you covered.</p>
-      <p>Call or text: (262) 745-1628</p>
-    </div>
-  </section>
-
-  <section id="contact">
-    <div class="container">
-      <h2>Contact Us</h2>
-      <p>Patrick "Mike" Kelley, Licensed Locksmith &amp; Handyman</p>
-      <p>Phone: (262) 745-1628</p>
-      <p>
-        Email:
-        <a href="mailto:kelocks@hotmail.com">kelocks@hotmail.com</a>
-      </p>
-      <p>$50 travel charge up to 5 miles, $0.56 per mile over 5 miles.</p>
-      <p>Business hours: 8am - 6pm (Monday - Friday)</p>
-    </div>
-  </section>
-
-  <section id="map">
-    <div class="container">
-      <h2>Our Location</h2>
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.132498705312!2d-95.46856618489408!3d29.760426981999944!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640c189e3f5e91f%3A0x4a67f6c4b1f7b2d!2sHouston%2C%20TX!5e0!3m2!1sen!2sus!4v1600000000000!5m2!1sen!2sus" width="100%" height="450" style="border: 0" allowfullscreen="" loading="lazy" frameborder="0"></iframe>
-    </div>
-  </section>
-
-  <section id="contact-form">
-    <div class="container">
-      <h2>Send Us a Message</h2>
-      <form id="contactForm" action="#" method="POST">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input id="name" type="text" name="name" required placeholder="Your Name" />
+      <!-- Farm Life Section -->
+      <section id="farmlife" class="space-y-4">
+        <h2 class="text-3xl font-extrabold">🌳 Farm Life</h2>
+        <p class="text-base leading-relaxed">Explore the life of our hogs and the beauty of the farm through our photo gallery.</p>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <img src="https://picsum.photos/id/1015/300/200" class="cursor-pointer rounded-lg shadow" alt="Farm Scene 1" onclick="openModal(0)">
+          <img src="https://picsum.photos/id/1024/300/200" class="cursor-pointer rounded-lg shadow" alt="Farm Scene 2" onclick="openModal(1)">
+          <img src="https://picsum.photos/id/1040/300/200" class="cursor-pointer rounded-lg shadow" alt="Farm Scene 3" onclick="openModal(2)">
         </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input id="email" type="email" name="email" required placeholder="Your Email" />
+      </section>
+
+      <!-- Contact Section -->
+      <section id="contact" class="space-y-6">
+        <h2 class="text-3xl font-extrabold">📬 Contact Us</h2>
+        <form class="space-y-6">
+          <div>
+            <label for="firstName" class="block font-bold">First Name</label>
+            <input type="text" id="firstName" name="firstName" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
+          </div>
+          <div>
+            <label for="lastName" class="block font-bold">Last Name</label>
+            <input type="text" id="lastName" name="lastName" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
+          </div>
+          <div>
+            <label for="phone" class="block font-bold">Phone</label>
+            <input type="tel" id="phone" name="phone" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
+          </div>
+          <div>
+            <label for="email" class="block font-bold">Email</label>
+            <input type="email" id="email" name="email" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
+          </div>
+          <button type="submit" class="bg-[#9c091a] text-yellow-400 px-6 py-3 rounded-lg hover:bg-yellow-300 hover:text-[#9c091a] transition duration-300">
+            Submit
+          </button>
+        </form>
+      </section>
+
+      <!-- Map Section -->
+      <section id="map" class="space-y-4 pb-12">
+        <h2 class="text-3xl font-extrabold mb-2">🗺️ Map</h2>
+        <div class="rounded-lg overflow-hidden shadow-lg">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.835434509729!2d-92.25959718489054!3d37.18279897986809!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87cf74f897bce69d%3A0x1fef29f7dbdb4c7d!2sMountain%20Grove%2C%20MO%2C%20USA!5e0!3m2!1sen!2sin!4v1691438757580!5m2!1sen!2sin" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
         </div>
-        <div class="form-group">
-          <label for="phone">Phone</label>
-          <input id="phone" type="tel" name="phone" placeholder="Your Phone Number" />
-        </div>
-        <div class="form-group">
-          <label for="message">Message</label>
-          <textarea id="message" name="message" rows="5" required placeholder="Your Message"></textarea>
-        </div>
-        <!-- Google reCAPTCHA Widget -->
-        <div class="form-group">
-          <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
-        </div>
-        <button type="submit">Send Message</button>
-      </form>
+      </section>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    <div class="container">
-      <p>&copy; 2024 Kelley Locksmithing &amp; Handyman Services. All rights reserved.</p>
-    </div>
-  </footer>
+  <!-- Modal Section -->
+  <div id="modal" class="modal">
+    <button class="close-btn" onclick="closeModal()">❌</button>
+    <button class="prev-btn" onclick="changeImage(-1)">&#8249;</button>
+    <img id="modal-image" src="" alt="Farm Image">
+    <button class="next-btn" onclick="changeImage(1)">&#8250;</button>
+  </div>
 
-  <!-- Back-to-Top Button -->
-  <button id="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-  </button>
+  <!-- Modal JavaScript -->
+  <script>
+    const images = [
+      "https://picsum.photos/id/1015/800/600",
+      "https://picsum.photos/id/1024/800/600",
+      "https://picsum.photos/id/1040/800/600",
+      "https://picsum.photos/id/1050/800/600",
+      "https://picsum.photos/id/1060/800/600",
+      "https://picsum.photos/id/1070/800/600"
+    ];
+    let currentIndex = 0;
 
-  <!-- EmailJS SDK -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <!-- Google reCAPTCHA -->
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <!-- Link to your custom JavaScript -->
-  <script src="script.js"></script>
+    function openModal(index) {
+      currentIndex = index;
+      const modal = document.getElementById("modal");
+      const modalImage = document.getElementById("modal-image");
+      modalImage.src = images[currentIndex];
+      modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("modal");
+      modal.style.display = "none";
+    }
+
+    function changeImage(direction) {
+      currentIndex = (currentIndex + direction + images.length) % images.length;
+      const modalImage = document.getElementById("modal-image");
+      modalImage.src = images[currentIndex];
+    }
+  </script>
 </body>
 
 </html>
