@@ -1,0 +1,5 @@
+# Robots.txt file for SEO
+User-agent: *
+Disallow:
+
+Sitemap: /sitemap.xml

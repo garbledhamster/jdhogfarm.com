@@ -1,0 +1,122 @@
+# InitializeFlatFileStructure.ps1
+# Creates a flat-file folder structure with commented help text in each file.
+
+# Get the parent directory of the "scripts" folder
+$TargetDir = Join-Path (Get-Location).Path ".."
+
+# Define folder structure
+$structure = @{
+    "assets/css"       = @("style.css")
+    "assets/js"        = @("script.js")
+    "assets/images"    = @()
+    "assets/fonts"     = @()
+    "assets/media"     = @()
+    "content/pages"    = @("index.md", "about.md")
+    "content/posts"    = @("example-post.md")
+    "content/templates"= @("header.html", "footer.html")
+    "content/snippets" = @("navigation.html")
+    "data"             = @("sample.json")
+    "config"           = @("site.yml", "routes.yml", "environment.yml")
+    "logs"             = @("app.log")
+    "tests"            = @("test_example.ps1")
+}
+
+# Define help text for files
+$fileHelpText = @{
+    "style.css"         = "/* Main stylesheet for the project */"
+    "script.js"         = "// Main JavaScript file for the project"
+    "index.md"          = "<!-- Home page content in Markdown -->"
+    "about.md"          = "<!-- About page content in Markdown -->"
+    "example-post.md"   = "<!-- Example blog post content in Markdown -->"
+    "header.html"       = "<!-- HTML template for the header -->"
+    "footer.html"       = "<!-- HTML template for the footer -->"
+    "navigation.html"   = "<!-- Reusable navigation snippet -->"
+    "sample.json"       = @"
+{
+  \"example\": \"sample data file\"
+}
+"@
+    "site.yml"          = "# Global site configuration settings"
+    "routes.yml"        = "# Custom routing rules for the site"
+    "environment.yml"   = "# Environment-specific configuration"
+    "app.log"           = "# Log file for tracking application activity"
+    "test_example.ps1"  = "# Example test script for the project"
+}
+
+# Function to create folders and files
+function Initialize-Structure {
+    param (
+        [string]$BaseDir,
+        [hashtable]$FolderStructure,
+        [hashtable]$FileContents
+    )
+
+    Write-Host "Initializing flat-file folder structure at: $BaseDir" -ForegroundColor Cyan
+
+    foreach ($folder in $FolderStructure.Keys) {
+        $folderPath = Join-Path $BaseDir $folder
+
+        # Create directory
+        if (!(Test-Path -Path $folderPath)) {
+            New-Item -ItemType Directory -Path $folderPath -Force | Out-Null
+            Write-Host "Created folder: $folderPath" -ForegroundColor Green
+        } else {
+            Write-Host "Folder already exists: $folderPath" -ForegroundColor Yellow
+        }
+
+        # Create files in the directory
+        foreach ($file in $FolderStructure[$folder]) {
+            $filePath = Join-Path $folderPath $file
+            $helpText = $FileContents[$file]
+
+            if (!(Test-Path -Path $filePath)) {
+                New-Item -ItemType File -Path $filePath -Force | Out-Null
+                Write-Host "Created file: $filePath" -ForegroundColor Green
+
+                # Add help text to the file
+                if ($helpText) {
+                    Set-Content -Path $filePath -Value $helpText
+                    Write-Host "Added help text to: $filePath" -ForegroundColor Cyan
+                }
+            } else {
+                Write-Host "File already exists: $filePath" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
+# Create top-level files
+function Initialize-TopLevelFiles {
+    param (
+        [string]$BaseDir
+    )
+
+    $topLevelFiles = @{
+        "README.md"  = "# Project Overview`n`nThis file provides an overview of the project."
+        "LICENSE"    = "# License Information`n`nSpecify your project's license here."
+        ".gitignore" = "# Git Ignore File`n`nDefine files and folders to ignore in Git."
+        "index.html" = "<!-- Main entry point for the site -->"
+    }
+
+    foreach ($file in $topLevelFiles.Keys) {
+        $filePath = Join-Path $BaseDir $file
+        $content = $topLevelFiles[$file]
+
+        if (!(Test-Path -Path $filePath)) {
+            New-Item -ItemType File -Path $filePath -Force | Out-Null
+            Write-Host "Created top-level file: $filePath" -ForegroundColor Green
+
+            # Add content to the file
+            Set-Content -Path $filePath -Value $content
+            Write-Host "Added content to: $filePath" -ForegroundColor Cyan
+        } else {
+            Write-Host "Top-level file already exists: $filePath" -ForegroundColor Yellow
+        }
+    }
+}
+
+# Run the functions
+Initialize-Structure -BaseDir $TargetDir -FolderStructure $structure -FileContents $fileHelpText
+Initialize-TopLevelFiles -BaseDir $TargetDir
+
+Write-Host "Flat-file folder structure initialization complete!" -ForegroundColor Green

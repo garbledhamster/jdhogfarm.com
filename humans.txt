@@ -1,0 +1,4 @@
+# Humans.txt file
+Team:
+    Developer: Your Name
+    Contact: email@example.com

@@ -1,11 +1,20 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Deb's Happy Hogs 🐖</title>
+  <title>Deb's Happy Hogs</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Add Font Links for Rye and Lora -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rye&display=swap" rel="stylesheet">
+
+  <!-- Add Feather Icons -->
+  <script src="https://unpkg.com/feather-icons"></script>
+
   <style>
     @keyframes scrollBanner {
       from {
@@ -19,6 +28,9 @@
 
     .scrolling-banner {
       animation: scrollBanner 15s linear infinite;
+      font-family: 'Rye', cursive; /* Apply Rye to scrolling banner */
+      font-size: 1.25rem;
+      color: #9c091a; /* Deep Rustic Red */
     }
 
     .hide-scrollbar {
@@ -30,10 +42,40 @@
       display: none;
     }
 
+    /* Set global font styles */
     body {
-      font-family: 'Merriweather', serif;
+      font-family: 'Lora', serif; /* Lora as the default font */
+      background: #fef3c7; /* Beige Cream */
+      color: #6b4226; /* Earthy Brown */
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
+    /* Apply Rye to all headings and center them */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Rye', cursive;
+      color: #9c091a; /* Deep Rustic Red */
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for rustic effect */
+      display: flex;
+      align-items: center;
+      justify-content: center; /* Centers content horizontally */
+      text-align: center; /* Ensures text is centered */
+    }
+
+    /* Fine-tune other text elements */
+    p, li, input, textarea, button {
+      font-family: 'Lora', serif;
+    }
+
+    /* Horizontal Row Styles */
+    .horizontal-row {
+      height: 3px;
+      background-color: #9c091a; /* Same as headings for consistency */
+      margin: 2rem 0;
+    }
+
+    /* Modal Styles */
     .modal {
       position: fixed;
       top: 0;
@@ -65,7 +107,7 @@
     }
 
     .modal button:hover {
-      color: #ffcc00;
+      color: #fbd38d; /* Sunlit Yellow on hover */
     }
 
     .modal .close-btn {
@@ -83,47 +125,142 @@
     .modal .next-btn {
       right: 10px;
     }
+
+    /* Updated Side Navigation Styles for Desktop */
+    #side-nav {
+      background-color: #6b4226; /* Rustic Brown */
+      color: #fef3c7; /* Light Beige for text */
+    }
+
+    #side-nav a {
+      color: #fef3c7; /* Light Beige for links */
+    }
+
+    #side-nav a:hover {
+      color: #fbd38d; /* Sunlit Yellow on hover */
+    }
+
+    /* Mobile Dropdown Menu Styles */
+    #mobile-nav {
+      background-color: #6b4226; /* Rustic Brown */
+      color: #fef3c7; /* Light Beige for text */
+      width: 100%;
+      position: fixed;
+      top: 40px; /* Below the top banner */
+      left: 0;
+      right: 0;
+      z-index: 40;
+      display: none;
+      flex-direction: column;
+      padding: 1rem 0;
+    }
+
+    #mobile-nav a {
+      color: #fef3c7; /* Light Beige for links */
+      padding: 0.5rem 1.5rem;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    #mobile-nav a:hover {
+      background-color: #fbd38d; /* Sunlit Yellow on hover */
+      color: #6b4226; /* Rustic Brown text on hover */
+    }
+
+    /* Adjust Toggle Button for Mobile */
+    .mobile-toggle-btn {
+      background-color: #6b4226; /* Rustic Brown */
+      color: #fef3c7; /* Light Beige */
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+    }
+
+    .mobile-toggle-btn:hover {
+      background-color: #fbd38d; /* Sunlit Yellow on hover */
+      color: #6b4226; /* Rustic Brown text on hover */
+    }
+
+    /* Button Styles */
+    .submit-btn {
+      background-color: #9c091a; /* Deep Rustic Red */
+      color: #fef3c7; /* Light Beige */
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .submit-btn:hover {
+      background-color: #fbd38d; /* Sunlit Yellow */
+      color: #9c091a; /* Deep Rustic Red */
+    }
   </style>
 </head>
 
-<body class="font-serif bg-gradient-to-r from-yellow-300 to-yellow-100 text-black">
+<body class="bg-fef3c7 text-6b4226 box-border">
   <!-- Top Banner -->
-  <div class="fixed top-0 left-0 w-full bg-yellow-400 overflow-hidden z-50 h-10 shadow-lg">
+  <div class="fixed top-0 left-0 w-full bg-fbd38d overflow-hidden z-50 h-10 shadow-lg">
     <div class="scrolling-banner font-bold text-lg py-2 whitespace-nowrap text-center">
       Pre-order your hog today — 10% off for new customers and 15% off for recurring customers!!!
     </div>
   </div>
 
+  <!-- Mobile Navigation Toggle -->
+  <button class="md:hidden fixed top-12 left-4 z-50 p-2 rounded mobile-toggle-btn" onclick="toggleMobileNav()">
+    ☰
+  </button>
+
+  <!-- Mobile Dropdown Navigation -->
+  <div id="mobile-nav" class="flex md:hidden">
+    <nav class="flex flex-col">
+      <a href="#home" onclick="toggleMobileNav()">Home</a>
+      <a href="#about" onclick="toggleMobileNav()">About Us</a>
+      <a href="#preorder" onclick="toggleMobileNav()">Pre-Order Hogs</a>
+      <a href="#farmlife" onclick="toggleMobileNav()">Farm Life</a>
+      <a href="#contact" onclick="toggleMobileNav()">Contact Us</a>
+    </nav>
+  </div>
+
+  <!-- Side Navigation for Desktop -->
+  <div id="side-nav" class="p-6 w-60 flex flex-col shadow-lg fixed top-10 bottom-0 left-0 z-40 hidden md:flex">
+    <nav class="flex-grow">
+      <ul class="space-y-6 text-lg font-bold leading-relaxed">
+        <li class="hover:underline transition duration-300">
+          <i data-feather="home" class="mr-2"></i>
+          <a href="#home">Home</a>
+        </li>
+        <li class="hover:underline transition duration-300">
+          <i data-feather="user" class="mr-2"></i>
+          <a href="#about">About Us</a>
+        </li>
+        <li class="hover:underline transition duration-300">
+          <i data-feather="shopping-cart" class="mr-2"></i>
+          <a href="#preorder">Pre-Order Hogs</a>
+        </li>
+        <li class="hover:underline transition duration-300">
+          <i data-feather="sun" class="mr-2"></i>
+          <a href="#farmlife">Farm Life</a>
+        </li>
+        <li class="hover:underline transition duration-300">
+          <i data-feather="mail" class="mr-2"></i>
+          <a href="#contact">Contact Us</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
   <!-- Main Content -->
   <div class="flex min-h-screen pt-10">
-    <div class="bg-yellow-400 p-6 w-60 flex flex-col h-full shadow-lg fixed">
-      <nav class="flex-grow">
-        <ul class="space-y-6 text-lg font-bold leading-relaxed">
-          <li class="hover:underline hover:text-yellow-600 transition duration-300">
-            <a href="#home">🏠 Home</a>
-          </li>
-          <li class="hover:underline hover:text-yellow-600 transition duration-300">
-            <a href="#about">👩‍🌾 About Us</a>
-          </li>
-          <li class="hover:underline hover:text-yellow-600 transition duration-300">
-            <a href="#preorder">🐖 Pre-Order Hogs</a>
-          </li>
-          <li class="hover:underline hover:text-yellow-600 transition duration-300">
-            <a href="#farmlife">🌳 Farm Life</a>
-          </li>
-          <li class="hover:underline hover:text-yellow-600 transition duration-300">
-            <a href="#contact">📬 Contact Us</a>
-          </li>
-        </ul>
-      </nav>
-    </div>
-    <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-12 box-border ml-60 bg-white rounded-lg shadow-md">
+    <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-12 box-border ml-0 md:ml-60 bg-fef3c7 rounded-lg shadow-md">
       <!-- Home Section -->
       <section id="home" class="space-y-4">
-        <h1 class="text-4xl font-extrabold sticky top-10 bg-gradient-to-r from-yellow-200 to-yellow-100 p-4 rounded-lg z-10 shadow">
+        <h1 class="text-4xl font-extrabold bg-fbd38d p-4 rounded-lg shadow">
           Welcome to Joe & Deb’s Happy Heritage Hog Farm!
         </h1>
-        <p class="text-lg italic leading-relaxed">
+        <p class="text-lg italic leading-relaxed mt-4">
           Pre-order your whole happy Red Wattle hog today! Joe & Deb’s Heritage Hog Farm (J&D Heritage Hog Farm)
           is a family-owned and operated Red Wattle heritage hog farm located in Mountain Grove, Missouri. Nestled
           between beautiful mountains and shaded by oak trees, our charming farm provides spacious, well-shaded
@@ -132,9 +269,15 @@
         </p>
       </section>
 
+      <!-- Horizontal Row -->
+      <div class="horizontal-row"></div>
+
       <!-- Farm Life Section -->
       <section id="farmlife" class="space-y-4">
-        <h2 class="text-3xl font-extrabold">🌳 Farm Life</h2>
+        <h2 class="text-3xl font-extrabold">
+          <i data-feather="sun" class="mr-2"></i>
+          Farm Life
+        </h2>
         <p class="text-base leading-relaxed">Explore the life of our hogs and the beauty of the farm through our photo gallery.</p>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
           <img src="https://picsum.photos/id/1015/300/200" class="cursor-pointer rounded-lg shadow" alt="Farm Scene 1" onclick="openModal(0)">
@@ -143,9 +286,15 @@
         </div>
       </section>
 
+      <!-- Horizontal Row -->
+      <div class="horizontal-row"></div>
+
       <!-- Contact Section -->
       <section id="contact" class="space-y-6">
-        <h2 class="text-3xl font-extrabold">📬 Contact Us</h2>
+        <h2 class="text-3xl font-extrabold">
+          <i data-feather="mail" class="mr-2"></i>
+          Contact Us
+        </h2>
         <form class="space-y-6">
           <div>
             <label for="firstName" class="block font-bold">First Name</label>
@@ -163,15 +312,21 @@
             <label for="email" class="block font-bold">Email</label>
             <input type="email" id="email" name="email" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
           </div>
-          <button type="submit" class="bg-[#9c091a] text-yellow-400 px-6 py-3 rounded-lg hover:bg-yellow-300 hover:text-[#9c091a] transition duration-300">
+          <button type="submit" class="submit-btn">
             Submit
           </button>
         </form>
       </section>
 
+      <!-- Horizontal Row -->
+      <div class="horizontal-row"></div>
+
       <!-- Map Section -->
       <section id="map" class="space-y-4 pb-12">
-        <h2 class="text-3xl font-extrabold mb-2">🗺️ Map</h2>
+        <h2 class="text-3xl font-extrabold mb-2">
+          <i data-feather="map" class="mr-2"></i>
+          Map
+        </h2>
         <div class="rounded-lg overflow-hidden shadow-lg">
           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.835434509729!2d-92.25959718489054!3d37.18279897986809!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87cf74f897bce69d%3A0x1fef29f7dbdb4c7d!2sMountain%20Grove%2C%20MO%2C%20USA!5e0!3m2!1sen!2sin!4v1691438757580!5m2!1sen!2sin" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
           </iframe>
@@ -206,11 +361,13 @@
       const modalImage = document.getElementById("modal-image");
       modalImage.src = images[currentIndex];
       modal.style.display = "flex";
+      document.body.style.overflow = "hidden"; // Prevent background scrolling
     }
 
     function closeModal() {
       const modal = document.getElementById("modal");
       modal.style.display = "none";
+      document.body.style.overflow = "auto"; // Restore scrolling
     }
 
     function changeImage(direction) {
@@ -218,6 +375,26 @@
       const modalImage = document.getElementById("modal-image");
       modalImage.src = images[currentIndex];
     }
+
+    function toggleMobileNav() {
+      const mobileNav = document.getElementById("mobile-nav");
+      mobileNav.style.display = (mobileNav.style.display === "flex") ? "none" : "flex";
+    }
+
+    // Optional: Close mobile nav when clicking outside
+    window.addEventListener('click', function (e) {
+      const sideNav = document.getElementById("side-nav");
+      const mobileNav = document.getElementById("mobile-nav");
+      const toggleButton = e.target.closest('button[onclick="toggleMobileNav()"]');
+      if (!sideNav.contains(e.target) && !mobileNav.contains(e.target) && !toggleButton) {
+        if (window.innerWidth < 768) { // Tailwind's md breakpoint is 768px
+          mobileNav.style.display = "none";
+        }
+      }
+    });
+
+    // Initialize Feather Icons
+    feather.replace();
   </script>
 </body>
 
