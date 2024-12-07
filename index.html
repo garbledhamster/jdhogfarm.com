@@ -172,6 +172,11 @@
         height: 200px;
       }
     }
+
+    /* Modal styles */
+    .modal-bg {
+      backdrop-filter: blur(4px);
+    }
   </style>
 
   <!-- Load Marked.js -->
@@ -219,8 +224,8 @@
     <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12">
       <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Get Started Today! 🚀</h3>
       <form 
+        id="contact-form"
         class="max-w-md mx-auto space-y-4" 
-        action="https://formspree.io/f/your_form_id" 
         method="POST">
         <input 
           class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -271,6 +276,20 @@
     </footer>
   </main>
 
+  <!-- Modal for form submission results -->
+  <div id="modal-overlay" class="fixed inset-0 z-50 hidden">
+    <div class="modal-bg absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
+      <div class="max-w-sm w-full bg-[#ffcd54] border-4 border-red-800 rounded-lg p-6 relative">
+        <button id="close-modal" class="absolute top-2 right-2 text-red-800 font-bold text-xl hover:text-red-900">&times;</button>
+        <h2 id="modal-title" class="text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Status</h2>
+        <p id="modal-message" class="text-red-800 mb-4 text-center text-lg"></p>
+        <div class="text-center">
+          <button id="close-button" class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Load the Rellax library (Parallax) -->
   <script src="https://cdn.jsdelivr.net/npm/rellax@1.12.1/rellax.min.js"></script>
 
@@ -279,6 +298,26 @@
       // Containers for home and about
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
+
+      // Modal elements
+      const modalOverlay = document.getElementById('modal-overlay');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const closeModal = document.getElementById('close-modal');
+      const closeButton = document.getElementById('close-button');
+
+      function showModal(title, message) {
+        modalTitle.innerText = title;
+        modalMessage.innerText = message;
+        modalOverlay.classList.remove('hidden');
+      }
+
+      function hideModal() {
+        modalOverlay.classList.add('hidden');
+      }
+
+      closeModal.addEventListener('click', hideModal);
+      closeButton.addEventListener('click', hideModal);
 
       // Load home.md
       fetch('data/home.md')
@@ -424,13 +463,46 @@
           if(!isDown) return;
           e.preventDefault();
           const x = e.pageX - scrollContainer.offsetLeft;
-          const walk = (x - startX) * 1; // multiplier for scroll speed if desired
+          const walk = (x - startX);
           scrollContainer.scrollLeft = scrollLeftPos - walk;
         });
       }
 
       // Initialize Parallax
       new Rellax('[data-rellax-speed]');
+
+      // Handle Form Submission with Fetch & Show Modal
+      const contactForm = document.getElementById('contact-form');
+      contactForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(contactForm);
+        
+        // Formspree endpoint
+        const endpoint = 'https://formspree.io/f/xvgongjo';
+
+        fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            // Success
+            showModal('Success 🎉', 'Your message has been sent successfully! Thank you for reaching out.');
+            contactForm.reset();
+          } else {
+            // Error
+            showModal('Error 😞', 'Oops! Something went wrong. Please try again later.');
+          }
+        })
+        .catch(error => {
+          console.error('Form submission error:', error);
+          showModal('Error 😞', 'Could not send your message. Please check your network connection and try again.');
+        });
+      });
     });
   </script>
 </body>
