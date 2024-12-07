@@ -1,0 +1,2 @@
+Joe & Deb’s Heritage Hog Farm is a small, family-owned haven built on love, respect, and thoughtful stewardship of the land and our animals. Each day here ends with everyone—hogs, humans, and even hummingbirds—content and well cared for. We believe in raising our Red Wattle hogs naturally and compassionately, ensuring a peaceful life that leads to savory, top-quality pork. When you choose our farm, you’re embracing a tradition of wholesome values and honest, nourishing work.
+

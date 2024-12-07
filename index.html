@@ -1,401 +1,437 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Deb's Happy Hogs</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flat Style Website</title>
+
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Add Font Links for Rye and Lora -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Rye&display=swap" rel="stylesheet">
-
-  <!-- Add Feather Icons -->
-  <script src="https://unpkg.com/feather-icons"></script>
-
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Asap:wght@500&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
+  
   <style>
-    @keyframes scrollBanner {
-      from {
-        transform: translateX(100%);
-      }
-
-      to {
-        transform: translateX(-100%);
-      }
+    /* ------------------------------------------------------------
+     GLOBAL FONT STYLING
+     ------------------------------------------------------------ */
+    body {
+      font-family: 'Asap', sans-serif !important;
+      font-weight: 500 !important;
     }
 
-    .scrolling-banner {
-      animation: scrollBanner 15s linear infinite;
-      font-family: 'Rye', cursive; /* Apply Rye to scrolling banner */
-      font-size: 1.25rem;
-      color: #9c091a; /* Deep Rustic Red */
+    /* Headings use Noto Serif Bold 700 */
+    .markdown-content h1, .markdown-content h2, .markdown-content h3,
+    .markdown-content h4, .markdown-content h5, .markdown-content h6,
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Noto Serif', serif !important;
+      font-weight: 700 !important;
     }
 
-    .hide-scrollbar {
-      scrollbar-width: none;
-      -ms-overflow-style: none;
+    /* ------------------------------------------------------------
+     MARKDOWN CONTENT STYLING
+     ------------------------------------------------------------ */
+    .markdown-content h1, .markdown-content h2, .markdown-content h3,
+    .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+      margin-bottom: 0.75rem !important;
+      line-height: 1.2 !important;
     }
 
-    .hide-scrollbar::-webkit-scrollbar {
+    .markdown-content h1 {
+      font-size: 2em !important;
+      margin-top: 1em !important;
+    }
+
+    .markdown-content h2 {
+      font-size: 1.75em !important;
+      margin-top: 1em !important;
+    }
+
+    .markdown-content h3 {
+      font-size: 1.5em !important;
+      margin-top: 1em !important;
+    }
+
+    .markdown-content h4 {
+      font-size: 1.25em !important;
+      margin-top: 1em !important;
+    }
+
+    .markdown-content h5 {
+      font-size: 1.1em !important;
+      margin-top: 1em !important;
+    }
+
+    .markdown-content h6 {
+      font-size: 1em !important;
+      margin-top: 1em !important;
+    }
+
+    .markdown-content p {
+      margin-bottom: 1em !important;
+      line-height: 1.5 !important;
+    }
+
+    .markdown-content ul, .markdown-content ol {
+      padding-left: 1.25em !important;
+      margin-bottom: 1em !important;
+    }
+
+    .markdown-content li {
+      margin-bottom: 0.5em !important;
+    }
+
+    .markdown-content blockquote {
+      border-left: 4px solid #ccc !important;
+      padding-left: 1em !important;
+      color: #555 !important;
+      margin-bottom: 1em !important;
+    }
+
+    .markdown-content pre {
+      background: #f5f5f5 !important;
+      padding: 1em !important;
+      overflow: auto !important;
+      margin-bottom: 1em !important;
+      border-radius: 4px !important;
+      font-family: Consolas, Monaco, 'Courier New', monospace !important;
+      font-size: 0.9em !important;
+    }
+
+    .markdown-content code {
+      background: #f5f5f5 !important;
+      padding: 0.2em 0.4em !important;
+      border-radius: 4px !important;
+      font-family: Consolas, Monaco, 'Courier New', monospace !important;
+      font-size: 0.95em !important;
+    }
+
+    .markdown-content table {
+      width: 100% !important;
+      border: 1px solid #ddd !important;
+      margin-bottom: 1em !important;
+    }
+
+    .markdown-content th, .markdown-content td {
+      border: 1px solid #ddd !important;
+      padding: 0.5em !important;
+    }
+
+    .markdown-content hr {
+      border: none;
+      border-top: 2px solid #a20000 !important;
+      margin: 2em 0 !important;
+    }
+
+    /* Minimal custom CSS for scrollbar hiding */
+    .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none; 
+    }
 
-    /* Set global font styles */
+    /* Styles from the original wiggle slider snippet */
     body {
-      font-family: 'Lora', serif; /* Lora as the default font */
-      background: #fef3c7; /* Beige Cream */
-      color: #6b4226; /* Earthy Brown */
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      overflow-x: hidden;
     }
 
-    /* Apply Rye to all headings and center them */
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Rye', cursive;
-      color: #9c091a; /* Deep Rustic Red */
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow for rustic effect */
+    .scroll-container {
       display: flex;
-      align-items: center;
-      justify-content: center; /* Centers content horizontally */
-      text-align: center; /* Ensures text is centered */
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px;
+      gap: 20px;
+      position: relative;
     }
-
-    /* Fine-tune other text elements */
-    p, li, input, textarea, button {
-      font-family: 'Lora', serif;
+    .image-wrapper {
+      flex: none;
+      width: 300px;
+      height: 300px;
     }
-
-    /* Horizontal Row Styles */
-    .horizontal-row {
-      height: 3px;
-      background-color: #9c091a; /* Same as headings for consistency */
-      margin: 2rem 0;
-    }
-
-    /* Modal Styles */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
+    .image-wrapper img {
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .scroll-container::-webkit-scrollbar {
       display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      margin-top: 0;
+    }
+    .scroll-container {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
-    .modal img {
-      max-width: 90%;
-      max-height: 90%;
-    }
-
-    .modal button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background-color: transparent;
-      color: white;
-      border: none;
-      font-size: 2rem;
-      cursor: pointer;
-    }
-
-    .modal button:hover {
-      color: #fbd38d; /* Sunlit Yellow on hover */
-    }
-
-    .modal .close-btn {
-      top: 10px;
-      right: 10px;
-      transform: none;
-      background-color: transparent;
-      font-size: 2rem;
-    }
-
-    .modal .prev-btn {
-      left: 10px;
-    }
-
-    .modal .next-btn {
-      right: 10px;
-    }
-
-    /* Updated Side Navigation Styles for Desktop */
-    #side-nav {
-      background-color: #6b4226; /* Rustic Brown */
-      color: #fef3c7; /* Light Beige for text */
-    }
-
-    #side-nav a {
-      color: #fef3c7; /* Light Beige for links */
-    }
-
-    #side-nav a:hover {
-      color: #fbd38d; /* Sunlit Yellow on hover */
-    }
-
-    /* Mobile Dropdown Menu Styles */
-    #mobile-nav {
-      background-color: #6b4226; /* Rustic Brown */
-      color: #fef3c7; /* Light Beige for text */
-      width: 100%;
-      position: fixed;
-      top: 40px; /* Below the top banner */
-      left: 0;
-      right: 0;
-      z-index: 40;
-      display: none;
-      flex-direction: column;
-      padding: 1rem 0;
-    }
-
-    #mobile-nav a {
-      color: #fef3c7; /* Light Beige for links */
-      padding: 0.5rem 1.5rem;
-      text-decoration: none;
-      font-size: 1.1rem;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    #mobile-nav a:hover {
-      background-color: #fbd38d; /* Sunlit Yellow on hover */
-      color: #6b4226; /* Rustic Brown text on hover */
-    }
-
-    /* Adjust Toggle Button for Mobile */
-    .mobile-toggle-btn {
-      background-color: #6b4226; /* Rustic Brown */
-      color: #fef3c7; /* Light Beige */
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-    }
-
-    .mobile-toggle-btn:hover {
-      background-color: #fbd38d; /* Sunlit Yellow on hover */
-      color: #6b4226; /* Rustic Brown text on hover */
-    }
-
-    /* Button Styles */
-    .submit-btn {
-      background-color: #9c091a; /* Deep Rustic Red */
-      color: #fef3c7; /* Light Beige */
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    .submit-btn:hover {
-      background-color: #fbd38d; /* Sunlit Yellow */
-      color: #9c091a; /* Deep Rustic Red */
+    @media (max-width: 640px) {
+      .image-wrapper {
+        width: 200px;
+        height: 200px;
+      }
     }
   </style>
+
+  <!-- Load Marked.js -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Load DOMPurify -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <!-- Tooly tooltip library -->
+  <script src="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.css" />
 </head>
+<body class="font-sans antialiased text-red-800 flex flex-col h-screen bg-[url('assets/images/backgrounds/image-028.jpeg')] bg-center bg-cover bg-fixed relative">
+  <!-- ✨ Parallax DIV ADDED BELOW ✨ -->
+  <div class="absolute inset-0 bg-center bg-cover" style="background-image: url('assets/images/backgrounds/image-028.jpeg');" data-rellax-speed="-2"></div>
+  <!-- END OF ADDED CODE -->
 
-<body class="bg-fef3c7 text-6b4226 box-border">
-  <!-- Top Banner -->
-  <div class="fixed top-0 left-0 w-full bg-fbd38d overflow-hidden z-50 h-10 shadow-lg">
-    <div class="scrolling-banner font-bold text-lg py-2 whitespace-nowrap text-center">
-      Pre-order your hog today — 10% off for new customers and 15% off for recurring customers!!!
-    </div>
-  </div>
+  <!-- Semi-transparent overlay -->
+  <div class="fixed inset-0 bg-[#ffcd54] opacity-85 z-10"></div>
 
-  <!-- Mobile Navigation Toggle -->
-  <button class="md:hidden fixed top-12 left-4 z-50 p-2 rounded mobile-toggle-btn" onclick="toggleMobileNav()">
-    ☰
-  </button>
+  <!-- Header (sticky) -->
+  <header class="sticky top-0 text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-20">
+    <h1 class="text-5xl sm:text-3xl font-bold">J & D Herritage Hogs</h1>
+  </header>
 
-  <!-- Mobile Dropdown Navigation -->
-  <div id="mobile-nav" class="flex md:hidden">
-    <nav class="flex flex-col">
-      <a href="#home" onclick="toggleMobileNav()">Home</a>
-      <a href="#about" onclick="toggleMobileNav()">About Us</a>
-      <a href="#preorder" onclick="toggleMobileNav()">Pre-Order Hogs</a>
-      <a href="#farmlife" onclick="toggleMobileNav()">Farm Life</a>
-      <a href="#contact" onclick="toggleMobileNav()">Contact Us</a>
-    </nav>
-  </div>
+  <!-- Main Content (single main) -->
+  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 scrollbar-hide">
+    <!-- Home Section -->
+    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none">
+      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home 🏠</h2>
+      <div id="home-content" class="markdown-content text-lg sm:text-base">Loading...</div>
+    </section>
 
-  <!-- Side Navigation for Desktop -->
-  <div id="side-nav" class="p-6 w-60 flex flex-col shadow-lg fixed top-10 bottom-0 left-0 z-40 hidden md:flex">
-    <nav class="flex-grow">
-      <ul class="space-y-6 text-lg font-bold leading-relaxed">
-        <li class="hover:underline transition duration-300">
-          <i data-feather="home" class="mr-2"></i>
-          <a href="#home">Home</a>
-        </li>
-        <li class="hover:underline transition duration-300">
-          <i data-feather="user" class="mr-2"></i>
-          <a href="#about">About Us</a>
-        </li>
-        <li class="hover:underline transition duration-300">
-          <i data-feather="shopping-cart" class="mr-2"></i>
-          <a href="#preorder">Pre-Order Hogs</a>
-        </li>
-        <li class="hover:underline transition duration-300">
-          <i data-feather="sun" class="mr-2"></i>
-          <a href="#farmlife">Farm Life</a>
-        </li>
-        <li class="hover:underline transition duration-300">
-          <i data-feather="mail" class="mr-2"></i>
-          <a href="#contact">Contact Us</a>
-        </li>
-      </ul>
-    </nav>
-  </div>
+    <!-- About Section -->
+    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none">
+      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">About Us 🤝</h2>
+      <div id="about-content" class="markdown-content text-lg sm:text-base">Loading...</div>
+    </section>
 
-  <!-- Main Content -->
-  <div class="flex min-h-screen pt-10">
-    <div class="flex-1 overflow-y-auto hide-scrollbar p-6 space-y-12 box-border ml-0 md:ml-60 bg-fef3c7 rounded-lg shadow-md">
-      <!-- Home Section -->
-      <section id="home" class="space-y-4">
-        <h1 class="text-4xl font-extrabold bg-fbd38d p-4 rounded-lg shadow">
-          Welcome to Joe & Deb’s Happy Heritage Hog Farm!
-        </h1>
-        <p class="text-lg italic leading-relaxed mt-4">
-          Pre-order your whole happy Red Wattle hog today! Joe & Deb’s Heritage Hog Farm (J&D Heritage Hog Farm)
-          is a family-owned and operated Red Wattle heritage hog farm located in Mountain Grove, Missouri. Nestled
-          between beautiful mountains and shaded by oak trees, our charming farm provides spacious, well-shaded
-          pastures where our hogs thrive. They enjoy a natural lifestyle—playing in the mud, relaxing in the grass,
-          and munching on acorns, kitchen scraps, and feed.
-        </p>
-      </section>
+    <!-- Gallery Section -->
+    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800">
+      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Gallery 🖼️</h2>
+      <div class="scroll-container" id="scroll-container"></div>
+    </section>
 
-      <!-- Horizontal Row -->
-      <div class="horizontal-row"></div>
+    <!-- Contact Section with Embedded Form -->
+    <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12">
+      <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Get Started Today! 🚀</h3>
+      <form 
+        class="max-w-md mx-auto space-y-4" 
+        action="https://formspree.io/f/your_form_id" 
+        method="POST">
+        <input 
+          class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+          type="text" 
+          name="name" 
+          placeholder="Your Name" 
+          required 
+        />
+        <input 
+          class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+          type="email" 
+          name="email" 
+          placeholder="Your Email" 
+          required 
+        />
+        <textarea 
+          class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+          name="message" 
+          placeholder="Your Message" 
+          rows="4" 
+          required></textarea>
+        <button 
+          type="submit"
+          class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition">
+          Send
+        </button>
+      </form>
+    </section>
 
-      <!-- Farm Life Section -->
-      <section id="farmlife" class="space-y-4">
-        <h2 class="text-3xl font-extrabold">
-          <i data-feather="sun" class="mr-2"></i>
-          Farm Life
-        </h2>
-        <p class="text-base leading-relaxed">Explore the life of our hogs and the beauty of the farm through our photo gallery.</p>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <img src="https://picsum.photos/id/1015/300/200" class="cursor-pointer rounded-lg shadow" alt="Farm Scene 1" onclick="openModal(0)">
-          <img src="https://picsum.photos/id/1024/300/200" class="cursor-pointer rounded-lg shadow" alt="Farm Scene 2" onclick="openModal(1)">
-          <img src="https://picsum.photos/id/1040/300/200" class="cursor-pointer rounded-lg shadow" alt="Farm Scene 3" onclick="openModal(2)">
-        </div>
-      </section>
+    <!-- Map Section -->
+    <section class="mb-12 p-6 sm:p-4 border-4 border-red-800 rounded-lg bg-primary">
+      <h4 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Where We're Located 🌍</h4>
+      <div class="relative w-full h-[450px]">
+        <iframe 
+          class="absolute inset-0 w-full h-full"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d47510.36286382497!2d-92.269941!3d37.13819095!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87d0081648854f83%3A0x7dcdeb008ad2fbe2!2sMountain%20Grove%2C%20MO%2065711!5e1!3m2!1sen!2sus!4v1733535778975!5m2!1sen!2sus"
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </section>
 
-      <!-- Horizontal Row -->
-      <div class="horizontal-row"></div>
+    <!-- Footer -->
+    <footer class="py-6 text-center mt-12 border-t-8 border-red-800 bg-[#ffcd54]/90 relative z-20">
+      <p class="text-sm text-red-800">&copy; 2024 Your Brand. All rights reserved.</p>
+    </footer>
+  </main>
 
-      <!-- Contact Section -->
-      <section id="contact" class="space-y-6">
-        <h2 class="text-3xl font-extrabold">
-          <i data-feather="mail" class="mr-2"></i>
-          Contact Us
-        </h2>
-        <form class="space-y-6">
-          <div>
-            <label for="firstName" class="block font-bold">First Name</label>
-            <input type="text" id="firstName" name="firstName" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
-          </div>
-          <div>
-            <label for="lastName" class="block font-bold">Last Name</label>
-            <input type="text" id="lastName" name="lastName" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
-          </div>
-          <div>
-            <label for="phone" class="block font-bold">Phone</label>
-            <input type="tel" id="phone" name="phone" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
-          </div>
-          <div>
-            <label for="email" class="block font-bold">Email</label>
-            <input type="email" id="email" name="email" class="w-full border border-gray-300 p-3 rounded-lg shadow-sm">
-          </div>
-          <button type="submit" class="submit-btn">
-            Submit
-          </button>
-        </form>
-      </section>
+  <!-- Load the Rellax library (Parallax) -->
+  <script src="https://cdn.jsdelivr.net/npm/rellax@1.12.1/rellax.min.js"></script>
 
-      <!-- Horizontal Row -->
-      <div class="horizontal-row"></div>
-
-      <!-- Map Section -->
-      <section id="map" class="space-y-4 pb-12">
-        <h2 class="text-3xl font-extrabold mb-2">
-          <i data-feather="map" class="mr-2"></i>
-          Map
-        </h2>
-        <div class="rounded-lg overflow-hidden shadow-lg">
-          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.835434509729!2d-92.25959718489054!3d37.18279897986809!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87cf74f897bce69d%3A0x1fef29f7dbdb4c7d!2sMountain%20Grove%2C%20MO%2C%20USA!5e0!3m2!1sen!2sin!4v1691438757580!5m2!1sen!2sin" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
-        </div>
-      </section>
-    </div>
-  </div>
-
-  <!-- Modal Section -->
-  <div id="modal" class="modal">
-    <button class="close-btn" onclick="closeModal()">❌</button>
-    <button class="prev-btn" onclick="changeImage(-1)">&#8249;</button>
-    <img id="modal-image" src="" alt="Farm Image">
-    <button class="next-btn" onclick="changeImage(1)">&#8250;</button>
-  </div>
-
-  <!-- Modal JavaScript -->
   <script>
-    const images = [
-      "https://picsum.photos/id/1015/800/600",
-      "https://picsum.photos/id/1024/800/600",
-      "https://picsum.photos/id/1040/800/600",
-      "https://picsum.photos/id/1050/800/600",
-      "https://picsum.photos/id/1060/800/600",
-      "https://picsum.photos/id/1070/800/600"
-    ];
-    let currentIndex = 0;
+    document.addEventListener('DOMContentLoaded', function () {
+      // Containers for home and about
+      var homeContainer = document.querySelector('#home-content');
+      var aboutContainer = document.querySelector('#about-content');
 
-    function openModal(index) {
-      currentIndex = index;
-      const modal = document.getElementById("modal");
-      const modalImage = document.getElementById("modal-image");
-      modalImage.src = images[currentIndex];
-      modal.style.display = "flex";
-      document.body.style.overflow = "hidden"; // Prevent background scrolling
-    }
+      // Load home.md
+      fetch('data/home.md')
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+          }
+          return response.text();
+        })
+        .then(function(markdown) {
+          var rawHtml = marked.parse(markdown);
+          var safeHtml = DOMPurify.sanitize(rawHtml);
+          homeContainer.innerHTML = safeHtml;
+        })
+        .catch(function(error) {
+          console.error('Error loading home.md:', error);
+          homeContainer.innerText = 'Sorry, the Home section could not be loaded.';
+        });
 
-    function closeModal() {
-      const modal = document.getElementById("modal");
-      modal.style.display = "none";
-      document.body.style.overflow = "auto"; // Restore scrolling
-    }
+      // Load about.md
+      fetch('data/about.md')
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+          }
+          return response.text();
+        })
+        .then(function(markdown) {
+          var rawHtml = marked.parse(markdown);
+          var safeHtml = DOMPurify.sanitize(rawHtml);
+          aboutContainer.innerHTML = safeHtml;
+        })
+        .catch(function(error) {
+          console.error('Error loading about.md:', error);
+          aboutContainer.innerText = 'Sorry, the About Us section could not be loaded.';
+        });
 
-    function changeImage(direction) {
-      currentIndex = (currentIndex + direction + images.length) % images.length;
-      const modalImage = document.getElementById("modal-image");
-      modalImage.src = images[currentIndex];
-    }
+      // Load gallery items from JSON and apply infinite scroll & wiggle
+      fetch('data/gallery.json')
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(function(data) {
+          var scrollContainer = document.getElementById('scroll-container');
 
-    function toggleMobileNav() {
-      const mobileNav = document.getElementById("mobile-nav");
-      mobileNav.style.display = (mobileNav.style.display === "flex") ? "none" : "flex";
-    }
+          // Insert initial images
+          data.images.forEach(function(img) {
+            var wrapper = document.createElement('div');
+            wrapper.className = 'image-wrapper';
+            
+            var imageElement = document.createElement('img');
+            imageElement.src = img.src;
+            imageElement.alt = img.alt;
+            wrapper.appendChild(imageElement);
+            scrollContainer.appendChild(wrapper);
+          });
 
-    // Optional: Close mobile nav when clicking outside
-    window.addEventListener('click', function (e) {
-      const sideNav = document.getElementById("side-nav");
-      const mobileNav = document.getElementById("mobile-nav");
-      const toggleButton = e.target.closest('button[onclick="toggleMobileNav()"]');
-      if (!sideNav.contains(e.target) && !mobileNav.contains(e.target) && !toggleButton) {
-        if (window.innerWidth < 768) { // Tailwind's md breakpoint is 768px
-          mobileNav.style.display = "none";
+          // After initial images load, implement infinite scroll & wiggle
+          applyInfiniteScrollWiggle();
+        })
+        .catch(function(error) {
+          console.error('Error loading gallery.json:', error);
+        });
+
+      function applyInfiniteScrollWiggle() {
+        const scrollContainer = document.querySelector('#scroll-container');
+        const originalImages = Array.from(scrollContainer.querySelectorAll('.image-wrapper'));
+
+        // Clone images to create 3 sets total
+        for (let i = 0; i < 2; i++) {
+          originalImages.forEach(img => {
+            const clone = img.cloneNode(true);
+            scrollContainer.appendChild(clone);
+          });
         }
-      }
-    });
 
-    // Initialize Feather Icons
-    feather.replace();
+        const allImages = Array.from(scrollContainer.querySelectorAll('.image-wrapper'));
+        let totalWidth = 0;
+        let segmentWidth = 0;
+
+        window.addEventListener('load', () => {
+          totalWidth = allImages.reduce((acc, img) => {
+            return acc + img.offsetWidth + 20;
+          }, 20);
+
+          segmentWidth = totalWidth / 3;
+          scrollContainer.scrollLeft = segmentWidth;
+        });
+
+        // Wiggle parameters
+        const amplitude = 5;     // max rotation in degrees
+        const frequency = 0.01;  // wiggle frequency
+
+        scrollContainer.addEventListener('scroll', () => {
+          const scrollLeft = scrollContainer.scrollLeft;
+
+          // Wiggle effect
+          allImages.forEach((wrapper, index) => {
+            const direction = index % 2 === 0 ? 1 : -1;
+            const rotation = Math.sin(scrollLeft * frequency) * amplitude * direction;
+            wrapper.style.transform = `rotate(${rotation}deg)`;
+          });
+
+          // Infinite scroll logic
+          if (scrollLeft < segmentWidth) {
+            scrollContainer.scrollLeft = scrollLeft + segmentWidth;
+          } else if (scrollLeft > 2 * segmentWidth) {
+            scrollContainer.scrollLeft = scrollLeft - segmentWidth;
+          }
+        });
+
+        // ✨ DRAG-TO-SCROLL LOGIC BELOW ✨
+        let isDown = false;
+        let startX;
+        let scrollLeftPos;
+
+        // Change cursor on hover for user feedback
+        scrollContainer.style.cursor = 'grab';
+
+        scrollContainer.addEventListener('mousedown', (e) => {
+          isDown = true;
+          scrollContainer.classList.add('active');
+          scrollContainer.style.cursor = 'grabbing';
+          startX = e.pageX - scrollContainer.offsetLeft;
+          scrollLeftPos = scrollContainer.scrollLeft;
+          e.preventDefault();
+        });
+
+        scrollContainer.addEventListener('mouseleave', () => {
+          isDown = false;
+          scrollContainer.style.cursor = 'grab';
+        });
+
+        scrollContainer.addEventListener('mouseup', () => {
+          isDown = false;
+          scrollContainer.style.cursor = 'grab';
+        });
+
+        scrollContainer.addEventListener('mousemove', (e) => {
+          if(!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - scrollContainer.offsetLeft;
+          const walk = (x - startX) * 1; // multiplier for scroll speed if desired
+          scrollContainer.scrollLeft = scrollLeftPos - walk;
+        });
+      }
+
+      // Initialize Parallax
+      new Rellax('[data-rellax-speed]');
+    });
   </script>
 </body>
-
 </html>

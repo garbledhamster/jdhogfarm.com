@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Horizontal Scrolling Gallery with Wiggle Effect</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px;
+            gap: 20px;
+            position: relative;
+            /* Removed scroll-snap properties for a free scroll feeling */
+        }
+        .image-wrapper {
+            flex: none;
+            width: 300px;
+            height: 300px;
+        }
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+        .scroll-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="scroll-container" id="scroll-container">
+        <!-- Initial set of images -->
+        <div class="image-wrapper">
+            <img src="https://picsum.photos/id/1015/300/300" alt="Image 1">
+        </div>
+        <div class="image-wrapper">
+            <img src="https://picsum.photos/id/1016/300/300" alt="Image 2">
+        </div>
+        <div class="image-wrapper">
+            <img src="https://picsum.photos/id/1018/300/300" alt="Image 3">
+        </div>
+        <div class="image-wrapper">
+            <img src="https://picsum.photos/id/1020/300/300" alt="Image 4">
+        </div>
+        <div class="image-wrapper">
+            <img src="https://picsum.photos/id/1024/300/300" alt="Image 5">
+        </div>
+    </div>
+
+    <script>
+        const scrollContainer = document.querySelector('#scroll-container');
+        const originalImages = Array.from(scrollContainer.querySelectorAll('.image-wrapper'));
+
+        // Clone images to create 3 sets total (Original + 2 clones)
+        for (let i = 0; i < 2; i++) {
+            originalImages.forEach(img => {
+                const clone = img.cloneNode(true);
+                scrollContainer.appendChild(clone);
+            });
+        }
+
+        const allImages = Array.from(scrollContainer.querySelectorAll('.image-wrapper'));
+        let totalWidth = 0;
+        let segmentWidth = 0;
+
+        window.addEventListener('load', () => {
+            totalWidth = allImages.reduce((acc, img) => {
+                // Each image has width 300 + 20px gap except last doesn't necessarily need the gap
+                // but for simplicity we consider the gap after each image.
+                return acc + img.offsetWidth + 20;
+            }, 20); // initial padding of 20px
+
+            // totalWidth is now the width of all three sets combined.
+            // Each set is the original images, so:
+            segmentWidth = totalWidth / 3;
+
+            // Position scroll at the middle set (so we can scroll both ways infinitely)
+            scrollContainer.scrollLeft = segmentWidth;
+        });
+
+        // Wiggle parameters:
+        const amplitude = 5;     // max rotation in degrees
+        const frequency = 0.01;  // determines wiggle tightness
+
+        scrollContainer.addEventListener('scroll', () => {
+            const scrollLeft = scrollContainer.scrollLeft;
+
+            // Wiggle effect using a sine wave:
+            allImages.forEach((wrapper, index) => {
+                const direction = index % 2 === 0 ? 1 : -1;
+                const rotation = Math.sin(scrollLeft * frequency) * amplitude * direction;
+                wrapper.style.transform = `rotate(${rotation}deg)`;
+            });
+
+            // Infinite scroll logic:
+            // If scrolling too far left (less than one segment width), jump forward:
+            if (scrollLeft < segmentWidth) {
+                scrollContainer.scrollLeft = scrollLeft + segmentWidth;
+            }
+            // If scrolling too far right (beyond two segment widths), jump backward:
+            else if (scrollLeft > 2 * segmentWidth) {
+                scrollContainer.scrollLeft = scrollLeft - segmentWidth;
+            }
+        });
+    </script>
+</body>
+</html>
