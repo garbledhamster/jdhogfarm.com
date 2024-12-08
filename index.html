@@ -220,36 +220,52 @@
       <div class="scroll-container" id="scroll-container"></div>
     </section>
 
-    <!-- Contact Section with Embedded Form -->
+    <!-- Contact Section with Embedded Form (updated) -->
     <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12">
       <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Get Started Today! 🚀</h3>
       <form 
         id="contact-form"
-        class="max-w-md mx-auto space-y-4" 
-        method="POST">
-        <input 
-          class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-          type="text" 
-          name="name" 
-          placeholder="Your Name" 
-          required 
-        />
-        <input 
-          class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-          type="email" 
-          name="email" 
-          placeholder="Your Email" 
-          required 
-        />
-        <textarea 
-          class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-          name="message" 
-          placeholder="Your Message" 
-          rows="4" 
-          required></textarea>
+        class="max-w-md mx-auto space-y-4"
+        action="https://formspree.io/f/xvgongjo"
+        method="POST"
+      >
+        <label class="block text-left">
+          <span class="text-red-800 font-bold">Your Name:</span>
+          <input 
+            class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            type="text" 
+            name="name" 
+            placeholder="Your Name" 
+            required 
+          />
+        </label>
+
+        <label class="block text-left">
+          <span class="text-red-800 font-bold">Your Email:</span>
+          <input 
+            class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            type="email" 
+            name="email" 
+            placeholder="Your Email" 
+            required 
+          />
+        </label>
+
+        <label class="block text-left">
+          <span class="text-red-800 font-bold">Your Message:</span>
+          <textarea 
+            class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            name="message" 
+            placeholder="Your Message" 
+            rows="4" 
+            required
+          ></textarea>
+        </label>
+
         <button 
           type="submit"
-          class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition">
+          class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition"
+        >
           Send
         </button>
       </form>
@@ -276,7 +292,7 @@
     </footer>
   </main>
 
-  <!-- Modal for form submission results -->
+  <!-- Modal for form submission results (Optional - If no longer using JS submission) -->
   <div id="modal-overlay" class="fixed inset-0 z-50 hidden">
     <div class="modal-bg absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
       <div class="max-w-sm w-full bg-[#ffcd54] border-4 border-red-800 rounded-lg p-6 relative">
@@ -298,26 +314,6 @@
       // Containers for home and about
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
-
-      // Modal elements
-      const modalOverlay = document.getElementById('modal-overlay');
-      const modalTitle = document.getElementById('modal-title');
-      const modalMessage = document.getElementById('modal-message');
-      const closeModal = document.getElementById('close-modal');
-      const closeButton = document.getElementById('close-button');
-
-      function showModal(title, message) {
-        modalTitle.innerText = title;
-        modalMessage.innerText = message;
-        modalOverlay.classList.remove('hidden');
-      }
-
-      function hideModal() {
-        modalOverlay.classList.add('hidden');
-      }
-
-      closeModal.addEventListener('click', hideModal);
-      closeButton.addEventListener('click', hideModal);
 
       // Load home.md
       fetch('data/home.md')
@@ -378,7 +374,6 @@
             scrollContainer.appendChild(wrapper);
           });
 
-          // After initial images load, implement infinite scroll & wiggle
           applyInfiniteScrollWiggle();
         })
         .catch(function(error) {
@@ -432,12 +427,11 @@
           }
         });
 
-        // ✨ DRAG-TO-SCROLL LOGIC BELOW ✨
+        // Drag-to-scroll logic
         let isDown = false;
         let startX;
         let scrollLeftPos;
 
-        // Change cursor on hover for user feedback
         scrollContainer.style.cursor = 'grab';
 
         scrollContainer.addEventListener('mousedown', (e) => {
@@ -470,39 +464,6 @@
 
       // Initialize Parallax
       new Rellax('[data-rellax-speed]');
-
-      // Handle Form Submission with Fetch & Show Modal
-      const contactForm = document.getElementById('contact-form');
-      contactForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const formData = new FormData(contactForm);
-        
-        // Formspree endpoint
-        const endpoint = 'https://formspree.io/f/xvgongjo';
-
-        fetch(endpoint, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json'
-          }
-        })
-        .then(response => {
-          if (response.ok) {
-            // Success
-            showModal('Success 🎉', 'Your message has been sent successfully! Thank you for reaching out.');
-            contactForm.reset();
-          } else {
-            // Error
-            showModal('Error 😞', 'Oops! Something went wrong. Please try again later.');
-          }
-        })
-        .catch(error => {
-          console.error('Form submission error:', error);
-          showModal('Error 😞', 'Could not send your message. Please check your network connection and try again.');
-        });
-      });
     });
   </script>
 </body>
