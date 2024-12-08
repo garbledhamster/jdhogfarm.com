@@ -220,7 +220,7 @@
       <div class="scroll-container" id="scroll-container"></div>
     </section>
 
-    <!-- Contact Section with Embedded Form (updated) -->
+    <!-- Contact Section with Embedded Form (using modal on fetch result) -->
     <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12">
       <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Get Started Today! 🚀</h3>
       <form 
@@ -292,7 +292,7 @@
     </footer>
   </main>
 
-  <!-- Modal for form submission results (Optional - If no longer using JS submission) -->
+  <!-- Modal for form submission results -->
   <div id="modal-overlay" class="fixed inset-0 z-50 hidden">
     <div class="modal-bg absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
       <div class="max-w-sm w-full bg-[#ffcd54] border-4 border-red-800 rounded-lg p-6 relative">
@@ -311,63 +311,82 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      // Containers for home and about
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
 
+      // Modal elements
+      const modalOverlay = document.getElementById('modal-overlay');
+      const modalTitle = document.getElementById('modal-title');
+      const modalMessage = document.getElementById('modal-message');
+      const closeModal = document.getElementById('close-modal');
+      const closeButton = document.getElementById('close-button');
+
+      function showModal(title, message) {
+        modalTitle.innerText = title;
+        modalMessage.innerText = message;
+        modalOverlay.classList.remove('hidden');
+      }
+
+      function hideModal() {
+        modalOverlay.classList.add('hidden');
+      }
+
+      closeModal.addEventListener('click', hideModal);
+      closeButton.addEventListener('click', hideModal);
+
       // Load home.md
       fetch('data/home.md')
-        .then(function(response) {
+        .then(response => {
           if (!response.ok) {
             throw new Error('HTTP error! status: ' + response.status);
           }
           return response.text();
         })
-        .then(function(markdown) {
-          var rawHtml = marked.parse(markdown);
-          var safeHtml = DOMPurify.sanitize(rawHtml);
+        .then(markdown => {
+          const rawHtml = marked.parse(markdown);
+          const safeHtml = DOMPurify.sanitize(rawHtml);
           homeContainer.innerHTML = safeHtml;
         })
-        .catch(function(error) {
+        .catch(error => {
           console.error('Error loading home.md:', error);
           homeContainer.innerText = 'Sorry, the Home section could not be loaded.';
         });
 
       // Load about.md
       fetch('data/about.md')
-        .then(function(response) {
+        .then(response => {
           if (!response.ok) {
             throw new Error('HTTP error! status: ' + response.status);
           }
           return response.text();
         })
-        .then(function(markdown) {
-          var rawHtml = marked.parse(markdown);
-          var safeHtml = DOMPurify.sanitize(rawHtml);
+        .then(markdown => {
+          const rawHtml = marked.parse(markdown);
+          const safeHtml = DOMPurify.sanitize(rawHtml);
           aboutContainer.innerHTML = safeHtml;
         })
-        .catch(function(error) {
+        .catch(error => {
           console.error('Error loading about.md:', error);
           aboutContainer.innerText = 'Sorry, the About Us section could not be loaded.';
         });
 
       // Load gallery items from JSON and apply infinite scroll & wiggle
       fetch('data/gallery.json')
-        .then(function(response) {
+        .then(response => {
           if (!response.ok) {
             throw new Error('HTTP error! status: ' + response.status);
           }
           return response.json();
         })
-        .then(function(data) {
-          var scrollContainer = document.getElementById('scroll-container');
+        .then(data => {
+          const scrollContainer = document.getElementById('scroll-container');
 
           // Insert initial images
-          data.images.forEach(function(img) {
-            var wrapper = document.createElement('div');
+          data.images.forEach(img => {
+            const wrapper = document.createElement('div');
             wrapper.className = 'image-wrapper';
-            
-            var imageElement = document.createElement('img');
+
+            const imageElement = document.createElement('img');
             imageElement.src = img.src;
             imageElement.alt = img.alt;
             wrapper.appendChild(imageElement);
@@ -376,7 +395,7 @@
 
           applyInfiniteScrollWiggle();
         })
-        .catch(function(error) {
+        .catch(error => {
           console.error('Error loading gallery.json:', error);
         });
 
@@ -406,8 +425,8 @@
         });
 
         // Wiggle parameters
-        const amplitude = 5;     // max rotation in degrees
-        const frequency = 0.01;  // wiggle frequency
+        const amplitude = 5;     
+        const frequency = 0.01; 
 
         scrollContainer.addEventListener('scroll', () => {
           const scrollLeft = scrollContainer.scrollLeft;
@@ -464,6 +483,38 @@
 
       // Initialize Parallax
       new Rellax('[data-rellax-speed]');
+
+      // Handle Form Submission with Fetch & Show Modal
+      const contactForm = document.getElementById('contact-form');
+      contactForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(contactForm);
+        
+        const endpoint = 'https://formspree.io/f/xvgongjo';
+
+        fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            // Success
+            showModal('Success 🎉', 'Your message has been sent successfully! Thank you for reaching out.');
+            contactForm.reset();
+          } else {
+            // Error
+            showModal('Error 😞', 'Oops! Something went wrong. Please try again later.');
+          }
+        })
+        .catch(error => {
+          console.error('Form submission error:', error);
+          showModal('Error 😞', 'Could not send your message. Please check your network connection and try again.');
+        });
+      });
     });
   </script>
 </body>
