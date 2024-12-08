@@ -3,7 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Flat Style Website</title>
+
+  <!-- Primary Meta Tags -->
+  <title>J & D's Heritage Hog Farm</title>
+  <meta name="title" content="J & D's Heritage Hog Farm">
+  <meta name="description" content="Discover the tradition, care, and flavor of heritage hog farming at J & D's Heritage Hog Farm. Sustainably raised hogs, authentic community values, and delicious culinary experiences.">
+
+  <!-- Favicon and App Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/branding/13.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/branding/13.png">
+  <link rel="apple-touch-icon" href="assets/images/branding/13.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffcd54">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://jdhogfarm.com/">
+  <meta property="og:title" content="J & D's Heritage Hog Farm">
+  <meta property="og:description" content="Discover the tradition, care, and flavor of heritage hog farming at J & D's Heritage Hog Farm. Sustainably raised hogs, authentic community values, and delicious culinary experiences.">
+  <meta property="og:image" content="https://jdhogfarm.com/assets/images/branding/13.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://jdhogfarm.com/">
+  <meta property="twitter:title" content="J & D's Heritage Hog Farm">
+  <meta property="twitter:description" content="Discover the tradition, care, and flavor of heritage hog farming at J & D's Heritage Hog Farm. Sustainably raised hogs, authentic community values, and delicious culinary experiences.">
+  <meta property="twitter:image" content="https://jdhogfarm.com/assets/images/branding/13.png">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -132,13 +157,12 @@
       scrollbar-width: none; 
     }
 
-    /* Styles from the original wiggle slider snippet */
+    /* Styles for the horizontal scroll gallery */
     body {
       margin: 0;
       padding: 0;
       overflow-x: hidden;
     }
-
     .scroll-container {
       display: flex;
       overflow-x: auto;
@@ -146,6 +170,8 @@
       padding: 20px;
       gap: 20px;
       position: relative;
+      scroll-behavior: smooth;
+      justify-content: center;
     }
     .image-wrapper {
       flex: none;
@@ -170,6 +196,28 @@
       .image-wrapper {
         width: 200px;
         height: 200px;
+      }
+      /* Make sure the layout fits nicely within ~375px width */
+      body, html {
+        width: 100%;
+        margin: 0 auto;
+      }
+      main {
+        padding: 1rem;
+      }
+      h1, h2, h3, h4 {
+        text-align: center !important;
+      }
+      .markdown-content p, .markdown-content ul, .markdown-content ol, .markdown-content li {
+        text-align: center;
+      }
+      .flex-col, .flex {
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      .w-48.h-48 {
+        width: 150px !important;
+        height: 150px !important;
       }
     }
 
@@ -197,39 +245,56 @@
 
   <!-- Header (sticky) -->
   <header class="sticky top-0 text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-20">
-    <h1 class="text-5xl sm:text-3xl font-bold">J & D Herritage Hogs</h1>
+    <h1 class="text-5xl sm:text-3xl font-bold flex items-center justify-center">
+      <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm" class="mx-auto h-32 w-auto" />
+    </h1>
   </header>
+  
 
   <!-- Main Content (single main) -->
-  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 scrollbar-hide">
+  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 scrollbar-hide flex flex-col items-center justify-start">
     <!-- Home Section -->
-    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none">
+    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home 🏠</h2>
-      <div id="home-content" class="markdown-content text-lg sm:text-base">Loading...</div>
+      <div id="home-content" class="markdown-content text-lg sm:text-base"></div>
     </section>
 
     <!-- About Section -->
-    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none">
+    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">About Us 🤝</h2>
-      <div id="about-content" class="markdown-content text-lg sm:text-base">Loading...</div>
+      <div id="about-content" class="markdown-content text-lg sm:text-base"></div>
+
+      <!-- Profile Panels -->
+      <div class="flex flex-col sm:flex-row gap-8 items-center justify-center mt-8 w-full">
+        <div class="max-w-sm text-center flex flex-col items-center">
+          <img src="assets/images/general/007.jpg" alt="Joe" class="w-48 h-48 object-cover rounded-full mx-auto mb-4">
+          <h3 class="text-xl font-bold mb-2">Joe</h3>
+          <p class="text-red-800 text-center px-4">Joe is a dedicated caretaker of our heritage hogs. With years of experience and a passion for sustainable farming, he ensures the well-being of our animals and the quality of our products.</p>
+        </div>
+        <div class="max-w-sm text-center flex flex-col items-center">
+          <img src="assets/images/general/006.jpg" alt="Deb" class="w-48 h-48 object-cover rounded-full mx-auto mb-4">
+          <h3 class="text-xl font-bold mb-2">Deb</h3>
+          <p class="text-red-800 text-center px-4">Deb is the nurturing soul behind our farm's community outreach. Her warmth, culinary skills, and creative approach bring families and friends together to celebrate the flavors and traditions of heritage hog farming.</p>
+        </div>
+      </div>
     </section>
 
     <!-- Gallery Section -->
-    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800">
+    <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Gallery 🖼️</h2>
-      <div class="scroll-container" id="scroll-container"></div>
+      <div class="scroll-container w-full justify-center" id="scroll-container"></div>
     </section>
 
     <!-- Contact Section with Embedded Form (using modal on fetch result) -->
-    <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12">
+    <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center">
       <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Get Started Today! 🚀</h3>
       <form 
         id="contact-form"
-        class="max-w-md mx-auto space-y-4"
+        class="max-w-md mx-auto space-y-4 w-full"
         action="https://formspree.io/f/xvgongjo"
         method="POST"
       >
-        <label class="block text-left">
+        <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Name:</span>
           <input 
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -240,7 +305,7 @@
           />
         </label>
 
-        <label class="block text-left">
+        <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Email:</span>
           <input 
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -251,7 +316,7 @@
           />
         </label>
 
-        <label class="block text-left">
+        <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Message:</span>
           <textarea 
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -264,7 +329,7 @@
 
         <button 
           type="submit"
-          class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition"
+          class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition w-full"
         >
           Send
         </button>
@@ -272,7 +337,7 @@
     </section>
 
     <!-- Map Section -->
-    <section class="mb-12 p-6 sm:p-4 border-4 border-red-800 rounded-lg bg-primary">
+    <section class="mb-12 p-6 sm:p-4 border-4 border-red-800 rounded-lg bg-primary w-full text-center">
       <h4 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Where We're Located 🌍</h4>
       <div class="relative w-full h-[450px]">
         <iframe 
@@ -287,7 +352,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="py-6 text-center mt-12 border-t-8 border-red-800 bg-[#ffcd54]/90 relative z-20">
+    <footer class="py-6 text-center mt-12 border-t-8 border-red-800 bg-[#ffcd54]/90 relative z-20 w-full">
       <p class="text-sm text-red-800">&copy; 2024 Your Brand. All rights reserved.</p>
     </footer>
   </main>
@@ -295,7 +360,7 @@
   <!-- Modal for form submission results -->
   <div id="modal-overlay" class="fixed inset-0 z-50 hidden">
     <div class="modal-bg absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
-      <div class="max-w-sm w-full bg-[#ffcd54] border-4 border-red-800 rounded-lg p-6 relative">
+      <div class="max-w-sm w-full bg-[#ffcd54] border-4 border-red-800 rounded-lg p-6 relative text-center">
         <button id="close-modal" class="absolute top-2 right-2 text-red-800 font-bold text-xl hover:text-red-900">&times;</button>
         <h2 id="modal-title" class="text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Status</h2>
         <p id="modal-message" class="text-red-800 mb-4 text-center text-lg"></p>
@@ -370,7 +435,7 @@
           aboutContainer.innerText = 'Sorry, the About Us section could not be loaded.';
         });
 
-      // Load gallery items from JSON and apply infinite scroll & wiggle
+      // Load gallery items from JSON
       fetch('data/gallery.json')
         .then(response => {
           if (!response.ok) {
@@ -384,8 +449,7 @@
           // Insert initial images
           data.images.forEach(img => {
             const wrapper = document.createElement('div');
-            wrapper.className = 'image-wrapper';
-
+            wrapper.className = 'image-wrapper flex-shrink-0';
             const imageElement = document.createElement('img');
             imageElement.src = img.src;
             imageElement.alt = img.alt;

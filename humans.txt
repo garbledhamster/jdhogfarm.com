@@ -1,4 +1,4 @@
 # Humans.txt file
 Team:
-    Developer: Your Name
-    Contact: email@example.com
+    Developer: https://joerice.com
+    Contact: admin@jdhogfarm.com
