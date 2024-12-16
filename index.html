@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Primary Meta Tags -->
-  <title>J & D's Heritage Hog Farm</title>
-  <meta name="title" content="J & D's Heritage Hog Farm">
-  <meta name="description" content="Discover the tradition, care, and flavor of heritage hog farming at J & D's Heritage Hog Farm. Sustainably raised hogs, authentic community values, and delicious culinary experiences.">
+  <title>J & D's Heritage Hog Farm | Whole Hogs, Red Wattle Hogs & More</title>
+  <meta name="title" content="J & D's Heritage Hog Farm - Whole Hogs, Red Wattle Hogs, 1/4 Hog, 1/5 Hog, & Hogs for Sale">
+  <meta name="description" content="Discover our heritage hog farm offering whole hogs, red wattle hogs, 1/4 hog, 1/5 hog options, and sustainable hogs for sale. Preorder now for fresh, local, premium quality pork.">
+
+  <!-- SEO Keywords Meta Tag -->
+  <meta name="keywords" content="hogs for sale, whole hogs, red wattle hogs, 1/4 hog, 1/5 hog, heritage hog farm, preorder hog, sustainable pork, farm fresh hogs">
 
   <!-- Favicon and App Icons -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/images/branding/13.png">
@@ -19,15 +22,15 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://jdhogfarm.com/">
-  <meta property="og:title" content="J & D's Heritage Hog Farm">
-  <meta property="og:description" content="Discover the tradition, care, and flavor of heritage hog farming at J & D's Heritage Hog Farm. Sustainably raised hogs, authentic community values, and delicious culinary experiences.">
+  <meta property="og:title" content="J & D's Heritage Hog Farm - Whole Hogs, Red Wattle Hogs & More">
+  <meta property="og:description" content="Heritage hog farm specializing in whole hogs, red wattle hogs, 1/4 hog, 1/5 hog options, and sustainable hogs for sale. Preorder now for fresh, local, premium pork.">
   <meta property="og:image" content="https://jdhogfarm.com/assets/images/branding/13.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://jdhogfarm.com/">
-  <meta property="twitter:title" content="J & D's Heritage Hog Farm">
-  <meta property="twitter:description" content="Discover the tradition, care, and flavor of heritage hog farming at J & D's Heritage Hog Farm. Sustainably raised hogs, authentic community values, and delicious culinary experiences.">
+  <meta property="twitter:title" content="J & D's Heritage Hog Farm - Whole Hogs, Red Wattle Hogs & More">
+  <meta property="twitter:description" content="Discover our heritage hogs for sale: whole hogs, red wattle hogs, 1/4 hog, 1/5 hog options. Sustainably raised for premium quality. Preorder today!">
   <meta property="twitter:image" content="https://jdhogfarm.com/assets/images/branding/13.png">
 
   <!-- Tailwind CSS CDN -->
@@ -35,17 +38,17 @@
   
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@500&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
-  
+
   <style>
-    /* ------------------------------------------------------------
-     GLOBAL FONT STYLING
-     ------------------------------------------------------------ */
     body {
       font-family: 'Asap', sans-serif !important;
       font-weight: 500 !important;
+      min-height: 100vh; 
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
     }
 
-    /* Headings use Noto Serif Bold 700 */
     .markdown-content h1, .markdown-content h2, .markdown-content h3,
     .markdown-content h4, .markdown-content h5, .markdown-content h6,
     h1, h2, h3, h4, h5, h6 {
@@ -53,9 +56,6 @@
       font-weight: 700 !important;
     }
 
-    /* ------------------------------------------------------------
-     MARKDOWN CONTENT STYLING
-     ------------------------------------------------------------ */
     .markdown-content h1, .markdown-content h2, .markdown-content h3,
     .markdown-content h4, .markdown-content h5, .markdown-content h6 {
       margin-bottom: 0.75rem !important;
@@ -148,7 +148,6 @@
       margin: 2em 0 !important;
     }
 
-    /* Minimal custom CSS for scrollbar hiding */
     .scrollbar-hide::-webkit-scrollbar {
       display: none;
     }
@@ -157,12 +156,6 @@
       scrollbar-width: none; 
     }
 
-    /* Styles for the horizontal scroll gallery */
-    body {
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-    }
     .scroll-container {
       display: flex;
       overflow-x: auto;
@@ -171,19 +164,21 @@
       gap: 20px;
       position: relative;
       scroll-behavior: smooth;
-      justify-content: center;
+      justify-content: start; 
     }
+
     .image-wrapper {
       flex: none;
-      width: 300px;
-      height: 300px;
+      max-width: 12rem;
     }
+
     .image-wrapper img {
       width: 100%;
-      height: 100%;
+      height: auto; 
       object-fit: cover;
       border-radius: 10px;
     }
+
     .scroll-container::-webkit-scrollbar {
       display: none;
     }
@@ -192,89 +187,64 @@
       scrollbar-width: none;
     }
 
-    @media (max-width: 640px) {
-      .image-wrapper {
-        width: 200px;
-        height: 200px;
-      }
-      /* Make sure the layout fits nicely within ~375px width */
-      body, html {
-        width: 100%;
-        margin: 0 auto;
-      }
-      main {
-        padding: 1rem;
-      }
-      h1, h2, h3, h4 {
-        text-align: center !important;
-      }
-      .markdown-content p, .markdown-content ul, .markdown-content ol, .markdown-content li {
-        text-align: center;
-      }
-      .flex-col, .flex {
-        align-items: center !important;
-        justify-content: center !important;
-      }
-      .w-48.h-48 {
-        width: 150px !important;
-        height: 150px !important;
-      }
-    }
-
-    /* Modal styles */
     .modal-bg {
       backdrop-filter: blur(4px);
     }
   </style>
 
-  <!-- Load Marked.js -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Load DOMPurify -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
-  <!-- Tooly tooltip library -->
   <script src="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.css" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
 </head>
-<body class="font-sans antialiased text-red-800 flex flex-col h-screen bg-[url('assets/images/backgrounds/image-028.jpeg')] bg-center bg-cover bg-fixed relative">
-  <!-- ✨ Parallax DIV ADDED BELOW ✨ -->
+<body class="font-sans antialiased text-red-800 flex flex-col bg-center bg-cover bg-fixed relative min-h-screen" style="overflow-x:hidden; margin:0; padding:0;">
+  <!-- Parallax background -->
   <div class="absolute inset-0 bg-center bg-cover" style="background-image: url('assets/images/backgrounds/image-028.jpeg');" data-rellax-speed="-2"></div>
-  <!-- END OF ADDED CODE -->
 
   <!-- Semi-transparent overlay -->
   <div class="fixed inset-0 bg-[#ffcd54] opacity-85 z-10"></div>
 
-  <!-- Header (sticky) -->
-  <header class="sticky top-0 text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-20">
+  <!-- Header -->
+  <header class="fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
     <h1 class="text-5xl sm:text-3xl font-bold flex items-center justify-center">
-      <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm" class="mx-auto h-32 w-auto" />
+      <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" class="mx-auto h-32 w-auto" />
     </h1>
   </header>
   
-
-  <!-- Main Content (single main) -->
-  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 scrollbar-hide flex flex-col items-center justify-start">
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 flex flex-col items-center justify-start" style="padding-top: 12rem;">
     <!-- Home Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home 🏠</h2>
-      <div id="home-content" class="markdown-content text-lg sm:text-base"></div>
+      <div id="home-content" class="markdown-content text-lg sm:text-base">
+        <!-- home.md should contain keyword-rich content about hogs for sale, whole hogs, red wattle hogs, etc. -->
+      </div>
     </section>
 
     <!-- About Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">About Us 🤝</h2>
-      <div id="about-content" class="markdown-content text-lg sm:text-base"></div>
+      <div id="about-content" class="markdown-content text-lg sm:text-base">
+        <!-- about.md should also mention whole hogs, red wattle hogs, hogs for sale, etc. -->
+      </div>
 
       <!-- Profile Panels -->
       <div class="flex flex-col sm:flex-row gap-8 items-center justify-center mt-8 w-full">
         <div class="max-w-sm text-center flex flex-col items-center">
-          <img src="assets/images/general/007.jpg" alt="Joe" class="w-48 h-48 object-cover rounded-full mx-auto mb-4">
+          <img src="assets/images/general/007.jpg" alt="Joe at J & D's - Hog Specialist" class="w-48 h-48 object-cover rounded-full mx-auto mb-4">
           <h3 class="text-xl font-bold mb-2">Joe</h3>
-          <p class="text-red-800 text-center px-4">Joe is a dedicated caretaker of our heritage hogs. With years of experience and a passion for sustainable farming, he ensures the well-being of our animals and the quality of our products.</p>
+          <p class="text-red-800 text-center px-4">
+            Joe ensures every hog we raise—whole hogs, red wattle hogs, and even 1/4 hog shares—is nurtured sustainably for premium quality meat.
+          </p>
         </div>
         <div class="max-w-sm text-center flex flex-col items-center">
-          <img src="assets/images/general/006.jpg" alt="Deb" class="w-48 h-48 object-cover rounded-full mx-auto mb-4">
+          <img src="assets/images/general/006.jpg" alt="Deb at J & D's - Culinary & Community" class="w-48 h-48 object-cover rounded-full mx-auto mb-4">
           <h3 class="text-xl font-bold mb-2">Deb</h3>
-          <p class="text-red-800 text-center px-4">Deb is the nurturing soul behind our farm's community outreach. Her warmth, culinary skills, and creative approach bring families and friends together to celebrate the flavors and traditions of heritage hog farming.</p>
+          <p class="text-red-800 text-center px-4">
+            Deb brings our community together with her culinary expertise, creating dishes from our heritage hogs—whole hogs or a 1/4 hog share—enhancing the farm-to-table experience.
+          </p>
         </div>
       </div>
     </section>
@@ -282,12 +252,15 @@
     <!-- Gallery Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Gallery 🖼️</h2>
-      <div class="scroll-container w-full justify-center" id="scroll-container"></div>
+      <div class="scroll-container w-full justify-start" id="scroll-container"></div>
     </section>
 
-    <!-- Contact Section with Embedded Form (using modal on fetch result) -->
+    <!-- Contact Section -->
     <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center">
       <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Get Started Today! 🚀</h3>
+      <p class="mb-4 text-red-800 text-lg">
+        Preorder your whole hog, 1/4 hog, or 1/5 hog share now! Contact us to secure sustainably raised, premium red wattle hogs for a farm-to-table experience.
+      </p>
       <form 
         id="contact-form"
         class="max-w-md mx-auto space-y-4 w-full"
@@ -321,11 +294,21 @@
           <textarea 
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             name="message" 
-            placeholder="Your Message" 
+            placeholder="Let us know if you're interested in whole hogs, red wattle hogs, or a 1/4 hog share."
             rows="4" 
             required
           ></textarea>
         </label>
+
+        <div 
+          class="cf-challenge"
+          data-sitekey="${{ secrets.TURNSTILE_SITE_KEY }}"
+          data-action="submit"
+          data-callback="onTurnstileSuccess"
+          data-size="invisible">
+        </div>
+        
+        <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response" />
 
         <button 
           type="submit"
@@ -351,13 +334,14 @@
       </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="py-6 text-center mt-12 border-t-8 border-red-800 bg-[#ffcd54]/90 relative z-20 w-full">
-      <p class="text-sm text-red-800">&copy; 2024 Your Brand. All rights reserved.</p>
-    </footer>
-  </main>
+  <!-- Footer (moved outside of main) -->
+  <footer class="py-6 text-center mt-12 border-t-8 border-red-800 bg-[#ffcd54]/90 relative z-20 w-full flex-none">
+    <p class="text-sm text-red-800">
+      &copy; 2024 J & D's Heritage Hog Farm. All rights reserved.
+    </p>
+  </footer>
 
-  <!-- Modal for form submission results -->
+  <!-- Modal -->
   <div id="modal-overlay" class="fixed inset-0 z-50 hidden">
     <div class="modal-bg absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
       <div class="max-w-sm w-full bg-[#ffcd54] border-4 border-red-800 rounded-lg p-6 relative text-center">
@@ -371,15 +355,36 @@
     </div>
   </div>
 
-  <!-- Load the Rellax library (Parallax) -->
+  <!-- Parallax -->
   <script src="https://cdn.jsdelivr.net/npm/rellax@1.12.1/rellax.min.js"></script>
-
   <script>
+    let originalFormData = null;
+
+    function onTurnstileSuccess(token) {
+      document.getElementById('cf-turnstile-response').value = token;
+      const endpoint = 'https://formspree.io/f/xvgongjo';
+      fetch(endpoint, {
+        method: 'POST',
+        body: originalFormData
+      })
+      .then(response => {
+        if (response.ok) {
+          showModal('Success 🎉', 'Your message has been sent successfully!');
+          document.getElementById('contact-form').reset();
+        } else {
+          showModal('Error 😞', 'Oops! Something went wrong. Please try again later.');
+        }
+      })
+      .catch(error => {
+        console.error('Form submission error:', error);
+        showModal('Error 😞', 'Could not send your message. Please try again.');
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
 
-      // Modal elements
       const modalOverlay = document.getElementById('modal-overlay');
       const modalTitle = document.getElementById('modal-title');
       const modalMessage = document.getElementById('modal-message');
@@ -446,13 +451,12 @@
         .then(data => {
           const scrollContainer = document.getElementById('scroll-container');
 
-          // Insert initial images
           data.images.forEach(img => {
             const wrapper = document.createElement('div');
             wrapper.className = 'image-wrapper flex-shrink-0';
             const imageElement = document.createElement('img');
             imageElement.src = img.src;
-            imageElement.alt = img.alt;
+            imageElement.alt = img.alt + " - red wattle hogs, whole hogs";
             wrapper.appendChild(imageElement);
             scrollContainer.appendChild(wrapper);
           });
@@ -467,7 +471,7 @@
         const scrollContainer = document.querySelector('#scroll-container');
         const originalImages = Array.from(scrollContainer.querySelectorAll('.image-wrapper'));
 
-        // Clone images to create 3 sets total
+        // Clone images to create infinite scroll effect
         for (let i = 0; i < 2; i++) {
           originalImages.forEach(img => {
             const clone = img.cloneNode(true);
@@ -488,21 +492,18 @@
           scrollContainer.scrollLeft = segmentWidth;
         });
 
-        // Wiggle parameters
         const amplitude = 5;     
         const frequency = 0.01; 
 
         scrollContainer.addEventListener('scroll', () => {
           const scrollLeft = scrollContainer.scrollLeft;
 
-          // Wiggle effect
           allImages.forEach((wrapper, index) => {
             const direction = index % 2 === 0 ? 1 : -1;
             const rotation = Math.sin(scrollLeft * frequency) * amplitude * direction;
             wrapper.style.transform = `rotate(${rotation}deg)`;
           });
 
-          // Infinite scroll logic
           if (scrollLeft < segmentWidth) {
             scrollContainer.scrollLeft = scrollLeft + segmentWidth;
           } else if (scrollLeft > 2 * segmentWidth) {
@@ -545,35 +546,13 @@
         });
       }
 
-      // Initialize Parallax
       new Rellax('[data-rellax-speed]');
 
-      // Handle Form Submission with Fetch & Show Modal
       const contactForm = document.getElementById('contact-form');
       contactForm.addEventListener('submit', function (event) {
         event.preventDefault();
-
-        const formData = new FormData(contactForm);
-        const endpoint = 'https://formspree.io/f/xvgongjo';
-
-        fetch(endpoint, {
-          method: 'POST',
-          body: formData
-        })
-        .then(response => {
-          if (response.ok) {
-            // Success
-            showModal('Success 🎉', 'Your message has been sent successfully! Thank you for reaching out.');
-            contactForm.reset();
-          } else {
-            // Error
-            showModal('Error 😞', 'Oops! Something went wrong. Please try again later.');
-          }
-        })
-        .catch(error => {
-          console.error('Form submission error:', error);
-          showModal('Error 😞', 'Could not send your message. Please check your network connection and try again.');
-        });
+        originalFormData = new FormData(contactForm);
+        turnstile.execute("${{ secrets.TURNSTILE_SITE_KEY }}", { action: 'submit' });
       });
     });
   </script>
