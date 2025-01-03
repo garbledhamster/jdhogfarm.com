@@ -1,3 +1,4 @@
 # Git Ignore File
 
 Define files and folders to ignore in Git.
+*.bak
