@@ -205,7 +205,9 @@
 
     .site-header {
       --logo-size: 8rem;
-      transition: padding 0.3s ease, transform 0.4s ease;
+      --logo-left-gap: 1rem;
+      --collapsed-header-min-height: 4.75rem;
+      transition: padding 0.3s ease, transform 0.4s ease, min-height 0.3s ease;
       transform: translateY(0);
     }
 
@@ -266,15 +268,16 @@
     .site-header.is-collapsed {
       padding-top: 0.75rem;
       padding-bottom: 0.75rem;
+      min-height: var(--collapsed-header-min-height);
       transform: translateY(calc(var(--logo-size) * -0.55));
     }
 
     .site-header.is-collapsed .logo-wrapper {
       position: absolute;
-      left: 0.4rem;
+      left: var(--logo-left-gap);
       top: 50%;
       margin-bottom: 0;
-      transform: translate(-18%, 15%);
+      transform: translate(0, -50%);
     }
 
     .site-header.is-collapsed .header-inner {
@@ -282,6 +285,7 @@
       flex-wrap: wrap;
       justify-content: center;
       position: relative;
+      min-height: var(--collapsed-header-min-height);
     }
 
     .site-header.is-collapsed .site-nav {
