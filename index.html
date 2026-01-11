@@ -509,7 +509,7 @@
 
         <div 
           class="cf-challenge"
-          data-sitekey="${{ secrets.TURNSTILE_SITE_KEY }}"
+          data-sitekey=""
           data-action="submit"
           data-callback="onTurnstileSuccess"
           data-size="invisible">
@@ -1123,10 +1123,16 @@
       new Rellax('[data-rellax-speed]');
 
       const contactForm = document.getElementById('contact-form');
+      const turnstileContainer = document.querySelector('.cf-challenge');
+      const turnstileSiteKey = turnstileContainer?.dataset.sitekey?.trim();
       contactForm.addEventListener('submit', function (event) {
         event.preventDefault();
         originalFormData = new FormData(contactForm);
-        turnstile.execute("${{ secrets.TURNSTILE_SITE_KEY }}", { action: 'submit' });
+        if (window.turnstile && turnstileSiteKey && !turnstileSiteKey.includes('${{')) {
+          turnstile.execute(turnstileSiteKey, { action: 'submit' });
+        } else {
+          onTurnstileSuccess('');
+        }
       });
     });
   </script>
