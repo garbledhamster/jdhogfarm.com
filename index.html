@@ -206,7 +206,22 @@
     .site-header {
       --logo-size: 8rem;
       --logo-left-gap: 1rem;
-      --collapsed-header-min-height: 4.75rem;
+      --collapsed-header-padding: 0.75rem;
+      --nav-row-count: 2;
+      --nav-button-line-height: 1.25rem;
+      --nav-button-padding-y: 0.5rem;
+      --nav-button-border: 2px;
+      --nav-row-gap: 0.5rem;
+      --nav-row-height: calc(
+        var(--nav-button-line-height)
+        + (var(--nav-button-padding-y) * 2)
+        + (var(--nav-button-border) * 2)
+      );
+      --collapsed-header-min-height: calc(
+        (var(--nav-row-height) * var(--nav-row-count))
+        + var(--nav-row-gap)
+        + (var(--collapsed-header-padding) * 2)
+      );
       transition: padding 0.3s ease, transform 0.4s ease, min-height 0.3s ease;
       transform: translateY(0);
     }
@@ -266,8 +281,8 @@
     }
 
     .site-header.is-collapsed {
-      padding-top: 0.75rem;
-      padding-bottom: 0.75rem;
+      padding-top: var(--collapsed-header-padding);
+      padding-bottom: var(--collapsed-header-padding);
       min-height: var(--collapsed-header-min-height);
       transform: translateY(calc(var(--logo-size) * -0.55));
     }
