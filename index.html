@@ -204,36 +204,34 @@
     }
 
     .site-header {
-      overflow: hidden;
-      transition: padding 0.35s ease;
+      --logo-size: 8rem;
+      transition: padding 0.3s ease;
     }
 
-    .site-logo {
-      max-height: 10rem;
-      opacity: 1;
-      transform: translateY(0);
-      transition: max-height 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffcd54;
+      border: 2px solid #991b1b;
+      border-radius: 9999px;
+      padding: 0.35rem;
+      transition: transform 0.3s ease, margin 0.3s ease;
     }
 
-    .header-collapsed .site-header {
-      padding-top: 0.75rem;
-      padding-bottom: 0.75rem;
+    .logo-badge img {
+      height: var(--logo-size);
+      width: auto;
+      display: block;
     }
 
-    .header-collapsed .site-logo {
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(-1.25rem);
-      pointer-events: none;
+    .site-header.is-collapsed {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
     }
 
-    .header-collapsed main {
-      padding-top: 6rem;
-      transition: padding-top 0.35s ease;
-    }
-
-    main {
-      transition: padding-top 0.35s ease;
+    .site-header.is-collapsed .logo-wrapper {
+      margin-bottom: calc(var(--logo-size) * -0.5);
     }
   </style>
 
@@ -258,9 +256,11 @@
   <div class="fixed inset-0 bg-[#ffcd54] opacity-85 z-10"></div>
 
   <!-- Header -->
-  <header id="site-header" class="site-header fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
-    <h1 class="site-logo text-5xl sm:text-3xl font-bold flex items-center justify-center">
-      <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" class="mx-auto h-32 w-auto" />
+  <header class="site-header fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
+    <h1 class="logo-wrapper flex items-center justify-center">
+      <span class="logo-badge">
+        <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" />
+      </span>
     </h1>
     <nav class="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base">
       <a href="#home" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Home</a>
@@ -664,6 +664,16 @@
       const modalMessage = document.getElementById('modal-message');
       const closeModal = document.getElementById('close-modal');
       const closeButton = document.getElementById('close-button');
+      const header = document.querySelector('.site-header');
+
+      const updateHeaderState = () => {
+        if (!header) return;
+        const shouldCollapse = window.scrollY > 120;
+        header.classList.toggle('is-collapsed', shouldCollapse);
+      };
+
+      updateHeaderState();
+      window.addEventListener('scroll', updateHeaderState, { passive: true });
 
       function showModal(title, message) {
         modalTitle.innerText = title;
