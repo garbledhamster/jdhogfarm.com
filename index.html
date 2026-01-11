@@ -205,7 +205,12 @@
 
     .site-header {
       --logo-size: 8rem;
-      transition: padding 0.3s ease;
+      transition: padding 0.3s ease, transform 0.4s ease;
+      transform: translateY(0);
+    }
+
+    .logo-wrapper {
+      transition: transform 0.4s ease, margin 0.3s ease;
     }
 
     .logo-badge {
@@ -226,12 +231,14 @@
     }
 
     .site-header.is-collapsed {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+      transform: translateY(calc(var(--logo-size) * -0.55));
     }
 
     .site-header.is-collapsed .logo-wrapper {
-      margin-bottom: calc(var(--logo-size) * -0.5);
+      margin-bottom: calc(var(--logo-size) * -0.45);
+      transform: translateY(calc(var(--logo-size) * 0.3));
     }
 
     main {
@@ -260,7 +267,7 @@
   <div class="fixed inset-0 bg-[#ffcd54] opacity-85 z-10"></div>
 
   <!-- Header -->
-  <header class="site-header fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
+  <header id="site-header" class="site-header fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
     <h1 class="logo-wrapper flex items-center justify-center">
       <span class="logo-badge">
         <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" />
@@ -669,7 +676,7 @@
 
       const updateHeaderState = () => {
         if (!header) return;
-        const shouldCollapse = window.scrollY > 120;
+        const shouldCollapse = window.scrollY > 80;
         header.classList.toggle('is-collapsed', shouldCollapse);
         setHeaderOffset();
       };
