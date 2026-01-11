@@ -257,6 +257,54 @@
       width: 100%;
     }
 
+    @media (max-width: 639px) {
+      .site-header {
+        --logo-size: 2.5rem;
+      }
+
+      .site-header .header-inner {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .logo-wrapper {
+        margin: 0;
+      }
+
+      .logo-badge {
+        margin-top: 0;
+        padding: 0.2rem;
+        padding-inline: 0.3rem;
+      }
+
+      .site-nav {
+        width: auto;
+        justify-content: flex-start;
+      }
+
+      .site-header.is-collapsed {
+        transform: none;
+      }
+
+      .site-header.is-collapsed .logo-wrapper {
+        position: static;
+        transform: none;
+      }
+
+      .site-header.is-collapsed .header-inner {
+        min-height: auto;
+        padding-bottom: 0;
+        align-items: center;
+      }
+
+      .site-header.is-collapsed .site-nav {
+        width: auto;
+      }
+    }
+
     @media (min-width: 640px) {
       .site-header .header-inner {
         flex-direction: row;
