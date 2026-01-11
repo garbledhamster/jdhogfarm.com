@@ -718,6 +718,18 @@
         mainContent.style.setProperty('--header-offset', `${headerHeight}px`);
       };
 
+      if (header) {
+        if ('ResizeObserver' in window) {
+          const headerResizeObserver = new ResizeObserver(() => setHeaderOffset());
+          headerResizeObserver.observe(header);
+        } else {
+          const headerLogo = header.querySelector('img');
+          if (headerLogo) {
+            headerLogo.addEventListener('load', setHeaderOffset, { once: true });
+          }
+        }
+      }
+
       const updateHeaderState = () => {
         if (!header) return;
         const shouldCollapse = window.scrollY > 80;
