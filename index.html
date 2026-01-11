@@ -185,6 +185,10 @@
       display: block;
     }
 
+    .gallery-hidden {
+      display: none;
+    }
+
     @media (max-width: 640px) {
       .gallery-collage {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -451,7 +455,7 @@
     <!-- Gallery Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Gallery</h2>
-      <div class="gallery-collage w-full" aria-label="Portrait collage of Red Wattle hogs">
+      <div id="gallery-collage" class="gallery-collage w-full" aria-label="Portrait collage of Red Wattle hogs">
         <figure class="gallery-tile gallery-tile--one">
           <img src="assets/images/general/001.jpg" alt="A Red Wattle hog’s muddy snout looking at the camera">
         </figure>
@@ -470,18 +474,29 @@
         <figure class="gallery-tile gallery-tile--six">
           <img src="assets/images/general/008.jpg" alt="A Red Wattle hog grazing in tall grass">
         </figure>
-        <figure class="gallery-tile gallery-tile--seven">
+        <figure class="gallery-tile gallery-tile--seven gallery-hidden" data-gallery-hidden>
           <img src="assets/images/general/009.jpg" alt="Two Red Wattle hogs resting together">
         </figure>
-        <figure class="gallery-tile gallery-tile--eight">
+        <figure class="gallery-tile gallery-tile--eight gallery-hidden" data-gallery-hidden>
           <img src="assets/images/general/010.jpg" alt="A Red Wattle hog standing near a trough">
         </figure>
-        <figure class="gallery-tile gallery-tile--nine">
+        <figure class="gallery-tile gallery-tile--nine gallery-hidden" data-gallery-hidden>
           <img src="assets/images/general/011.jpg" alt="A Red Wattle hog in dappled forest light">
         </figure>
-        <figure class="gallery-tile gallery-tile--ten">
+        <figure class="gallery-tile gallery-tile--ten gallery-hidden" data-gallery-hidden>
           <img src="assets/images/general/012.jpg" alt="A Red Wattle hog walking across the pasture">
         </figure>
+      </div>
+      <div class="mt-6 flex justify-center">
+        <button
+          id="gallery-load-more"
+          class="px-5 py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition"
+          aria-controls="gallery-collage"
+          aria-expanded="false"
+          type="button"
+        >
+          Load More
+        </button>
       </div>
     </section>
 
@@ -902,6 +917,20 @@
 
       const faqToggles = document.querySelectorAll('[data-faq-toggle]');
       const faqPanels = document.querySelectorAll('[data-faq-panel]');
+      const galleryLoadMore = document.getElementById('gallery-load-more');
+      const galleryHiddenTiles = document.querySelectorAll('[data-gallery-hidden]');
+
+      if (galleryLoadMore) {
+        if (!galleryHiddenTiles.length) {
+          galleryLoadMore.classList.add('gallery-hidden');
+        } else {
+          galleryLoadMore.addEventListener('click', () => {
+            galleryHiddenTiles.forEach(tile => tile.classList.remove('gallery-hidden'));
+            galleryLoadMore.classList.add('gallery-hidden');
+            galleryLoadMore.setAttribute('aria-expanded', 'true');
+          });
+        }
+      }
 
       faqToggles.forEach(toggle => {
         toggle.addEventListener('click', () => {
