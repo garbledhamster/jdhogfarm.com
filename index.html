@@ -379,7 +379,6 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.css" />
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-0F7TP7PMQQ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -506,16 +505,6 @@
             required
           ></textarea>
         </label>
-
-        <div 
-          class="cf-challenge"
-          data-sitekey="${{ secrets.TURNSTILE_SITE_KEY }}"
-          data-action="submit"
-          data-callback="onTurnstileSuccess"
-          data-size="invisible">
-        </div>
-        
-        <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response" />
 
         <button 
           type="submit"
@@ -739,74 +728,7 @@
 
   <!-- Parallax -->
   <script src="https://cdn.jsdelivr.net/npm/rellax@1.12.1/rellax.min.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-analytics.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDSkvoFMBcWcBGSdI6T485ElFf4EOzGhis",
-      authDomain: "jd-hog-farm.firebaseapp.com",
-      projectId: "jd-hog-farm",
-      storageBucket: "jd-hog-farm.firebasestorage.app",
-      messagingSenderId: "325404735338",
-      appId: "1:325404735338:web:92a20c931315c8527d5713",
-      measurementId: "G-VDRV1TREKD"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const db = getFirestore(app);
-    let originalFormData = null;
-
-    function buildContactPayload(formData) {
-      return {
-        name: String(formData.get('name') || '').trim(),
-        email: String(formData.get('email') || '').trim(),
-        message: String(formData.get('message') || '').trim(),
-        createdAt: serverTimestamp()
-      };
-    }
-
-    async function saveContactToFirebase(formData) {
-      const payload = buildContactPayload(formData);
-      return addDoc(collection(db, 'contactMessages'), payload);
-    }
-
-    async function onTurnstileSuccess(token) {
-      document.getElementById('cf-turnstile-response').value = token;
-      const endpoint = 'https://formspree.io/f/xvgongjo';
-      const formspreePromise = fetch(endpoint, {
-        method: 'POST',
-        body: originalFormData
-      });
-      const firebasePromise = saveContactToFirebase(originalFormData);
-
-      try {
-        const [formspreeResult, firebaseResult] = await Promise.allSettled([
-          formspreePromise,
-          firebasePromise
-        ]);
-        const formspreeResponse = formspreeResult.status === 'fulfilled' ? formspreeResult.value : null;
-
-        if (formspreeResponse && formspreeResponse.ok) {
-          if (firebaseResult.status === 'rejected') {
-            console.error('Firebase submission error:', firebaseResult.reason);
-            showModal('Success 🎉', 'Your message has been sent successfully! We could not save your details for tracking.');
-          } else {
-            showModal('Success 🎉', 'Your message has been sent successfully!');
-          }
-          document.getElementById('contact-form').reset();
-        } else {
-          showModal('Error 😞', 'Oops! Something went wrong. Please try again later.');
-        }
-      } catch (error) {
-        console.error('Form submission error:', error);
-        showModal('Error 😞', 'Could not send your message. Please try again.');
-      }
-    }
-    window.onTurnstileSuccess = onTurnstileSuccess;
-
+  <script>
     document.addEventListener('DOMContentLoaded', function () {
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
@@ -1125,8 +1047,26 @@
       const contactForm = document.getElementById('contact-form');
       contactForm.addEventListener('submit', function (event) {
         event.preventDefault();
-        originalFormData = new FormData(contactForm);
-        turnstile.execute("${{ secrets.TURNSTILE_SITE_KEY }}", { action: 'submit' });
+        const formData = new FormData(contactForm);
+        fetch('https://formspree.io/f/xvgongjo', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Accept: 'application/json'
+          }
+        })
+          .then(response => {
+            if (response.ok) {
+              showModal('Success 🎉', 'Your message has been sent successfully!');
+              contactForm.reset();
+            } else {
+              throw new Error('Formspree submission failed.');
+            }
+          })
+          .catch(error => {
+            console.error('Form submission error:', error);
+            showModal('Error 😞', 'Could not send your message. Please try again.');
+          });
       });
     });
   </script>
