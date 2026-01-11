@@ -51,6 +51,11 @@
       padding: 0;
     }
 
+    html.faq-drawer-open,
+    body.faq-drawer-open {
+      overflow: hidden;
+    }
+
     .markdown-content h1, .markdown-content h2, .markdown-content h3,
     .markdown-content h4, .markdown-content h5, .markdown-content h6,
     h1, h2, h3, h4, h5, h6 {
@@ -866,6 +871,10 @@
       const faqDrawer = document.getElementById('faq-drawer');
       const faqDrawerOverlay = document.getElementById('faq-drawer-overlay');
       const faqDrawerClose = document.getElementById('faq-drawer-close');
+      const setFaqScrollLock = isLocked => {
+        document.documentElement.classList.toggle('faq-drawer-open', isLocked);
+        document.body.classList.toggle('faq-drawer-open', isLocked);
+      };
 
       const openFaqDrawer = () => {
         if (!faqDrawer || !faqDrawerButton || !faqDrawerOverlay) {
@@ -875,6 +884,7 @@
         faqDrawerOverlay.classList.remove('hidden');
         faqDrawer.setAttribute('aria-hidden', 'false');
         faqDrawerButton.setAttribute('aria-expanded', 'true');
+        setFaqScrollLock(true);
       };
 
       const closeFaqDrawer = () => {
@@ -885,6 +895,7 @@
         faqDrawerOverlay.classList.add('hidden');
         faqDrawer.setAttribute('aria-hidden', 'true');
         faqDrawerButton.setAttribute('aria-expanded', 'false');
+        setFaqScrollLock(false);
       };
 
       if (faqDrawerButton) {
