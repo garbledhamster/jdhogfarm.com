@@ -202,6 +202,39 @@
     .modal-bg {
       backdrop-filter: blur(4px);
     }
+
+    .site-header {
+      overflow: hidden;
+      transition: padding 0.35s ease;
+    }
+
+    .site-logo {
+      max-height: 10rem;
+      opacity: 1;
+      transform: translateY(0);
+      transition: max-height 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .header-collapsed .site-header {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+
+    .header-collapsed .site-logo {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-1.25rem);
+      pointer-events: none;
+    }
+
+    .header-collapsed main {
+      padding-top: 6rem;
+      transition: padding-top 0.35s ease;
+    }
+
+    main {
+      transition: padding-top 0.35s ease;
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -225,8 +258,8 @@
   <div class="fixed inset-0 bg-[#ffcd54] opacity-85 z-10"></div>
 
   <!-- Header -->
-  <header class="fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
-    <h1 class="text-5xl sm:text-3xl font-bold flex items-center justify-center">
+  <header id="site-header" class="site-header fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
+    <h1 class="site-logo text-5xl sm:text-3xl font-bold flex items-center justify-center">
       <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" class="mx-auto h-32 w-auto" />
     </h1>
     <nav class="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base">
@@ -616,6 +649,15 @@
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
       var buyContainer = document.querySelector('#buy-content');
+      const header = document.getElementById('site-header');
+
+      const updateHeaderState = () => {
+        const isCollapsed = window.scrollY > 10;
+        document.body.classList.toggle('header-collapsed', isCollapsed);
+      };
+
+      updateHeaderState();
+      window.addEventListener('scroll', updateHeaderState, { passive: true });
 
       const modalOverlay = document.getElementById('modal-overlay');
       const modalTitle = document.getElementById('modal-title');
