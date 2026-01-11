@@ -233,6 +233,10 @@
     .site-header.is-collapsed .logo-wrapper {
       margin-bottom: calc(var(--logo-size) * -0.5);
     }
+
+    main {
+      padding-top: var(--header-offset, 15rem);
+    }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -271,7 +275,7 @@
   </header>
   
   <!-- Main Content -->
-  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 flex flex-col items-center justify-start" style="padding-top: 15rem;">
+  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 flex flex-col items-center justify-start">
     <!-- Home Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home</h2>
@@ -649,31 +653,31 @@
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
       var buyContainer = document.querySelector('#buy-content');
-      const header = document.getElementById('site-header');
-
-      const updateHeaderState = () => {
-        const isCollapsed = window.scrollY > 10;
-        document.body.classList.toggle('header-collapsed', isCollapsed);
-      };
-
-      updateHeaderState();
-      window.addEventListener('scroll', updateHeaderState, { passive: true });
-
       const modalOverlay = document.getElementById('modal-overlay');
       const modalTitle = document.getElementById('modal-title');
       const modalMessage = document.getElementById('modal-message');
       const closeModal = document.getElementById('close-modal');
       const closeButton = document.getElementById('close-button');
       const header = document.querySelector('.site-header');
+      const mainContent = document.querySelector('main');
+
+      const setHeaderOffset = () => {
+        if (!header || !mainContent) return;
+        const headerHeight = header.getBoundingClientRect().height;
+        mainContent.style.setProperty('--header-offset', `${headerHeight}px`);
+      };
 
       const updateHeaderState = () => {
         if (!header) return;
         const shouldCollapse = window.scrollY > 120;
         header.classList.toggle('is-collapsed', shouldCollapse);
+        setHeaderOffset();
       };
 
+      setHeaderOffset();
       updateHeaderState();
       window.addEventListener('scroll', updateHeaderState, { passive: true });
+      window.addEventListener('resize', setHeaderOffset, { passive: true });
 
       function showModal(title, message) {
         modalTitle.innerText = title;
