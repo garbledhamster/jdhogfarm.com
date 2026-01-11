@@ -209,8 +209,36 @@
       transform: translateY(0);
     }
 
+    .site-header .header-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+    }
+
     .logo-wrapper {
       transition: transform 0.4s ease, margin 0.3s ease;
+    }
+
+    .site-nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .site-header .header-inner {
+        justify-content: flex-start;
+      }
+
+      .site-nav {
+        margin-left: auto;
+        justify-content: flex-end;
+      }
     }
 
     .logo-badge {
@@ -268,17 +296,19 @@
 
   <!-- Header -->
   <header id="site-header" class="site-header fixed top-0 left-0 w-full text-center py-6 border-b-8 border-red-800 bg-[#ffcd54] flex-none z-50">
-    <h1 class="logo-wrapper flex items-center justify-center">
-      <span class="logo-badge">
-        <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" />
-      </span>
-    </h1>
-    <nav class="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base">
-      <a href="#home" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Home</a>
-      <a href="#about" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">About Us</a>
-      <a href="#buy" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Buy a Hog</a>
-      <a href="#contact" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Contact Us</a>
-    </nav>
+    <div class="header-inner px-4">
+      <h1 class="logo-wrapper flex items-center justify-center">
+        <span class="logo-badge">
+          <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" />
+        </span>
+      </h1>
+      <nav class="site-nav text-sm sm:text-base">
+        <a href="#home" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Home</a>
+        <a href="#about" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">About Us</a>
+        <a href="#buy" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Buy a Hog</a>
+        <a href="#contact" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Contact Us</a>
+      </nav>
+    </div>
   </header>
   
   <!-- Main Content -->
