@@ -487,44 +487,45 @@
         </iframe>
       </div>
     </section>
+  </main>
 
-    <!-- FAQ Drawer -->
-    <button
-      id="faq-drawer-button"
-      class="fixed bottom-6 right-6 z-[70] bg-red-800 text-[#ffcd54] font-black uppercase text-sm sm:text-base px-4 py-3 rounded-full shadow-lg border-2 border-[#ffcd54] hover:bg-red-900 transition"
-      aria-expanded="false"
-      aria-controls="faq-drawer"
-      type="button"
-    >
-      Frequenty Asked Questions (FAQS)
-    </button>
-    <div id="faq-drawer-overlay" class="fixed inset-0 bg-black/40 z-[60] hidden"></div>
-    <aside
-      id="faq-drawer"
-      class="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-[90vw] bg-[#ffcd54]/95 border-l-4 border-red-800 z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
-      aria-hidden="true"
-    >
-      <div class="flex items-center justify-between px-6 py-4 border-b-4 border-red-800 bg-red-800 text-[#ffcd54]">
-        <h2 class="text-xl sm:text-2xl font-black uppercase">FAQs</h2>
-        <button id="faq-drawer-close" class="text-2xl font-bold leading-none hover:text-white" type="button" aria-label="Close FAQ drawer">
-          &times;
+  <!-- FAQ Drawer -->
+  <button
+    id="faq-drawer-button"
+    class="fixed bottom-6 right-6 z-[70] bg-red-800 text-[#ffcd54] font-black uppercase text-sm sm:text-base px-4 py-3 rounded-full shadow-lg border-2 border-[#ffcd54] hover:bg-red-900 transition"
+    aria-expanded="false"
+    aria-controls="faq-drawer"
+    type="button"
+  >
+    Frequenty Asked Questions (FAQS)
+  </button>
+  <div id="faq-drawer-overlay" class="fixed inset-0 bg-black/40 z-[60] hidden"></div>
+  <aside
+    id="faq-drawer"
+    class="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-[90vw] bg-[#ffcd54]/95 border-l-4 border-red-800 z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
+    aria-hidden="true"
+  >
+    <div class="flex items-center justify-between px-6 py-4 border-b-4 border-red-800 bg-red-800 text-[#ffcd54]">
+      <h2 class="text-xl sm:text-2xl font-black uppercase">FAQs</h2>
+      <button id="faq-drawer-close" class="text-2xl font-bold leading-none hover:text-white" type="button" aria-label="Close FAQ drawer">
+        &times;
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto px-6 py-6 space-y-4 text-left">
+      <div class="border-4 border-red-800 rounded-lg p-4 bg-[#ffcd54]">
+        <button class="w-full flex items-center justify-between text-left text-xl sm:text-lg font-bold text-red-800" data-faq-toggle aria-expanded="false" aria-controls="faq-panel-1">
+          <span>1. What Is a Heritage Hog Farm, and Why Should I Care?</span>
+          <span class="text-2xl leading-none">+</span>
         </button>
-      </div>
-      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-4 text-left">
-        <div class="border-4 border-red-800 rounded-lg p-4 bg-[#ffcd54]">
-          <button class="w-full flex items-center justify-between text-left text-xl sm:text-lg font-bold text-red-800" data-faq-toggle aria-expanded="false" aria-controls="faq-panel-1">
-            <span>1. What Is a Heritage Hog Farm, and Why Should I Care?</span>
-            <span class="text-2xl leading-none">+</span>
-          </button>
-          <div id="faq-panel-1" class="mt-4 text-red-800 text-lg sm:text-base hidden" data-faq-panel>
-            <p>Have you ever wondered why store-bought pork doesn't taste as rich and flavorful as the home-cooked meals you remember? You're not alone—that's exactly why we started J &amp; D's Hog Farm. We raise heritage hogs the old-fashioned way, allowing pigs to roam freely on open pastures, grow naturally, and develop that deep, delicious flavor you just can't get from commercial farms.</p>
-            <ul class="list-disc pl-6">
-              <li>Traditional Breeds: Raised for flavor, hardiness, and respect for natural growth rates.</li>
-              <li>Pasture-Based Living: Hogs enjoy sunlight, space to roam, and natural foraging.</li>
-              <li>Ethical &amp; Sustainable: A slower, more caring approach that yields superior taste and quality.</li>
-            </ul>
-          </div>
+        <div id="faq-panel-1" class="mt-4 text-red-800 text-lg sm:text-base hidden" data-faq-panel>
+          <p>Have you ever wondered why store-bought pork doesn't taste as rich and flavorful as the home-cooked meals you remember? You're not alone—that's exactly why we started J &amp; D's Hog Farm. We raise heritage hogs the old-fashioned way, allowing pigs to roam freely on open pastures, grow naturally, and develop that deep, delicious flavor you just can't get from commercial farms.</p>
+          <ul class="list-disc pl-6">
+            <li>Traditional Breeds: Raised for flavor, hardiness, and respect for natural growth rates.</li>
+            <li>Pasture-Based Living: Hogs enjoy sunlight, space to roam, and natural foraging.</li>
+            <li>Ethical &amp; Sustainable: A slower, more caring approach that yields superior taste and quality.</li>
+          </ul>
         </div>
+      </div>
 
         <div class="border-4 border-red-800 rounded-lg p-4 bg-[#ffcd54]">
           <button class="w-full flex items-center justify-between text-left text-xl sm:text-lg font-bold text-red-800" data-faq-toggle aria-expanded="false" aria-controls="faq-panel-2">
