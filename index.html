@@ -172,6 +172,11 @@
     .image-wrapper {
       flex: none;
       max-width: 12rem;
+      --rotation: 0deg;
+      --scale: 1;
+      transform: rotate(var(--rotation)) scale(var(--scale));
+      transition: transform 0.3s ease;
+      will-change: transform;
     }
 
     .image-wrapper img {
@@ -179,6 +184,11 @@
       height: auto; 
       object-fit: cover;
       border-radius: 10px;
+    }
+
+    .image-wrapper:hover {
+      --scale: 1.5;
+      z-index: 2;
     }
 
     .scroll-container::-webkit-scrollbar {
@@ -689,6 +699,9 @@
 
         const amplitude = 5;     
         const frequency = 0.01; 
+        const scrollSpeed = 0.4;
+        let isAutoScrolling = true;
+        let resumeTimeoutId;
 
         scrollContainer.addEventListener('scroll', () => {
           const scrollLeft = scrollContainer.scrollLeft;
@@ -696,7 +709,7 @@
           allImages.forEach((wrapper, index) => {
             const direction = index % 2 === 0 ? 1 : -1;
             const rotation = Math.sin(scrollLeft * frequency) * amplitude * direction;
-            wrapper.style.transform = `rotate(${rotation}deg)`;
+            wrapper.style.setProperty('--rotation', `${rotation}deg`);
           });
 
           if (scrollLeft < segmentWidth) {
@@ -705,6 +718,36 @@
             scrollContainer.scrollLeft = scrollLeft - segmentWidth;
           }
         });
+
+        const pauseAutoScroll = () => {
+          isAutoScrolling = false;
+          if (resumeTimeoutId) {
+            clearTimeout(resumeTimeoutId);
+            resumeTimeoutId = null;
+          }
+        };
+
+        const scheduleResume = () => {
+          if (resumeTimeoutId) {
+            clearTimeout(resumeTimeoutId);
+          }
+          resumeTimeoutId = setTimeout(() => {
+            isAutoScrolling = true;
+          }, 3000);
+        };
+
+        const startAutoScroll = () => {
+          const step = () => {
+            if (isAutoScrolling) {
+              scrollContainer.scrollLeft += scrollSpeed;
+            }
+            requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+        };
+
+        scrollContainer.addEventListener('mouseenter', pauseAutoScroll);
+        scrollContainer.addEventListener('mouseleave', scheduleResume);
 
         // Drag-to-scroll logic
         let isDown = false;
@@ -715,6 +758,7 @@
 
         scrollContainer.addEventListener('mousedown', (e) => {
           isDown = true;
+          pauseAutoScroll();
           scrollContainer.classList.add('active');
           scrollContainer.style.cursor = 'grabbing';
           startX = e.pageX - scrollContainer.offsetLeft;
@@ -725,11 +769,13 @@
         scrollContainer.addEventListener('mouseleave', () => {
           isDown = false;
           scrollContainer.style.cursor = 'grab';
+          scheduleResume();
         });
 
         scrollContainer.addEventListener('mouseup', () => {
           isDown = false;
           scrollContainer.style.cursor = 'grab';
+          scheduleResume();
         });
 
         scrollContainer.addEventListener('mousemove', (e) => {
@@ -738,6 +784,10 @@
           const x = e.pageX - scrollContainer.offsetLeft;
           const walk = (x - startX);
           scrollContainer.scrollLeft = scrollLeftPos - walk;
+        });
+
+        window.addEventListener('load', () => {
+          startAutoScroll();
         });
       }
 
