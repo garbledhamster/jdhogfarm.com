@@ -267,6 +267,14 @@
       </div>
     </section>
 
+    <!-- Buy Section -->
+    <section id="buy" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
+      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Buy a Hog 🐖</h2>
+      <div id="buy-content" class="markdown-content text-lg sm:text-base">
+        <!-- buy.md should outline hog options and ordering details. -->
+      </div>
+    </section>
+
     <!-- Gallery Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Gallery 🖼️</h2>
@@ -601,6 +609,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
+      var buyContainer = document.querySelector('#buy-content');
 
       const modalOverlay = document.getElementById('modal-overlay');
       const modalTitle = document.getElementById('modal-title');
@@ -655,6 +664,24 @@
         .catch(error => {
           console.error('Error loading about.md:', error);
           aboutContainer.innerText = 'Sorry, the About Us section could not be loaded.';
+        });
+
+      // Load buy.md
+      fetch('data/buy.md')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+          }
+          return response.text();
+        })
+        .then(markdown => {
+          const rawHtml = marked.parse(markdown);
+          const safeHtml = DOMPurify.sanitize(rawHtml);
+          buyContainer.innerHTML = safeHtml;
+        })
+        .catch(error => {
+          console.error('Error loading buy.md:', error);
+          buyContainer.innerText = 'Sorry, the Buy a Hog section could not be loaded.';
         });
 
       // Load gallery items from JSON
