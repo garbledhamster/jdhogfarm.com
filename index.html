@@ -229,10 +229,16 @@
     <h1 class="text-5xl sm:text-3xl font-bold flex items-center justify-center">
       <img src="assets/images/branding/3.png" alt="J & D's Heritage Hog Farm - Whole Hogs & Red Wattle Hogs" class="mx-auto h-32 w-auto" />
     </h1>
+    <nav class="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base">
+      <a href="#home" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Home</a>
+      <a href="#about" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">About Us</a>
+      <a href="#buy" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Buy a Hog</a>
+      <a href="#contact" class="px-3 py-1.5 sm:px-4 sm:py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition">Contact Us</a>
+    </nav>
   </header>
   
   <!-- Main Content -->
-  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 flex flex-col items-center justify-start" style="padding-top: 12rem;">
+  <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 flex flex-col items-center justify-start" style="padding-top: 15rem;">
     <!-- Home Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home</h2>
@@ -264,6 +270,14 @@
             Deb keeps the farm’s finances in order, handles day-to-day tasks, and makes sure Joe stays well-fed. Despite the challenges of Multiple Sclerosis, she’s the linchpin of J &amp; D’s Hog Farm, balancing the books and overseeing the homestead with care and dedication.
           </p>
         </div>
+      </div>
+    </section>
+
+    <!-- Buy Section -->
+    <section id="buy" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
+      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Buy a Hog 🐖</h2>
+      <div id="buy-content" class="markdown-content text-lg sm:text-base">
+        <!-- buy.md should outline hog options and ordering details. -->
       </div>
     </section>
 
@@ -429,7 +443,7 @@
     </section>
 
     <!-- Contact Section -->
-    <section class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center">
+    <section id="contact" class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center">
       <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Get Started Today! 🚀</h3>
       <p class="mb-4 text-red-800 text-lg">
         Preorder your whole hog, 1/4 hog, or 1/5 hog share now! Contact us to secure sustainably raised, premium red wattle hogs for a farm-to-table experience.
@@ -601,6 +615,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
+      var buyContainer = document.querySelector('#buy-content');
 
       const modalOverlay = document.getElementById('modal-overlay');
       const modalTitle = document.getElementById('modal-title');
@@ -655,6 +670,24 @@
         .catch(error => {
           console.error('Error loading about.md:', error);
           aboutContainer.innerText = 'Sorry, the About Us section could not be loaded.';
+        });
+
+      // Load buy.md
+      fetch('data/buy.md')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+          }
+          return response.text();
+        })
+        .then(markdown => {
+          const rawHtml = marked.parse(markdown);
+          const safeHtml = DOMPurify.sanitize(rawHtml);
+          buyContainer.innerHTML = safeHtml;
+        })
+        .catch(error => {
+          console.error('Error loading buy.md:', error);
+          buyContainer.innerText = 'Sorry, the Buy a Hog section could not be loaded.';
         });
 
       // Load gallery items from JSON
