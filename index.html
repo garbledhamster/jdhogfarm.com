@@ -211,6 +211,7 @@
 
     .site-header .header-inner {
       display: flex;
+      flex-direction: column;
       flex-wrap: wrap;
       align-items: center;
       justify-content: center;
@@ -232,12 +233,12 @@
 
     @media (min-width: 640px) {
       .site-header .header-inner {
+        flex-direction: row;
         justify-content: flex-start;
       }
 
       .site-nav {
-        margin-left: auto;
-        justify-content: flex-end;
+        justify-content: center;
       }
     }
 
@@ -269,6 +270,17 @@
     .site-header.is-collapsed .logo-wrapper {
       margin-bottom: calc(var(--logo-size) * -0.45);
       transform: translateY(calc(var(--logo-size) * 0.3));
+    }
+
+    .site-header.is-collapsed .header-inner {
+      flex-direction: row;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    .site-header.is-collapsed .site-nav {
+      position: absolute;
+      left: 0;
     }
 
     main {
