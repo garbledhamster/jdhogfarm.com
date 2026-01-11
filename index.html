@@ -229,12 +229,13 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      width: 100%;
     }
 
     @media (min-width: 640px) {
       .site-header .header-inner {
         flex-direction: row;
-        justify-content: flex-start;
+        justify-content: center;
       }
 
       .site-nav {
@@ -274,13 +275,15 @@
 
     .site-header.is-collapsed .header-inner {
       flex-direction: row;
-      justify-content: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
       position: relative;
     }
 
     .site-header.is-collapsed .site-nav {
-      position: absolute;
-      left: 0;
+      position: static;
+      width: 100%;
+      justify-content: center;
     }
 
     main {
