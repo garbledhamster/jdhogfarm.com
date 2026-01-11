@@ -290,8 +290,18 @@
       justify-content: center;
     }
 
+    :root {
+      --header-offset: 0px;
+    }
+
     main {
-      padding-top: var(--header-offset, 15rem);
+      padding-top: calc(var(--header-offset, 0px) + 2rem);
+    }
+
+    @media (min-width: 640px) {
+      main {
+        padding-top: calc(var(--header-offset, 0px) + 1rem);
+      }
     }
   </style>
 
@@ -718,11 +728,12 @@
       const closeButton = document.getElementById('close-button');
       const header = document.querySelector('.site-header');
       const mainContent = document.querySelector('main');
+      const root = document.documentElement;
 
       const setHeaderOffset = () => {
         if (!header || !mainContent) return;
         const headerHeight = header.getBoundingClientRect().height;
-        mainContent.style.setProperty('--header-offset', `${headerHeight}px`);
+        root.style.setProperty('--header-offset', `${headerHeight}px`);
       };
 
       if (header) {
