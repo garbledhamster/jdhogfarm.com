@@ -217,10 +217,11 @@
       justify-content: center;
       gap: 1rem;
       width: 100%;
+      position: relative;
     }
 
     .logo-wrapper {
-      transition: transform 0.4s ease, margin 0.3s ease;
+      transition: transform 0.4s ease, margin 0.3s ease, left 0.3s ease, top 0.3s ease;
     }
 
     .site-nav {
@@ -269,8 +270,11 @@
     }
 
     .site-header.is-collapsed .logo-wrapper {
-      margin-bottom: calc(var(--logo-size) * -0.45);
-      transform: translateY(calc(var(--logo-size) * 0.3));
+      position: absolute;
+      left: 0.4rem;
+      top: 50%;
+      margin-bottom: 0;
+      transform: translate(-18%, 15%);
     }
 
     .site-header.is-collapsed .header-inner {
