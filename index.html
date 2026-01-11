@@ -1045,6 +1045,8 @@
       new Rellax('[data-rellax-speed]');
 
       const contactForm = document.getElementById('contact-form');
+      const turnstileContainer = document.querySelector('.cf-challenge');
+      const turnstileSiteKey = turnstileContainer?.dataset.sitekey?.trim();
       contactForm.addEventListener('submit', function (event) {
         event.preventDefault();
         const formData = new FormData(contactForm);
