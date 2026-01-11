@@ -649,6 +649,15 @@
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
       var buyContainer = document.querySelector('#buy-content');
+      const header = document.getElementById('site-header');
+
+      const updateHeaderState = () => {
+        const isCollapsed = window.scrollY > 10;
+        document.body.classList.toggle('header-collapsed', isCollapsed);
+      };
+
+      updateHeaderState();
+      window.addEventListener('scroll', updateHeaderState, { passive: true });
 
       const modalOverlay = document.getElementById('modal-overlay');
       const modalTitle = document.getElementById('modal-title');
