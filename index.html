@@ -207,6 +207,7 @@
       --logo-size: 8rem;
       --logo-left-gap: 1rem;
       --collapsed-header-padding: 0.75rem;
+      --collapsed-nav-top-gap: 15px;
       --collapsed-nav-bottom-gap: 15px;
       --collapsed-logo-translate-x: 12px;
       --collapsed-logo-translate-y: 60px;
@@ -226,6 +227,7 @@
           (var(--nav-row-height) * var(--nav-row-count))
           + var(--nav-row-gap)
           + var(--collapsed-header-padding)
+          + var(--collapsed-nav-top-gap)
           + var(--collapsed-nav-bottom-gap)
         )
       );
@@ -337,7 +339,9 @@
     }
 
     .site-header.is-collapsed {
-      padding-top: var(--collapsed-header-padding);
+      padding-top: calc(
+        var(--collapsed-header-padding) + var(--collapsed-nav-top-gap)
+      );
       padding-bottom: 0;
       min-height: var(--collapsed-header-min-height);
       transform: translateY(calc(var(--logo-size) * -0.55));
