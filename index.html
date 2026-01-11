@@ -741,12 +741,18 @@
       const header = document.querySelector('.site-header');
       const updateHeaderState = () => {
         if (!header) return;
+        const isMobile = window.matchMedia('(max-width: 639px)').matches;
+        if (isMobile) {
+          header.classList.remove('is-collapsed');
+          return;
+        }
         const shouldCollapse = window.scrollY > 80;
         header.classList.toggle('is-collapsed', shouldCollapse);
       };
 
       updateHeaderState();
       window.addEventListener('scroll', updateHeaderState, { passive: true });
+      window.addEventListener('resize', updateHeaderState);
 
       const navLinks = document.querySelectorAll('.site-nav a[href^="#"]');
       navLinks.forEach(link => {
