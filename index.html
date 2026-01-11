@@ -207,6 +207,7 @@
       --logo-size: 8rem;
       --logo-left-gap: 1rem;
       --collapsed-header-padding: 0.75rem;
+      --collapsed-logo-offset: 0.4rem;
       --nav-row-count: 2;
       --nav-button-line-height: 1.25rem;
       --nav-button-padding-y: 0.5rem;
@@ -292,7 +293,7 @@
       left: var(--logo-left-gap);
       top: 50%;
       margin-bottom: 0;
-      transform: translate(0, -50%);
+      transform: translate(0, -50%) translateY(var(--collapsed-logo-offset));
     }
 
     .site-header.is-collapsed .header-inner {
