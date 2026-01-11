@@ -293,11 +293,12 @@
       }
 
       .site-header .header-inner {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: flex-start;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: center;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
+        width: 100%;
       }
 
       .logo-wrapper {
@@ -311,8 +312,8 @@
       }
 
       .site-nav {
-        width: auto;
-        justify-content: flex-start;
+        width: 100%;
+        justify-content: center;
       }
 
       .site-header.is-collapsed {
@@ -331,7 +332,7 @@
       }
 
       .site-header.is-collapsed .site-nav {
-        width: auto;
+        width: 100%;
       }
     }
 
