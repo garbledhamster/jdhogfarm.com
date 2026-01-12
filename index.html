@@ -56,6 +56,11 @@
       overflow: hidden;
     }
 
+    #faq-drawer-button {
+      bottom: calc(1.5rem + env(safe-area-inset-bottom) + var(--faq-button-offset, 0px));
+      transition: bottom 0.2s ease;
+    }
+
     .markdown-content h1, .markdown-content h2, .markdown-content h3,
     .markdown-content h4, .markdown-content h5, .markdown-content h6,
     h1, h2, h3, h4, h5, h6 {
@@ -653,7 +658,7 @@
   <!-- FAQ Drawer -->
   <button
     id="faq-drawer-button"
-    class="fixed bottom-6 right-6 z-[70] bg-red-800 text-[#ffcd54] font-black uppercase text-sm sm:text-base px-4 py-3 rounded-full shadow-lg border-2 border-[#ffcd54] hover:bg-red-900 transition"
+    class="fixed right-6 z-[70] bg-red-800 text-[#ffcd54] font-black uppercase text-sm sm:text-base px-4 py-3 rounded-full shadow-lg border-2 border-[#ffcd54] hover:bg-red-900 transition"
     aria-expanded="false"
     aria-controls="faq-drawer"
     type="button"
@@ -992,6 +997,24 @@
       if (faqDrawerClose) {
         faqDrawerClose.addEventListener('click', closeFaqDrawer);
       }
+
+      const faqFooter = document.querySelector('footer');
+      const faqFooterBuffer = 16;
+
+      const updateFaqButtonOffset = () => {
+        if (!faqDrawerButton || !faqFooter) {
+          return;
+        }
+
+        const footerRect = faqFooter.getBoundingClientRect();
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const overlap = Math.max(0, viewportHeight - footerRect.top + faqFooterBuffer);
+        faqDrawerButton.style.setProperty('--faq-button-offset', `${overlap}px`);
+      };
+
+      updateFaqButtonOffset();
+      window.addEventListener('scroll', updateFaqButtonOffset, { passive: true });
+      window.addEventListener('resize', updateFaqButtonOffset);
 
       const faqToggles = document.querySelectorAll('[data-faq-toggle]');
       const faqPanels = document.querySelectorAll('[data-faq-panel]');
