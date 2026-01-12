@@ -168,6 +168,38 @@
       scrollbar-width: none; 
     }
 
+    .card-title {
+      position: relative;
+      border-radius: 0.75rem;
+      border: 2px solid #ffcd54;
+      box-shadow:
+        0 0 0 2px #7a3419,
+        inset 0 0 12px rgba(0, 0, 0, 0.25);
+      letter-spacing: 0.08em;
+    }
+
+    .card-title::before {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border: 1px dashed rgba(255, 205, 84, 0.65);
+      border-radius: 0.5rem;
+      pointer-events: none;
+    }
+
+    .card-title::after {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 1rem;
+      background:
+        radial-gradient(circle at top left, rgba(255, 205, 84, 0.9) 0, rgba(255, 205, 84, 0.9) 6px, transparent 6px),
+        radial-gradient(circle at top right, rgba(255, 205, 84, 0.9) 0, rgba(255, 205, 84, 0.9) 6px, transparent 6px),
+        radial-gradient(circle at bottom left, rgba(255, 205, 84, 0.9) 0, rgba(255, 205, 84, 0.9) 6px, transparent 6px),
+        radial-gradient(circle at bottom right, rgba(255, 205, 84, 0.9) 0, rgba(255, 205, 84, 0.9) 6px, transparent 6px);
+      pointer-events: none;
+    }
+
     .gallery-collage {
       display: grid;
       gap: 16px;
@@ -487,7 +519,7 @@
   <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 flex flex-col items-center justify-start">
     <!-- Home Section -->
     <section id="home" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
-      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home</h2>
+      <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home</h2>
       <div id="home-content" class="markdown-content text-lg sm:text-base">
         <!-- home.md should contain keyword-rich content about hogs for sale, whole hogs, red wattle hogs, etc. -->
       </div>
@@ -495,7 +527,7 @@
 
     <!-- About Section -->
     <section id="about" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
-      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">About Us</h2>
+      <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">About Us</h2>
       <div id="about-content" class="markdown-content text-lg sm:text-base">
         <!-- about.md should also mention whole hogs, red wattle hogs, hogs for sale, etc. -->
       </div>
@@ -521,7 +553,7 @@
 
     <!-- Buy Section -->
     <section id="buy" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
-      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Buy a Hog</h2>
+      <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Buy a Hog</h2>
       <div id="buy-content" class="markdown-content text-lg sm:text-base text-left">
         <!-- buy.md should outline hog options and ordering details. -->
       </div>
@@ -537,7 +569,7 @@
 
     <!-- Gallery Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 w-full text-center">
-      <h2 class="text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Gallery</h2>
+      <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Gallery</h2>
       <div id="gallery-collage" class="gallery-collage w-full" aria-label="Portrait collage of Red Wattle hogs">
         <figure class="gallery-tile gallery-tile--one">
           <img src="assets/images/general/001.jpg" alt="A Red Wattle hog’s muddy snout looking at the camera">
@@ -585,7 +617,7 @@
 
     <!-- Contact Section -->
     <section id="contact" class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center">
-      <h3 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2 w-full">Get Started Today!</h3>
+      <h3 class="card-title text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2 w-full">Get Started Today!</h3>
       <p class="mb-4 text-red-800 text-base sm:text-lg max-w-2xl">
         Pasture-raised Red Wattle hogs deliver rich, marbled pork for freezer-fillers and food lovers alike. We offer whole hogs, feeder hogs, and future reservations, with pre-orders and full payment required before butcher pickup. For detailed options, visit the
         <a href="#buy" class="font-bold underline underline-offset-4 hover:text-red-900">Buy a Hog</a>
@@ -641,7 +673,7 @@
 
     <!-- Map Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 border-red-800 rounded-lg bg-primary w-full text-center">
-      <h4 class="text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Where We're Located</h4>
+      <h4 class="card-title text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Where We're Located</h4>
       <div class="relative w-full h-[450px]">
         <iframe 
           class="absolute inset-0 w-full h-full"
