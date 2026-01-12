@@ -900,7 +900,7 @@
   <!-- Footer (moved outside of main) -->
   <footer class="py-6 text-center mt-12 border-t-8 border-red-800 bg-[#ffcd54]/90 relative z-20 w-full flex-none">
     <p class="text-sm text-red-800">
-      &copy; 2024 J & D's Heritage Hog Farm. All rights reserved.
+      &copy; <span id="current-year">2024</span> J & D's Heritage Hog Farm. All rights reserved.
     </p>
   </footer>
 
@@ -929,6 +929,10 @@
       const closeModal = document.getElementById('close-modal');
       const closeButton = document.getElementById('close-button');
       const header = document.querySelector('.site-header');
+      const currentYear = document.getElementById('current-year');
+      if (currentYear) {
+        currentYear.textContent = new Date().getFullYear();
+      }
       const updateHeaderState = () => {
         if (!header) return;
         const isMobile = window.matchMedia('(max-width: 639px)').matches;
