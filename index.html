@@ -342,28 +342,7 @@
         radial-gradient(circle at top left, currentColor 0, currentColor var(--ornSize), transparent var(--ornSize)),
         radial-gradient(circle at top right, currentColor 0, currentColor var(--ornSize), transparent var(--ornSize)),
         radial-gradient(circle at bottom left, currentColor 0, currentColor var(--ornSize), transparent var(--ornSize)),
-        radial-gradient(circle at bottom right, currentColor 0, currentColor var(--ornSize), transparent var(--ornSize)),
-        repeating-linear-gradient(
-          90deg,
-          color-mix(in srgb, currentColor 70%, transparent) 0,
-          color-mix(in srgb, currentColor 70%, transparent) var(--bw),
-          transparent var(--bw),
-          transparent calc(var(--patternScale) * 0.5)
-        ),
-        repeating-linear-gradient(
-          0deg,
-          color-mix(in srgb, currentColor 70%, transparent) 0,
-          color-mix(in srgb, currentColor 70%, transparent) var(--bw),
-          transparent var(--bw),
-          transparent calc(var(--patternScale) * 0.5)
-        );
-      background-size:
-        auto,
-        auto,
-        auto,
-        auto,
-        var(--patternScale) var(--patternScale),
-        var(--patternScale) var(--patternScale);
+        radial-gradient(circle at bottom right, currentColor 0, currentColor var(--ornSize), transparent var(--ornSize));
       pointer-events: none;
       opacity: 0.55;
     }
