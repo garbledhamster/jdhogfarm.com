@@ -304,6 +304,40 @@
       min-width: 8.5rem;
       text-align: center;
       border-radius: 0.75rem;
+      position: relative;
+      box-shadow:
+        0 0 0 2px #ffcd54,
+        inset 0 0 12px rgba(122, 52, 25, 0.2);
+      letter-spacing: 0.08em;
+    }
+
+    .nav-link::before {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border: 1px dashed rgba(122, 52, 25, 0.6);
+      border-radius: 0.5rem;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 1rem;
+      background:
+        radial-gradient(circle at top left, rgba(122, 52, 25, 0.7) 0, rgba(122, 52, 25, 0.7) 6px, transparent 6px),
+        radial-gradient(circle at top right, rgba(122, 52, 25, 0.7) 0, rgba(122, 52, 25, 0.7) 6px, transparent 6px),
+        radial-gradient(circle at bottom left, rgba(122, 52, 25, 0.7) 0, rgba(122, 52, 25, 0.7) 6px, transparent 6px),
+        radial-gradient(circle at bottom right, rgba(122, 52, 25, 0.7) 0, rgba(122, 52, 25, 0.7) 6px, transparent 6px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .nav-link > * {
+      position: relative;
+      z-index: 2;
     }
 
     .nav-link svg {
