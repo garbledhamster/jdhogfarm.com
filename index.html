@@ -303,6 +303,8 @@
       --innerFrameOn: 1;
       --innerFrameWidth: 3px;
       position: relative;
+      z-index: 0;
+      isolation: isolate;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -366,6 +368,7 @@
         var(--patternScale) var(--patternScale);
       pointer-events: none;
       opacity: 0.55;
+      z-index: -1;
     }
 
     @media (min-width: 640px) {
