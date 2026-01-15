@@ -360,7 +360,7 @@
 
     @media (max-width: 639px) {
       .site-header {
-        --logo-size: 2.5rem;
+        --logo-size: 4rem;
       }
 
       .site-header .header-inner {
@@ -404,6 +404,28 @@
 
       .site-header.is-collapsed .site-nav {
         width: 100%;
+      }
+
+      /* Hide text labels on mobile visually, but keep for screen readers */
+      .nav-link span {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      .nav-link {
+        min-width: auto;
+        padding: 0.75rem;
+      }
+
+      .nav-link svg {
+        width: 1.75rem;
+        height: 1.75rem;
       }
     }
 
