@@ -406,9 +406,13 @@
         width: 100%;
       }
 
-      /* Hide text labels on mobile, show icons only */
+      /* Hide text labels on mobile visually, but keep for screen readers */
       .nav-link span {
-        display: none;
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
       }
 
       .nav-link {
