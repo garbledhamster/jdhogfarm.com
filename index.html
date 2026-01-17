@@ -1033,37 +1033,38 @@
           };
 
           try {
-            // 1. Save to Firebase first (primary storage)
+            // 1. Save to Firebase first
             await db.collection('messages').add(formData);
-            console.log('Message saved to Firebase successfully');
+            console.log('Message saved to Firebase');
 
-            // 2. Attempt to submit to Formspree (secondary email notification)
-            // This is optional - don't fail if it doesn't work
-            try {
-              const formspreeResponse = await fetch('https://formspree.io/f/xvgongjo', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  name: formData.name,
-                  email: formData.email,
-                  message: formData.message
-                })
-              });
+            // 2. Submit to Formspree using FormData (mimics traditional form submission)
+            const formspreeData = new FormData();
+            formspreeData.append('name', formData.name);
+            formspreeData.append('email', formData.email);
+            formspreeData.append('message', formData.message);
 
-              if (formspreeResponse.ok) {
-                console.log('Email notification sent via Formspree');
-              } else {
-                console.warn('Formspree notification failed with status:', formspreeResponse.status);
+            const formspreeResponse = await fetch('https://formspree.io/f/xvgongjo', {
+              method: 'POST',
+              body: formspreeData,
+              headers: {
+                'Accept': 'application/json'
               }
-            } catch (formspreeError) {
-              console.warn('Formspree notification failed:', formspreeError);
-            }
+            });
 
-            // Show success since Firebase save succeeded
-            showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
-            contactForm.reset();
+            if (formspreeResponse.ok) {
+              console.log('Formspree email sent successfully');
+              showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
+              contactForm.reset();
+            } else {
+              // Log detailed error for debugging
+              const errorData = await formspreeResponse.json().catch(() => ({}));
+              console.error('Formspree submission failed:', {
+                status: formspreeResponse.status,
+                statusText: formspreeResponse.statusText,
+                error: errorData
+              });
+              throw new Error('Formspree submission failed');
+            }
           } catch (error) {
             console.error('Error submitting form:', error);
             showModal('Error', 'There was an error sending your message. Please try again or contact us directly.');
