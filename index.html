@@ -688,9 +688,6 @@
       <form
         id="contact-form"
         class="max-w-md mx-auto space-y-4 w-full"
-        action="https://formspree.io/f/xvgongjo"
-        method="POST"
-        target="formspree-iframe"
       >
         <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Name:</span>
@@ -736,8 +733,6 @@
         </button>
       </form>
 
-      <!-- Hidden iframe for Formspree submission -->
-      <iframe name="formspree-iframe" id="formspree-iframe" style="display:none;"></iframe>
     </section>
 
     <!-- Map Section -->
@@ -1023,9 +1018,9 @@
 
       // Handle contact form submission
       const contactForm = document.getElementById('contact-form');
-      const formspreeIframe = document.getElementById('formspree-iframe');
+      const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xvgongjo';
 
-      if (contactForm && formspreeIframe) {
+      if (contactForm) {
         contactForm.addEventListener('submit', async function(event) {
           event.preventDefault();
 
@@ -1034,8 +1029,8 @@
           submitButton.disabled = true;
           submitButton.textContent = 'Sending...';
 
-          // Get form data
-          const formData = {
+          // Get form data for Firebase
+          const firebaseData = {
             name: contactForm.querySelector('input[name="name"]').value,
             email: contactForm.querySelector('input[name="email"]').value,
             message: contactForm.querySelector('textarea[name="message"]').value,
@@ -1043,38 +1038,67 @@
             submittedAt: new Date().toISOString()
           };
 
+          // Create FormData for Formspree (proper format)
+          const formspreeData = new FormData(contactForm);
+
+          console.log('=== Form Submission Started ===');
+          console.log('Name:', firebaseData.name);
+          console.log('Email:', firebaseData.email);
+          console.log('Message:', firebaseData.message);
+
           try {
-            // 1. Save to Firebase first
-            await db.collection('messages').add(formData);
-            console.log('Message saved to Firebase');
+            // 1. Save to Firebase first (this is our log/backup)
+            console.log('Saving to Firebase...');
+            const firebaseResult = await db.collection('messages').add(firebaseData);
+            console.log('✓ Message saved to Firebase with ID:', firebaseResult.id);
 
-            // 2. Submit form naturally to Formspree via hidden iframe
-            // This uses traditional form POST submission which Formspree accepts
-            const iframeLoadHandler = function() {
-              // Form submission complete (whether success or failure)
-              console.log('Form submitted to Formspree via iframe');
+            // 2. Submit to Formspree using Fetch API with FormData
+            console.log('Submitting to Formspree...');
+            console.log('Endpoint:', FORMSPREE_ENDPOINT);
 
-              // Show success message and reset form
+            const formspreeResponse = await fetch(FORMSPREE_ENDPOINT, {
+              method: 'POST',
+              body: formspreeData,
+              headers: {
+                'Accept': 'application/json'
+              }
+            });
+
+            console.log('Formspree response status:', formspreeResponse.status);
+            console.log('Formspree response ok:', formspreeResponse.ok);
+
+            // Parse the response
+            const formspreeResult = await formspreeResponse.json();
+            console.log('Formspree response:', formspreeResult);
+
+            if (formspreeResponse.ok) {
+              console.log('✓ Formspree submission successful!');
               showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
               contactForm.reset();
+            } else {
+              // Formspree returned an error
+              console.error('✗ Formspree returned an error:', formspreeResult);
+              const errorMessage = formspreeResult.error || formspreeResult.errors || 'Unknown error from Formspree';
+              showModal('Partial Success', `Your message was saved, but there was an issue sending the email notification: ${errorMessage}. We will still receive your message.`);
+              contactForm.reset();
+            }
 
-              submitButton.disabled = false;
-              submitButton.textContent = originalButtonText;
-
-              // Remove the event listener
-              formspreeIframe.removeEventListener('load', iframeLoadHandler);
-            };
-
-            // Listen for iframe load (indicates submission complete)
-            formspreeIframe.addEventListener('load', iframeLoadHandler);
-
-            // Trigger the traditional form submission
-            // This will POST to Formspree in the hidden iframe
-            contactForm.submit();
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
 
           } catch (error) {
-            console.error('Error submitting form:', error);
-            showModal('Error', 'There was an error sending your message. Please try again or contact us directly.');
+            console.error('=== Error During Form Submission ===');
+            console.error('Error type:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+
+            // Check if Firebase at least succeeded
+            if (error.message.includes('fetch') || error.message.includes('Formspree')) {
+              showModal('Partial Success', 'Your message was saved to our database, but there was an issue with the email notification. We will still receive your message.');
+            } else {
+              showModal('Error', 'There was an error sending your message. Please try again or contact us directly.');
+            }
+
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
           }
