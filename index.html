@@ -688,47 +688,56 @@
       <form
         id="contact-form"
         class="max-w-md mx-auto space-y-4 w-full"
+        action="https://formspree.io/f/xvgongjo"
+        method="POST"
+        target="formspree-iframe"
       >
         <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Name:</span>
-          <input 
+          <input
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            type="text" 
-            name="name" 
-            placeholder="Your Name" 
-            required 
+            type="text"
+            name="name"
+            placeholder="Your Name"
+            maxlength="30"
+            required
           />
         </label>
 
         <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Email:</span>
-          <input 
+          <input
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            type="email" 
-            name="email" 
-            placeholder="Your Email" 
-            required 
+            type="email"
+            name="email"
+            placeholder="Your Email"
+            maxlength="50"
+            required
           />
         </label>
 
         <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Message: Tell us what you're looking for and when you need it.</span>
-          <textarea 
+          <textarea
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            name="message" 
+            name="message"
             placeholder="Let us know if you're interested in whole hogs, red wattle hogs, or a 1/4 hog share."
-            rows="4" 
+            rows="4"
+            maxlength="500"
             required
           ></textarea>
         </label>
 
-        <button 
+        <button
           type="submit"
           class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition w-full"
         >
           Send
         </button>
       </form>
+
+      <!-- Hidden iframe for Formspree submission -->
+      <iframe name="formspree-iframe" id="formspree-iframe" style="display:none;"></iframe>
     </section>
 
     <!-- Map Section -->
@@ -1014,7 +1023,9 @@
 
       // Handle contact form submission
       const contactForm = document.getElementById('contact-form');
-      if (contactForm) {
+      const formspreeIframe = document.getElementById('formspree-iframe');
+
+      if (contactForm && formspreeIframe) {
         contactForm.addEventListener('submit', async function(event) {
           event.preventDefault();
 
@@ -1037,38 +1048,33 @@
             await db.collection('messages').add(formData);
             console.log('Message saved to Firebase');
 
-            // 2. Submit to Formspree using FormData (mimics traditional form submission)
-            const formspreeData = new FormData();
-            formspreeData.append('name', formData.name);
-            formspreeData.append('email', formData.email);
-            formspreeData.append('message', formData.message);
+            // 2. Submit form naturally to Formspree via hidden iframe
+            // This uses traditional form POST submission which Formspree accepts
+            const iframeLoadHandler = function() {
+              // Form submission complete (whether success or failure)
+              console.log('Form submitted to Formspree via iframe');
 
-            const formspreeResponse = await fetch('https://formspree.io/f/xvgongjo', {
-              method: 'POST',
-              body: formspreeData,
-              headers: {
-                'Accept': 'application/json'
-              }
-            });
-
-            if (formspreeResponse.ok) {
-              console.log('Formspree email sent successfully');
+              // Show success message and reset form
               showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
               contactForm.reset();
-            } else {
-              // Log detailed error for debugging
-              const errorData = await formspreeResponse.json().catch(() => ({}));
-              console.error('Formspree submission failed:', {
-                status: formspreeResponse.status,
-                statusText: formspreeResponse.statusText,
-                error: errorData
-              });
-              throw new Error('Formspree submission failed');
-            }
+
+              submitButton.disabled = false;
+              submitButton.textContent = originalButtonText;
+
+              // Remove the event listener
+              formspreeIframe.removeEventListener('load', iframeLoadHandler);
+            };
+
+            // Listen for iframe load (indicates submission complete)
+            formspreeIframe.addEventListener('load', iframeLoadHandler);
+
+            // Trigger the traditional form submission
+            // This will POST to Formspree in the hidden iframe
+            contactForm.submit();
+
           } catch (error) {
             console.error('Error submitting form:', error);
             showModal('Error', 'There was an error sending your message. Please try again or contact us directly.');
-          } finally {
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
           }
