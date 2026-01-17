@@ -1037,23 +1037,32 @@
             await db.collection('messages').add(formData);
             console.log('Message saved to Firebase');
 
-            // 2. Submit to Formspree
+            // 2. Submit to Formspree using FormData (mimics traditional form submission)
+            const formspreeData = new FormData();
+            formspreeData.append('name', formData.name);
+            formspreeData.append('email', formData.email);
+            formspreeData.append('message', formData.message);
+
             const formspreeResponse = await fetch('https://formspree.io/f/xvgongjo', {
               method: 'POST',
+              body: formspreeData,
               headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                name: formData.name,
-                email: formData.email,
-                message: formData.message
-              })
+                'Accept': 'application/json'
+              }
             });
 
             if (formspreeResponse.ok) {
+              console.log('Formspree email sent successfully');
               showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
               contactForm.reset();
             } else {
+              // Log detailed error for debugging
+              const errorData = await formspreeResponse.json().catch(() => ({}));
+              console.error('Formspree submission failed:', {
+                status: formspreeResponse.status,
+                statusText: formspreeResponse.statusText,
+                error: errorData
+              });
               throw new Error('Formspree submission failed');
             }
           } catch (error) {
