@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formspree Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .test-section {
+      border: 2px solid #333;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    .log {
+      background: #f5f5f5;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+    .log-entry.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .log-entry.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .log-entry.info {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    input, textarea, button {
+      padding: 10px;
+      font-size: 14px;
+    }
+    button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #1976d2;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>Formspree Integration Test</h1>
+  <p>This page tests different methods of submitting to Formspree: <code>https://formspree.io/f/xvgongjo</code></p>
+
+  <!-- Test 1: Direct form submission with iframe -->
+  <div class="test-section">
+    <h2>Test 1: Traditional Form Submission (Current Method)</h2>
+    <p>Submits the form to a hidden iframe target</p>
+    <form id="test-form-1">
+      <input type="text" name="name" placeholder="Name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <textarea name="message" placeholder="Message" rows="3" required></textarea>
+      <button type="submit">Submit (Traditional)</button>
+    </form>
+    <iframe name="formspree-iframe-1" id="formspree-iframe-1" style="display:none;"></iframe>
+    <div class="log" id="log-1"></div>
+  </div>
+
+  <!-- Test 2: Fetch API submission -->
+  <div class="test-section">
+    <h2>Test 2: Fetch API Submission (Alternative Method)</h2>
+    <p>Uses modern fetch() API to submit to Formspree</p>
+    <form id="test-form-2">
+      <input type="text" name="name" placeholder="Name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <textarea name="message" placeholder="Message" rows="3" required></textarea>
+      <button type="submit">Submit (Fetch API)</button>
+    </form>
+    <div class="log" id="log-2"></div>
+  </div>
+
+  <!-- Test 3: Fetch API with FormData -->
+  <div class="test-section">
+    <h2>Test 3: Fetch API with FormData (Recommended)</h2>
+    <p>Uses FormData object with fetch() - Formspree's recommended approach</p>
+    <form id="test-form-3">
+      <input type="text" name="name" placeholder="Name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <textarea name="message" placeholder="Message" rows="3" required></textarea>
+      <button type="submit">Submit (FormData)</button>
+    </form>
+    <div class="log" id="log-3"></div>
+  </div>
+
+  <!-- Test 4: Check endpoint directly -->
+  <div class="test-section">
+    <h2>Test 4: Endpoint Health Check</h2>
+    <p>Verify the Formspree endpoint is accessible</p>
+    <button onclick="checkEndpoint()">Check Endpoint</button>
+    <div class="log" id="log-4"></div>
+  </div>
+
+  <script>
+    const FORMSPREE_URL = 'https://formspree.io/f/xvgongjo';
+
+    function log(testNum, message, type = 'info') {
+      const logEl = document.getElementById(`log-${testNum}`);
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(`Test ${testNum} [${type}]:`, message);
+    }
+
+    // Test 1: Traditional form submission with iframe
+    const form1 = document.getElementById('test-form-1');
+    const iframe1 = document.getElementById('formspree-iframe-1');
+
+    form1.addEventListener('submit', function(e) {
+      e.preventDefault();
+      log(1, 'Form submission started...', 'info');
+      log(1, `Target: ${FORMSPREE_URL}`, 'info');
+
+      // Set up iframe listener
+      let loadFired = false;
+      const iframeLoadHandler = function() {
+        loadFired = true;
+        log(1, 'Iframe load event fired!', 'success');
+        iframe1.removeEventListener('load', iframeLoadHandler);
+
+        try {
+          // Try to access iframe content (will fail due to CORS but let's try)
+          const iframeDoc = iframe1.contentDocument || iframe1.contentWindow.document;
+          log(1, 'Iframe document accessible', 'success');
+          log(1, `Iframe body length: ${iframeDoc.body.innerHTML.length}`, 'info');
+        } catch (e) {
+          log(1, `Cannot access iframe content (expected): ${e.message}`, 'info');
+        }
+
+        log(1, 'Form submission complete!', 'success');
+        form1.reset();
+      };
+
+      iframe1.addEventListener('load', iframeLoadHandler);
+
+      // Set form attributes
+      form1.setAttribute('action', FORMSPREE_URL);
+      form1.setAttribute('method', 'POST');
+      form1.setAttribute('target', 'formspree-iframe-1');
+
+      log(1, 'Triggering form.submit()...', 'info');
+      form1.submit();
+
+      // Timeout check
+      setTimeout(() => {
+        if (!loadFired) {
+          log(1, 'WARNING: Iframe load event did not fire after 5 seconds!', 'error');
+          log(1, 'This suggests the submission may have failed or CORS prevented the event', 'error');
+        }
+      }, 5000);
+    });
+
+    // Test 2: Fetch API with JSON
+    const form2 = document.getElementById('test-form-2');
+    form2.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      log(2, 'Fetch API submission started...', 'info');
+
+      const data = {
+        name: form2.querySelector('[name="name"]').value,
+        email: form2.querySelector('[name="email"]').value,
+        message: form2.querySelector('[name="message"]').value,
+      };
+
+      log(2, `Sending JSON data: ${JSON.stringify(data)}`, 'info');
+
+      try {
+        const response = await fetch(FORMSPREE_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        log(2, `Response status: ${response.status}`, response.ok ? 'success' : 'error');
+
+        const result = await response.json();
+        log(2, `Response: ${JSON.stringify(result)}`, response.ok ? 'success' : 'error');
+
+        if (response.ok) {
+          log(2, 'Submission successful!', 'success');
+          form2.reset();
+        } else {
+          log(2, `Error: ${result.error || 'Unknown error'}`, 'error');
+        }
+      } catch (error) {
+        log(2, `Fetch error: ${error.message}`, 'error');
+      }
+    });
+
+    // Test 3: Fetch API with FormData (Formspree's recommended method)
+    const form3 = document.getElementById('test-form-3');
+    form3.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      log(3, 'FormData submission started...', 'info');
+
+      const formData = new FormData(form3);
+
+      log(3, 'FormData entries:', 'info');
+      for (let [key, value] of formData.entries()) {
+        log(3, `  ${key}: ${value}`, 'info');
+      }
+
+      try {
+        const response = await fetch(FORMSPREE_URL, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        log(3, `Response status: ${response.status}`, response.ok ? 'success' : 'error');
+        log(3, `Response headers: ${[...response.headers.entries()].map(([k,v]) => `${k}: ${v}`).join(', ')}`, 'info');
+
+        const result = await response.json();
+        log(3, `Response: ${JSON.stringify(result)}`, response.ok ? 'success' : 'error');
+
+        if (response.ok) {
+          log(3, '✓ Submission successful!', 'success');
+          form3.reset();
+        } else {
+          log(3, `✗ Error: ${result.error || result.errors || 'Unknown error'}`, 'error');
+        }
+      } catch (error) {
+        log(3, `✗ Fetch error: ${error.message}`, 'error');
+        log(3, `Error stack: ${error.stack}`, 'error');
+      }
+    });
+
+    // Test 4: Check endpoint
+    async function checkEndpoint() {
+      log(4, 'Checking Formspree endpoint...', 'info');
+      log(4, `URL: ${FORMSPREE_URL}`, 'info');
+
+      try {
+        // Try a GET request to see if endpoint exists
+        const response = await fetch(FORMSPREE_URL, {
+          method: 'GET'
+        });
+
+        log(4, `GET request status: ${response.status}`, 'info');
+        log(4, `Response type: ${response.headers.get('content-type')}`, 'info');
+
+        // Formspree typically returns 405 for GET requests, which is normal
+        if (response.status === 405) {
+          log(4, '✓ Endpoint exists (405 Method Not Allowed is expected for GET)', 'success');
+        } else {
+          log(4, `Endpoint returned: ${response.status}`, 'info');
+        }
+
+        // Try OPTIONS request to check CORS
+        const optionsResponse = await fetch(FORMSPREE_URL, {
+          method: 'OPTIONS'
+        });
+
+        log(4, `OPTIONS request status: ${optionsResponse.status}`, 'info');
+        log(4, `CORS headers:`, 'info');
+        log(4, `  Access-Control-Allow-Origin: ${optionsResponse.headers.get('access-control-allow-origin')}`, 'info');
+        log(4, `  Access-Control-Allow-Methods: ${optionsResponse.headers.get('access-control-allow-methods')}`, 'info');
+
+      } catch (error) {
+        log(4, `✗ Error: ${error.message}`, 'error');
+      }
+    }
+
+    log(1, 'Test 1 ready', 'info');
+    log(2, 'Test 2 ready', 'info');
+    log(3, 'Test 3 ready', 'info');
+    log(4, 'Test 4 ready', 'info');
+  </script>
+</body>
+</html>
