@@ -688,6 +688,9 @@
       <form
         id="contact-form"
         class="max-w-md mx-auto space-y-4 w-full"
+        action="https://formspree.io/f/xvgongjo"
+        method="POST"
+        target="formspree-iframe"
       >
         <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Name:</span>
@@ -942,6 +945,9 @@
     </div>
   </div>
 
+  <!-- Hidden iframe for Formspree submission -->
+  <iframe name="formspree-iframe" id="formspree-iframe" style="display:none;"></iframe>
+
   <script>
     // Initialize Firebase
     const firebaseConfig = {
@@ -1014,10 +1020,19 @@
 
       // Handle contact form submission
       const contactForm = document.getElementById('contact-form');
+      const formspreeIframe = document.getElementById('formspree-iframe');
+
       if (contactForm) {
+        let formSubmissionInProgress = false;
+
         contactForm.addEventListener('submit', async function(event) {
           event.preventDefault();
 
+          if (formSubmissionInProgress) {
+            return; // Prevent double submission
+          }
+
+          formSubmissionInProgress = true;
           const submitButton = contactForm.querySelector('button[type="submit"]');
           const originalButtonText = submitButton.textContent;
           submitButton.disabled = true;
@@ -1035,42 +1050,35 @@
           try {
             // 1. Save to Firebase first
             await db.collection('messages').add(formData);
-            console.log('Message saved to Firebase');
+            console.log('Message saved to Firebase successfully');
 
-            // 2. Submit to Formspree using FormData (mimics traditional form submission)
-            const formspreeData = new FormData();
-            formspreeData.append('name', formData.name);
-            formspreeData.append('email', formData.email);
-            formspreeData.append('message', formData.message);
+            // 2. Submit to Formspree using traditional form submission (to iframe)
+            // Set up iframe load listener to detect when Formspree responds
+            const iframeLoadHandler = function() {
+              console.log('Formspree submission completed via iframe');
+              formspreeIframe.removeEventListener('load', iframeLoadHandler);
 
-            const formspreeResponse = await fetch('https://formspree.io/f/xvgongjo', {
-              method: 'POST',
-              body: formspreeData,
-              headers: {
-                'Accept': 'application/json'
-              }
-            });
-
-            if (formspreeResponse.ok) {
-              console.log('Formspree email sent successfully');
+              // Show success modal
               showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
               contactForm.reset();
-            } else {
-              // Log detailed error for debugging
-              const errorData = await formspreeResponse.json().catch(() => ({}));
-              console.error('Formspree submission failed:', {
-                status: formspreeResponse.status,
-                statusText: formspreeResponse.statusText,
-                error: errorData
-              });
-              throw new Error('Formspree submission failed');
-            }
+
+              // Re-enable submit button
+              submitButton.disabled = false;
+              submitButton.textContent = originalButtonText;
+              formSubmissionInProgress = false;
+            };
+
+            formspreeIframe.addEventListener('load', iframeLoadHandler);
+
+            // Submit the form naturally (will POST to Formspree via iframe)
+            contactForm.submit();
+
           } catch (error) {
             console.error('Error submitting form:', error);
             showModal('Error', 'There was an error sending your message. Please try again or contact us directly.');
-          } finally {
             submitButton.disabled = false;
             submitButton.textContent = originalButtonText;
+            formSubmissionInProgress = false;
           }
         });
       }
