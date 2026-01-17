@@ -515,6 +515,11 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tooly/dist/tooly.min.css" />
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-0F7TP7PMQQ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -680,11 +685,9 @@
         <a href="#buy" class="font-bold underline underline-offset-4 hover:text-red-900">Buy a Hog</a>
         section and reach out if you want help choosing.
       </p>
-      <form 
+      <form
         id="contact-form"
         class="max-w-md mx-auto space-y-4 w-full"
-        action="https://formspree.io/f/xvgongjo"
-        method="POST"
       >
         <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Name:</span>
@@ -940,6 +943,21 @@
   </div>
 
   <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSkvoFMBcWcBGSdI6T485ElFf4EOzGhis",
+      authDomain: "jd-hog-farm.firebaseapp.com",
+      projectId: "jd-hog-farm",
+      storageBucket: "jd-hog-farm.firebasestorage.app",
+      messagingSenderId: "325404735338",
+      appId: "1:325404735338:web:92a20c931315c8527d5713",
+      measurementId: "G-VDRV1TREKD"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     document.addEventListener('DOMContentLoaded', function () {
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
@@ -993,6 +1011,60 @@
 
       closeModal.addEventListener('click', hideModal);
       closeButton.addEventListener('click', hideModal);
+
+      // Handle contact form submission
+      const contactForm = document.getElementById('contact-form');
+      if (contactForm) {
+        contactForm.addEventListener('submit', async function(event) {
+          event.preventDefault();
+
+          const submitButton = contactForm.querySelector('button[type="submit"]');
+          const originalButtonText = submitButton.textContent;
+          submitButton.disabled = true;
+          submitButton.textContent = 'Sending...';
+
+          // Get form data
+          const formData = {
+            name: contactForm.querySelector('input[name="name"]').value,
+            email: contactForm.querySelector('input[name="email"]').value,
+            message: contactForm.querySelector('textarea[name="message"]').value,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            submittedAt: new Date().toISOString()
+          };
+
+          try {
+            // 1. Save to Firebase first
+            await db.collection('messages').add(formData);
+            console.log('Message saved to Firebase');
+
+            // 2. Submit to Formspree
+            const formspreeResponse = await fetch('https://formspree.io/f/xvgongjo', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                name: formData.name,
+                email: formData.email,
+                message: formData.message
+              })
+            });
+
+            if (formspreeResponse.ok) {
+              showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
+              contactForm.reset();
+            } else {
+              throw new Error('Formspree submission failed');
+            }
+          } catch (error) {
+            console.error('Error submitting form:', error);
+            showModal('Error', 'There was an error sending your message. Please try again or contact us directly.');
+          } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+          }
+        });
+      }
 
       // Load home.md
       fetch('data/home.md')
