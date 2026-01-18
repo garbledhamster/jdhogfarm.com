@@ -1,4 +1,22 @@
 # Git Ignore File
+# Define files and folders to ignore in Git
 
-Define files and folders to ignore in Git.
+# Backup files
 *.bak
+
+# Dependencies
+node_modules/
+
+# Build outputs (optional - remove if you want to commit compiled CSS)
+# assets/css/output.css
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
