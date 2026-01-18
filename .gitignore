@@ -2,3 +2,20 @@
 
 Define files and folders to ignore in Git.
 *.bak
+
+# Node.js dependencies
+node_modules/
+
+# Package manager lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
