@@ -1,0 +1,15 @@
+{
+  "name": "J & D's Heritage Hog Farm",
+  "short_name": "JD Hog Farm",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffcd54",
+  "theme_color": "#ffcd54",
+  "icons": [
+    {
+      "src": "assets/images/branding/13.png",
+      "sizes": "500x500",
+      "type": "image/png"
+    }
+  ]
+}
