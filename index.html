@@ -721,6 +721,8 @@
   <aside
     id="faq-drawer"
     class="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-[90vw] bg-[#ffcd54]/95 border-l-4 border-red-800 z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
+    aria-hidden="true"
+    inert
   >
     <div class="flex items-center justify-between px-6 py-4 border-b-4 border-red-800 bg-red-800 text-[#ffcd54]">
       <h2 class="text-xl sm:text-2xl font-black uppercase">FAQs</h2>
@@ -1133,6 +1135,7 @@
         faqDrawer.classList.remove('translate-x-full');
         faqDrawerOverlay.classList.remove('hidden');
         faqDrawer.setAttribute('aria-hidden', 'false');
+        faqDrawer.removeAttribute('inert');
         faqDrawerButton.setAttribute('aria-expanded', 'true');
         setFaqScrollLock(true);
       };
@@ -1144,6 +1147,7 @@
         faqDrawer.classList.add('translate-x-full');
         faqDrawerOverlay.classList.add('hidden');
         faqDrawer.setAttribute('aria-hidden', 'true');
+        faqDrawer.setAttribute('inert', '');
         faqDrawerButton.setAttribute('aria-expanded', 'false');
         setFaqScrollLock(false);
       };
