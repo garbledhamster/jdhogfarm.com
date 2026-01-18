@@ -244,8 +244,9 @@
 
     .site-header {
       --logo-size: 8rem;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      will-change: padding, transform;
+      --logo-wrapper-max: calc(var(--logo-size) + 3rem);
+      transition: padding 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      will-change: padding;
     }
 
     .site-header .header-inner {
@@ -261,11 +262,14 @@
     }
 
     .logo-wrapper {
+      max-height: var(--logo-wrapper-max);
       transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                   max-height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                   margin 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
                   transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       overflow: hidden;
+      transform: translateY(0) scale(1);
+      transform-origin: top center;
       will-change: opacity, max-height, margin, transform;
     }
 
@@ -347,6 +351,7 @@
     @media (max-width: 639px) {
       .site-header {
         --logo-size: 4rem;
+        --logo-wrapper-max: calc(var(--logo-size) + 2rem);
       }
 
       .site-header .header-inner {
@@ -446,6 +451,7 @@
       opacity: 0;
       max-height: 0;
       margin: 0;
+      transform: translateY(-0.5rem) scale(0.96);
       pointer-events: none;
     }
 
