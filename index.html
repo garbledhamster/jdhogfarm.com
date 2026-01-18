@@ -33,9 +33,9 @@
   <meta property="twitter:description" content="Discover our heritage hogs for sale: whole hogs, red wattle hogs, 1/4 hog, 1/5 hog options. Sustainably raised for premium quality. Preorder today!">
   <meta property="twitter:image" content="https://jdhogfarm.com/assets/images/branding/13.png">
 
-  <!-- Tailwind CSS -->
-  <link rel="stylesheet" href="assets/css/output.css">
-
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@500&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
 
@@ -1064,7 +1064,8 @@
               method: 'POST',
               body: formspreeData,
               headers: {
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Formspree-Project-Key': 'dw9tKDtE9k+RhrN42vZE5QyaYdWRTo46pzQKv6LEqc8='
               }
             });
 
