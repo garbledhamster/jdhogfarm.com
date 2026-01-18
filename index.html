@@ -917,7 +917,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', () => {
       var homeContainer = document.querySelector('#home-content');
       var aboutContainer = document.querySelector('#about-content');
       var buyContainer = document.querySelector('#buy-content');
@@ -977,7 +977,7 @@
       const FORMSPREE_ENDPOINT = contactForm?.getAttribute('action') || 'https://formspree.io/f/xvgongjo';
 
       if (contactForm) {
-        contactForm.addEventListener('submit', async function(event) {
+        contactForm.addEventListener('submit', async (event) => {
           event.preventDefault();
 
           const submitButton = contactForm.querySelector('button[type="submit"]');
