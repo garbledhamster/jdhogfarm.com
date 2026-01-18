@@ -1,0 +1,10 @@
+{
+  "*.html": [
+    "stylelint --custom-syntax postcss-html --fix",
+    "eslint --fix",
+    "html-validate"
+  ],
+  "*.{js,mjs,cjs}": [
+    "eslint --fix"
+  ]
+}
