@@ -936,20 +936,44 @@
         currentYear.textContent = new Date().getFullYear();
       }
 
-      const updateHeaderState = () => {
+      let headerCollapsed = false;
+      let lastKnownScrollY = window.scrollY;
+      let ticking = false;
+
+      const applyHeaderState = (scrollY) => {
         if (!header) return;
         const isMobile = window.matchMedia('(max-width: 639px)').matches;
         if (isMobile) {
+          headerCollapsed = false;
           header.classList.remove('is-collapsed');
           return;
         }
-        const shouldCollapse = window.scrollY > 80;
-        header.classList.toggle('is-collapsed', shouldCollapse);
+
+        const collapseThreshold = 110;
+        const expandThreshold = 60;
+        if (!headerCollapsed && scrollY > collapseThreshold) {
+          headerCollapsed = true;
+        } else if (headerCollapsed && scrollY < expandThreshold) {
+          headerCollapsed = false;
+        }
+
+        header.classList.toggle('is-collapsed', headerCollapsed);
       };
 
-      updateHeaderState();
+      const updateHeaderState = () => {
+        lastKnownScrollY = window.scrollY;
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            applyHeaderState(lastKnownScrollY);
+            ticking = false;
+          });
+          ticking = true;
+        }
+      };
+
+      applyHeaderState(lastKnownScrollY);
       window.addEventListener('scroll', updateHeaderState, { passive: true });
-      window.addEventListener('resize', updateHeaderState);
+      window.addEventListener('resize', () => applyHeaderState(window.scrollY));
 
       const navLinks = document.querySelectorAll('.site-nav a[href^="#"]');
       navLinks.forEach(link => {
