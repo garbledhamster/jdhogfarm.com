@@ -688,6 +688,8 @@
       <form
         id="contact-form"
         class="max-w-md mx-auto space-y-4 w-full"
+        action="https://formspree.io/f/xvgongjo"
+        method="POST"
       >
         <label class="block text-left w-full">
           <span class="text-red-800 font-bold">Your Name:</span>
@@ -1018,7 +1020,7 @@
 
       // Handle contact form submission
       const contactForm = document.getElementById('contact-form');
-      const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xvgongjo';
+      const FORMSPREE_ENDPOINT = contactForm?.getAttribute('action') || 'https://formspree.io/f/xvgongjo';
 
       if (contactForm) {
         contactForm.addEventListener('submit', async function(event) {
@@ -1040,6 +1042,8 @@
 
           // Create FormData for Formspree (proper format)
           const formspreeData = new FormData(contactForm);
+          formspreeData.set('_replyto', firebaseData.email);
+          formspreeData.set('_subject', 'New J&D Hog Farm inquiry');
 
           console.log('=== Form Submission Started ===');
           console.log('Name:', firebaseData.name);
