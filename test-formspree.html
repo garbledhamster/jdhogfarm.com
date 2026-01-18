@@ -138,14 +138,14 @@
     const form1 = document.getElementById('test-form-1');
     const iframe1 = document.getElementById('formspree-iframe-1');
 
-    form1.addEventListener('submit', function(e) {
+    form1.addEventListener('submit', (e) => {
       e.preventDefault();
       log(1, 'Form submission started...', 'info');
       log(1, `Target: ${FORMSPREE_URL}`, 'info');
 
       // Set up iframe listener
       let loadFired = false;
-      const iframeLoadHandler = function() {
+      const iframeLoadHandler = () => {
         loadFired = true;
         log(1, 'Iframe load event fired!', 'success');
         iframe1.removeEventListener('load', iframeLoadHandler);
@@ -184,7 +184,7 @@
 
     // Test 2: Fetch API with JSON
     const form2 = document.getElementById('test-form-2');
-    form2.addEventListener('submit', async function(e) {
+    form2.addEventListener('submit', async (e) => {
       e.preventDefault();
       log(2, 'Fetch API submission started...', 'info');
 
@@ -224,14 +224,14 @@
 
     // Test 3: Fetch API with FormData (Formspree's recommended method)
     const form3 = document.getElementById('test-form-3');
-    form3.addEventListener('submit', async function(e) {
+    form3.addEventListener('submit', async (e) => {
       e.preventDefault();
       log(3, 'FormData submission started...', 'info');
 
       const formData = new FormData(form3);
 
       log(3, 'FormData entries:', 'info');
-      for (let [key, value] of formData.entries()) {
+      for (const [key, value] of formData.entries()) {
         log(3, `  ${key}: ${value}`, 'info');
       }
 
