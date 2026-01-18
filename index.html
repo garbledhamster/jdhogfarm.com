@@ -40,7 +40,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@500&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
 
   <!-- reCAPTCHA v3 Enterprise - No challenges, background verification only -->
-  <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfCoU4sAAAAANKG9A42zjb8IrLrj2vOuk-ESQCV" async defer></script>
+  <script src="https://www.google.com/recaptcha/enterprise.js?render=66LfCoU4sAAAAANKG9A42zjb8IrLrj2vOuk-ESQCV" async defer></script>
   <style>
     body {
       font-family: Asap, sans-serif !important;
@@ -1021,7 +1021,7 @@
           try {
             // Execute reCAPTCHA v3 Enterprise (no user challenges)
             console.log('Executing reCAPTCHA...');
-            const recaptchaToken = await grecaptcha.enterprise.execute('6LfCoU4sAAAAANKG9A42zjb8IrLrj2vOuk-ESQCV', {action: 'submit'});
+            const recaptchaToken = await grecaptcha.enterprise.execute('66LfCoU4sAAAAANKG9A42zjb8IrLrj2vOuk-ESQCV', {action: 'submit'});
             console.log('✓ reCAPTCHA token received');
 
             // Get form data for Firebase
