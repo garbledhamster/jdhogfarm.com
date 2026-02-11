@@ -61,6 +61,7 @@
     }
 
     #faq-button-container {
+      position: relative;
       bottom: calc(2rem + env(safe-area-inset-bottom) + var(--faq-button-offset, 0px));
       transition: bottom 0.2s ease;
     }
@@ -79,10 +80,6 @@
     }
 
     /* Tooltip for FAQ button */
-    #faq-button-container {
-      position: relative;
-    }
-
     #faq-button-container .faq-tooltip {
       visibility: hidden;
       opacity: 0;
@@ -99,7 +96,7 @@
       font-weight: 700;
       white-space: nowrap;
       border: 2px solid #ffcd54;
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -2px rgb(0 0 0 / 10%);
       transition: opacity 0.2s, visibility 0.2s;
       z-index: 71;
     }
