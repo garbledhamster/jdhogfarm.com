@@ -61,6 +61,7 @@
     }
 
     #faq-button-container {
+      position: relative;
       bottom: calc(2rem + env(safe-area-inset-bottom) + var(--faq-button-offset, 0px));
       transition: bottom 0.2s ease;
     }
@@ -69,6 +70,40 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
+    }
+
+    /* Position reCAPTCHA badge inside contact form */
+    .grecaptcha-badge {
+      position: absolute !important;
+      bottom: 10px !important;
+      right: 10px !important;
+    }
+
+    /* Tooltip for FAQ button */
+    #faq-button-container .faq-tooltip {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-right: 10px;
+      background-color: #7a0000;
+      color: #ffcd54;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      white-space: nowrap;
+      border: 2px solid #ffcd54;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 10%), 0 2px 4px -2px rgb(0 0 0 / 10%);
+      transition: opacity 0.2s, visibility 0.2s;
+      z-index: 71;
+    }
+
+    #faq-button-container:hover .faq-tooltip {
+      visibility: visible;
+      opacity: 1;
     }
 
     .markdown-content h1, .markdown-content h2, .markdown-content h3,
@@ -630,7 +665,7 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center">
+    <section id="contact" class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center relative">
       <h3 class="card-title text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2 w-full">Get Started Today!</h3>
       <p class="mb-4 text-red-800 text-base sm:text-lg max-w-2xl">
         Pasture-raised Red Wattle hogs deliver rich, marbled pork for freezer-fillers and food lovers alike. We offer whole hogs, feeder hogs, and future reservations, with pre-orders and full payment required before butcher pickup. For detailed options, visit the
@@ -707,7 +742,7 @@
 
   <!-- FAQ Section -->
   <div class="fixed right-8 z-[70] flex flex-col items-end" id="faq-button-container">
-    <span class="text-[#ffcd54] font-bold text-sm mb-2 bg-red-800 px-3 py-1 rounded-full border-2 border-[#ffcd54] shadow-md">Frequently Asked Questions (FAQs)</span>
+    <span class="faq-tooltip">Frequently Asked Questions (FAQs)</span>
     <button
       id="faq-drawer-button"
       class="bg-[#ffcd54] text-red-800 shadow-lg border-2 border-red-800 hover:bg-yellow-300 transition flex items-center justify-center font-bold text-2xl"
