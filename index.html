@@ -6,11 +6,11 @@
 
   <!-- Primary Meta Tags -->
   <title>J &amp; D's Heritage Hog Farm | Whole Hogs, Red Wattle Hogs &amp; More</title>
-  <meta name="title" content="J &amp; D's Heritage Hog Farm - Whole Hogs, Red Wattle Hogs, 1/4 Hog, 1/5 Hog, &amp; Hogs for Sale">
-  <meta name="description" content="Discover our heritage hog farm offering whole hogs, red wattle hogs, 1/4 hog, 1/5 hog options, and sustainable hogs for sale. Preorder now for fresh, local, premium quality pork.">
+  <meta name="title" content="J &amp; D's Heritage Hog Farm - Whole &amp; Feeder Hogs in Mountain Grove, Missouri">
+  <meta name="description" content="Pasture-raised Red Wattle hogs in Mountain Grove, Missouri. Explore whole hog and feeder hog options and ask about availability at J &amp; D’s Heritage Hog Farm.">
 
   <!-- SEO Keywords Meta Tag -->
-  <meta name="keywords" content="hogs for sale, whole hogs, red wattle hogs, 1/4 hog, 1/5 hog, heritage hog farm, preorder hog, sustainable pork, farm fresh hogs">
+  <meta name="keywords" content="hogs for sale, whole hogs, feeder hogs, red wattle hogs, heritage hog farm, Mountain Grove Missouri">
 
   <!-- Favicon and App Icons -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/images/branding/13.png">
@@ -23,14 +23,14 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://jdhogfarm.com/">
   <meta property="og:title" content="J &amp; D's Heritage Hog Farm - Whole Hogs, Red Wattle Hogs &amp; More">
-  <meta property="og:description" content="Heritage hog farm specializing in whole hogs, red wattle hogs, 1/4 hog, 1/5 hog options, and sustainable hogs for sale. Preorder now for fresh, local, premium pork.">
+  <meta property="og:description" content="Pasture-raised Red Wattle hogs in Mountain Grove, Missouri. Ask about whole hog and feeder hog availability.">
   <meta property="og:image" content="https://jdhogfarm.com/assets/images/branding/13.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://jdhogfarm.com/">
   <meta property="twitter:title" content="J &amp; D's Heritage Hog Farm - Whole Hogs, Red Wattle Hogs &amp; More">
-  <meta property="twitter:description" content="Discover our heritage hogs for sale: whole hogs, red wattle hogs, 1/4 hog, 1/5 hog options. Sustainably raised for premium quality. Preorder today!">
+  <meta property="twitter:description" content="Pasture-raised Red Wattle hogs in Mountain Grove, Missouri. Ask about whole hog and feeder hog availability.">
   <meta property="twitter:image" content="https://jdhogfarm.com/assets/images/branding/13.png">
 
   <!-- Tailwind CSS CDN -->
@@ -49,6 +49,50 @@
       overflow-x: hidden;
       margin: 0;
       padding: 0;
+    }
+
+    html {
+      scroll-padding-top: var(--header-offset, 22rem);
+    }
+
+    :focus-visible {
+      outline: 3px solid #7a0000;
+      outline-offset: 4px;
+    }
+
+    #faq-drawer-close:focus-visible {
+      outline-color: #ffcd54;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #6b4b3a;
+      opacity: 1;
+    }
+
+    #home .card-title {
+      letter-spacing: 0.02em;
+      line-height: 1.4;
+      text-transform: none;
+    }
+
+    .markdown-content {
+      max-width: 70ch;
+      margin-inline: auto;
+    }
+
+    @media (width <= 639px) {
+      #home .card-title {
+        font-size: 1.375rem;
+        line-height: 1.35;
+      }
+
+      main {
+        padding: 1rem !important;
+      }
+
+      main section {
+        padding: 1rem !important;
+      }
     }
 
     .farm-background {
@@ -565,15 +609,16 @@
   <!-- Main Content -->
   <main class="max-w-4xl mx-auto p-8 sm:p-4 flex-grow overflow-auto relative z-20 flex flex-col items-center justify-start">
     <!-- Home Section -->
-    <section id="home" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
-      <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Home</h2>
+    <section tabindex="-1" id="home" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
+      <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Pasture-raised Red Wattle hogs in Mountain Grove, Missouri</h2>
       <div id="home-content" class="markdown-content text-lg sm:text-base">
-        <!-- home.md should contain keyword-rich content about hogs for sale, whole hogs, red wattle hogs, etc. -->
+        <!-- Short farm introduction, loaded from data/home.md. -->
       </div>
+      <a href="#contact" class="inline-block px-5 py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold hover:bg-red-800 hover:text-[#ffcd54] transition">Ask about availability</a>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
+    <section tabindex="-1" id="about" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">About Us</h2>
       <div id="about-content" class="markdown-content text-lg sm:text-base">
         <!-- about.md should also mention whole hogs, red wattle hogs, hogs for sale, etc. -->
@@ -599,18 +644,19 @@
     </section>
 
     <!-- Buy Section -->
-    <section id="buy" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
+    <section tabindex="-1" id="buy" class="mb-12 p-6 sm:p-4 border-4 rounded-lg border-red-800 shadow-none w-full text-center">
       <h2 class="card-title text-3xl sm:text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Buy a Hog</h2>
       <div id="buy-content" class="markdown-content text-lg sm:text-base text-left">
         <!-- buy.md should outline hog options and ordering details. -->
       </div>
-      <div class="mt-6 flex justify-center">
+      <div class="mt-6 flex flex-wrap gap-4 justify-center">
         <a
           href="#contact"
           class="px-5 py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold uppercase tracking-wide hover:bg-red-800 hover:text-[#ffcd54] transition"
         >
-          Contact us
+          Ask about availability
         </a>
+        <button type="button" data-open-faq aria-controls="faq-drawer" aria-expanded="false" class="px-5 py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold hover:bg-red-800 hover:text-[#ffcd54] transition">Buying questions</button>
       </div>
     </section>
 
@@ -663,15 +709,17 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center relative">
-      <h3 class="card-title text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2 w-full">Get Started Today!</h3>
+    <section tabindex="-1" id="contact" class="text-center p-6 sm:p-4 border-4 border-red-800 mb-12 w-full flex flex-col items-center relative">
+      <h2 class="card-title text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2 w-full">Ask about availability</h2>
       <p class="mb-4 text-red-800 text-base sm:text-lg max-w-2xl">
-        Pasture-raised Red Wattle hogs deliver rich, marbled pork for freezer-fillers and food lovers alike. We offer whole hogs, feeder hogs, and future reservations, with pre-orders and full payment required before butcher pickup. For detailed options, visit the
+        Interested in a whole hog or a feeder hog? Tell us what you’re looking for and when. See
         <a href="#buy" class="font-bold underline underline-offset-4 hover:text-red-900">Buy a Hog</a>
-        section and reach out if you want help choosing.
+        for options and pickup details.
       </p>
+      <p id="inquiry-note" class="mb-6 max-w-2xl">Sending this form starts an inquiry. It does not confirm availability or reserve a hog; the farm must confirm those details with you.</p>
       <form
         id="contact-form"
+        aria-describedby="inquiry-note"
         class="max-w-md mx-auto space-y-4 w-full"
         action="https://formspree.io/f/xvgongjo"
         method="POST"
@@ -705,7 +753,7 @@
           <textarea
             class="w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
             name="message"
-            placeholder="Let us know if you're interested in whole hogs, red wattle hogs, or a 1/4 hog share."
+            placeholder="Tell us whether you’re interested in a whole hog or a feeder hog, and your preferred timing."
             rows="4"
             maxlength="500"
             required
@@ -716,7 +764,7 @@
           type="submit"
           class="px-4 py-2 bg-red-800 text-white font-semibold rounded hover:bg-red-900 transition w-full"
         >
-          Send
+          Send inquiry
         </button>
       </form>
 
@@ -724,7 +772,7 @@
 
     <!-- Map Section -->
     <section class="mb-12 p-6 sm:p-4 border-4 border-red-800 rounded-lg bg-primary w-full text-center">
-      <h4 class="card-title text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Where We're Located</h4>
+      <h3 class="card-title text-2xl sm:text-xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Where We're Located</h3>
       <div class="relative w-full h-[450px]">
         <iframe 
           class="absolute inset-0 w-full h-full border-0"
@@ -753,14 +801,17 @@
     </button>
   </div>
   <div id="faq-drawer-overlay" class="fixed inset-0 bg-black/40 z-[60] hidden"></div>
-  <aside
+  <div
     id="faq-drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="faq-title"
     class="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-[90vw] bg-[#ffcd54]/95 border-l-4 border-red-800 z-[70] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col"
     aria-hidden="true"
     inert
   >
     <div class="flex items-center justify-between px-6 py-4 border-b-4 border-red-800 bg-red-800 text-[#ffcd54]">
-      <h2 class="text-xl sm:text-2xl font-black uppercase">FAQs</h2>
+      <h2 id="faq-title" class="text-xl sm:text-2xl font-black uppercase">FAQs</h2>
       <button id="faq-drawer-close" class="text-2xl font-bold leading-none hover:text-white" type="button" aria-label="Close FAQ drawer">
         &times;
       </button>
@@ -820,11 +871,11 @@
             <span class="text-2xl leading-none">+</span>
           </button>
           <div id="faq-panel-4" class="mt-4 text-red-800 text-lg sm:text-base hidden" data-faq-panel>
-            <p>If you’re ready to experience the difference, ordering from J &amp; D’s is simple. We sell feeder hogs at about 25–75 pounds if you’d like to raise them yourself. For those wanting a fully grown hog, our whole hogs typically weigh between 250–300 pounds and are ready for butchering. You can browse our website or call us directly to place your order. Once the hog is at your desired weight, we’ll coordinate with you for pickup.</p>
+            <p>Start with our <a href="#contact" class="font-bold underline underline-offset-4">contact form</a>. Tell us whether you’re interested in a whole hog or a feeder hog and your preferred timing. The farm will need to confirm availability and reservation details with you; submitting the form does not reserve a hog.</p>
             <ul class="list-disc pl-6">
-              <li>Two Options: 25–75 lb feeder hogs or 250–300 lb whole hogs.</li>
-              <li>Easy Ordering: Reserve online or by phone.</li>
-              <li>Seamless Coordination: We update you when your hog reaches market weight.</li>
+              <li>Two options: 25–75 lb feeder hogs or 250–300 lb whole hogs.</li>
+              <li>Whole hogs: Full payment is required before delivery to the local butcher. You arrange cut instructions and pickup directly with the butcher.</li>
+              <li>Feeder hogs: Pickup is at the farm. We don’t offer shipping or long-distance delivery.</li>
             </ul>
           </div>
         </div>
@@ -875,13 +926,8 @@
             <span class="text-2xl leading-none">+</span>
           </button>
           <div id="faq-panel-8" class="mt-4 text-red-800 text-lg sm:text-base hidden" data-faq-panel>
-            <p>Because these animals are raised and then butchered to your specific needs, we typically don’t offer refunds or returns after processing. Once the hog is delivered to the butcher, all weights are final, and no returns or adjustments are possible. Payment must be received in full before we drop off your hog, and it is then your responsibility to pick up the hog directly from the butcher. However, if you need to make adjustments prior to butcher, let us know as soon as possible—we’ll do our best to find a fair outcome, such as matching your hog to a new buyer. Our goal is to keep communication open so everyone feels treated fairly.</p>
-            <ul class="list-disc pl-6">
-              <li>Custom Orders: Once processed, refunds or returns aren’t usually possible.</li>
-              <li>Final Weights: No returns or adjustments once the hog is at the butcher.</li>
-              <li>Full Payment &amp; Pickup: Payment is required in full before drop-off, and you must pick up your hog directly from the butcher.</li>
-              <li>Case-by-Case Approach: Contact us early if your plans change so we can explore possible solutions.</li>
-            </ul>
+            <p>Whole hogs are delivered to a local butcher. You coordinate your cut instructions directly with the butcher and arrange pickup once processing is complete.</p>
+            <p>Feeder hogs are picked up at the farm. We don’t offer shipping or long-distance delivery.</p>
           </div>
         </div>
 
@@ -915,7 +961,7 @@
           </div>
         </div>
       </div>
-    </aside>
+    </div>
 
   <!-- Footer (moved outside of main) -->
   <footer class="py-6 text-center mt-12 border-t-8 border-red-800 bg-[#ffcd54]/90 relative z-20 w-full flex-none">
@@ -925,10 +971,10 @@
   </footer>
 
   <!-- Modal -->
-  <div id="modal-overlay" class="fixed inset-0 z-50 hidden">
+  <div id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-message" class="fixed inset-0 z-50 hidden">
     <div class="modal-bg absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
       <div class="max-w-sm w-full bg-[#ffcd54] border-4 border-red-800 rounded-lg p-6 relative text-center">
-        <button id="close-modal" class="absolute top-2 right-2 text-red-800 font-bold text-xl hover:text-red-900" type="button">&times;</button>
+        <button id="close-modal" aria-label="Close message status" class="absolute top-2 right-2 text-red-800 font-bold text-xl hover:text-red-900" type="button">&times;</button>
         <h2 id="modal-title" class="text-2xl font-black uppercase bg-red-800 text-[#ffcd54] text-center mb-4 p-2">Status</h2>
         <p id="modal-message" class="text-red-800 mb-4 text-center text-lg"></p>
         <div class="text-center">
@@ -1008,26 +1054,27 @@
       window.addEventListener('scroll', updateHeaderState, { passive: true });
       window.addEventListener('resize', () => applyHeaderState(window.scrollY));
 
-      const navLinks = document.querySelectorAll('.site-nav a[href^="#"]');
-      navLinks.forEach(link => {
-        link.addEventListener('click', event => {
-          const targetId = link.getAttribute('href');
-          if (!targetId) return;
-          const target = document.querySelector(targetId);
-          if (!target) return;
-          event.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-      });
+      // Keep anchor headings below the sticky header as it resizes or collapses.
+      const updateHeaderOffset = () => {
+        document.documentElement.style.setProperty('--header-offset', `${header.getBoundingClientRect().height + 16}px`);
+      };
+      new ResizeObserver(updateHeaderOffset).observe(header);
+      updateHeaderOffset();
 
+      let modalReturnFocus;
       function showModal(title, message) {
+        modalReturnFocus = document.activeElement;
         modalTitle.innerText = title;
         modalMessage.innerText = message;
         modalOverlay.classList.remove('hidden');
+        setPageInert(true);
+        closeButton.focus();
       }
 
       function hideModal() {
         modalOverlay.classList.add('hidden');
+        setPageInert(false);
+        modalReturnFocus?.focus();
       }
 
       closeModal.addEventListener('click', hideModal);
@@ -1048,6 +1095,7 @@
 
           console.log('=== Form Submission Started ===');
 
+          let messageSaved = false;
           try {
             // Execute reCAPTCHA v3 Enterprise (no user challenges)
             console.log('Executing reCAPTCHA...');
@@ -1069,13 +1117,10 @@
             formspreeData.set('_subject', 'New J&D Hog Farm inquiry');
             formspreeData.set('g-recaptcha-response', recaptchaToken);
 
-            console.log('Name:', firebaseData.name);
-            console.log('Email:', firebaseData.email);
-            console.log('Message:', firebaseData.message);
-
             // 1. Save to Firebase first (this is our log/backup)
             console.log('Saving to Firebase...');
             const firebaseResult = await db.collection('messages').add(firebaseData);
+            messageSaved = true;
             console.log('✓ Message saved to Firebase with ID:', firebaseResult.id);
 
             // 2. Submit to Formspree using Fetch API with FormData
@@ -1099,14 +1144,12 @@
 
             if (formspreeResponse.ok) {
               console.log('✓ Formspree submission successful!');
-              showModal('Success!', 'Thank you for your message! We\'ll get back to you soon.');
+              showModal('Inquiry sent', 'Thank you for your inquiry. Availability and any reservation still need confirmation from the farm.');
               contactForm.reset();
             } else {
               // Formspree returned an error
               console.error('✗ Formspree returned an error:', formspreeResult);
-              const errorMessage = formspreeResult.error || formspreeResult.errors || 'Unknown error from Formspree';
-              showModal('Partial Success', `Your message was saved, but there was an issue sending the email notification: ${errorMessage}. We will still receive your message.`);
-              contactForm.reset();
+              showModal('Inquiry saved', 'Your inquiry was saved, but the email notification could not be sent. Availability and any reservation still need confirmation from the farm.');
             }
 
             submitButton.disabled = false;
@@ -1118,13 +1161,10 @@
             console.error('Error message:', error.message);
             console.error('Error stack:', error.stack);
 
-            // Check for specific error types
-            if (error.message.includes('grecaptcha') || error.message.includes('recaptcha')) {
-              showModal('Error', 'There was an issue with spam protection. Please try again or contact us directly.');
-            } else if (error.message.includes('fetch') || error.message.includes('Formspree')) {
-              showModal('Partial Success', 'Your message was saved to our database, but there was an issue with the email notification. We will still receive your message.');
+            if (messageSaved) {
+              showModal('Inquiry saved', 'Your inquiry was saved, but the email notification could not be confirmed. Availability and any reservation still need confirmation from the farm.');
             } else {
-              showModal('Error', 'There was an error sending your message. Please try again or contact us directly.');
+              showModal('Inquiry not sent', 'Your inquiry could not be sent. Your message is still in the form; please try again.');
             }
 
             submitButton.disabled = false;
@@ -1191,6 +1231,10 @@
       const faqDrawer = document.getElementById('faq-drawer');
       const faqDrawerOverlay = document.getElementById('faq-drawer-overlay');
       const faqDrawerClose = document.getElementById('faq-drawer-close');
+      const faqOpenButtons = document.querySelectorAll('#faq-drawer-button, [data-open-faq]');
+      const pageRegions = document.querySelectorAll('header, main, footer, #faq-button-container');
+      const setPageInert = isInert => pageRegions.forEach(region => { region.inert = isInert; });
+      let faqReturnFocus;
       const setFaqScrollLock = isLocked => {
         document.documentElement.classList.toggle('faq-drawer-open', isLocked);
         document.body.classList.toggle('faq-drawer-open', isLocked);
@@ -1200,12 +1244,15 @@
         if (!faqDrawer || !faqDrawerButton || !faqDrawerOverlay) {
           return;
         }
+        faqReturnFocus = document.activeElement;
         faqDrawer.classList.remove('translate-x-full');
         faqDrawerOverlay.classList.remove('hidden');
         faqDrawer.setAttribute('aria-hidden', 'false');
         faqDrawer.removeAttribute('inert');
-        faqDrawerButton.setAttribute('aria-expanded', 'true');
+        faqOpenButtons.forEach(button => button.setAttribute('aria-expanded', 'true'));
         setFaqScrollLock(true);
+        setPageInert(true);
+        faqDrawerClose.focus();
       };
 
       const closeFaqDrawer = () => {
@@ -1216,13 +1263,13 @@
         faqDrawerOverlay.classList.add('hidden');
         faqDrawer.setAttribute('aria-hidden', 'true');
         faqDrawer.setAttribute('inert', '');
-        faqDrawerButton.setAttribute('aria-expanded', 'false');
+        faqOpenButtons.forEach(button => button.setAttribute('aria-expanded', 'false'));
         setFaqScrollLock(false);
+        setPageInert(false);
+        faqReturnFocus?.focus();
       };
 
-      if (faqDrawerButton) {
-        faqDrawerButton.addEventListener('click', openFaqDrawer);
-      }
+      faqOpenButtons.forEach(button => button.addEventListener('click', openFaqDrawer));
 
       if (faqDrawerOverlay) {
         faqDrawerOverlay.addEventListener('click', closeFaqDrawer);
@@ -1232,6 +1279,30 @@
         faqDrawerClose.addEventListener('click', closeFaqDrawer);
       }
 
+
+      faqDrawer.querySelectorAll('a[href="#contact"]').forEach(link => {
+        link.addEventListener('click', closeFaqDrawer);
+      });
+
+      document.addEventListener('keydown', event => {
+        const activeDialog = !modalOverlay.classList.contains('hidden') ? modalOverlay
+          : faqDrawer.getAttribute('aria-hidden') === 'false' ? faqDrawer : null;
+        if (!activeDialog) return;
+        if (event.key === 'Escape') {
+          activeDialog === modalOverlay ? hideModal() : closeFaqDrawer();
+        } else if (event.key === 'Tab') {
+          const controls = [...activeDialog.querySelectorAll('button, a[href]')].filter(control => control.getClientRects().length);
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+      });
 
       const faqToggles = document.querySelectorAll('[data-faq-toggle]');
       const faqPanels = document.querySelectorAll('[data-faq-panel]');
