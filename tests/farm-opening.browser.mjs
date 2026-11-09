@@ -94,6 +94,33 @@ test('skip opens the same plot with touch, frame in portrait and full viewport i
   await dialog.locator('[data-plot="1"][data-stage="fenced"]').waitFor();
 });
 
+for (const [width, height] of [[320, 568], [667, 375]]) {
+  test(`season goals before the first purchase and in Help at ${width} × ${height}`, async t => {
+    const { launcher, dialog, button } = await play(t, {
+      isMobile: true, hasTouch: true, viewport: { width, height }, reducedMotion: 'reduce'
+    });
+    const goals = /feeder sale.+market hog sale.+cash left after the last bill/i;
+    await launcher.press('Enter');
+    await button('Continue').tap();
+    assert.match(await dialog.locator('.farm-prologue-text').innerText(), goals);
+    await button('Skip intro').tap();
+    await button('Wooded plot').tap();
+    await button('Clear trees').tap();
+    await button('Build first pen').tap();
+    await button('Go to Farm Supply').tap();
+    await button('Buy starters for Pen 1').tap();
+    const purchase = dialog.getByRole('dialog', { name: 'Starters for Pen 1' });
+    const displayedGoals = purchase.getByText(goals);
+    const goalsBounds = await displayedGoals.boundingBox();
+    const bodyBounds = await purchase.locator('.farm-panel-body').boundingBox();
+    assert.ok(goalsBounds.y + goalsBounds.height <= bodyBounds.y + bodyBounds.height + 1);
+    await purchase.getByRole('button', { name: 'Confirm starter purchase' }).tap();
+    assert.equal(await dialog.locator('[data-stat="cash"]').innerText(), '$800');
+    await button('Help journal').tap();
+    await dialog.getByRole('dialog', { name: 'Help journal' }).getByText(goals).waitFor();
+  });
+}
+
 test('Farm Supply waits for a pen and starts two distinct groups with one purchase', async t => {
   const { launcher, dialog, button } = await play(t, { reducedMotion: 'reduce' });
   await launcher.click();

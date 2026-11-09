@@ -4,6 +4,8 @@ export const STARTER_COST = 100;
 export const PEN_CAPACITY = 4;
 export const KIT_COST = 120;
 export const GRAIN_BUNDLE = { units: 4, cost: 100 };
+export const SEASON_GOAL = 'Make a feeder sale and a market hog sale, and have cash left after the last bill.';
+export const SALE_AGE = { feeder: 2, market: 6 };
 export const SALE_PRICES = { feeder: 200, market: 450 };
 export const PADDOCK_FORAGE = 4;
 export const SPARE_FORAGE = 2;
@@ -159,8 +161,8 @@ export function feedForecast(state, { next = false } = {}) {
 export function saleGroups(state, kind) {
   if (state.result) return [];
   const groups = feedGroups(state);
-  if (kind === 'feeder') return groups.filter(group => group.fedWeeks >= 2 && group.fedWeeks <= 5);
-  if (kind === 'market') return groups.filter(group => group.fedWeeks >= 6);
+  if (kind === 'feeder') return groups.filter(group => group.fedWeeks >= SALE_AGE.feeder && group.fedWeeks < SALE_AGE.market);
+  if (kind === 'market') return groups.filter(group => group.fedWeeks >= SALE_AGE.market);
   return [];
 }
 

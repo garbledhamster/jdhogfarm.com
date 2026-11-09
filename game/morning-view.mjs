@@ -1,6 +1,6 @@
 import { openingArt } from './opening-art.mjs';
 import { herdDetails, renderCommerceDecision, renderCommercePlace, spareGrassDetail } from './commerce-view.mjs';
-import { applyFarmAction, feedForecast, saleGroups } from './morning.mjs';
+import { applyFarmAction, feedForecast, saleGroups, SEASON_GOAL } from './morning.mjs';
 import { renderChoreDecision, renderChorePlace, renderPastureGate } from './chores-view.mjs';
 import { renderOfficeDecision, renderOfficePlace } from './office-view.mjs';
 
@@ -28,7 +28,7 @@ export const prologue = [
     art: 'opening-ledger',
     alt: 'Debbie at her ledger in the office',
     title: 'I’ll keep the books',
-    text: 'We start with $1,000. Come see me in the Office to look over the morning and pay the bill.'
+    text: `We start with $1,000. ${SEASON_GOAL}`
   },
   {
     speaker: 'Joe Rice',

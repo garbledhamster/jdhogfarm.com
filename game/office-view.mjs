@@ -1,5 +1,5 @@
 import { renderFeedForecast, renderFeedingGroups } from './chores-view.mjs';
-import { endWeekBlocker, feedForecast, formatCash, OVERHEAD, saleGroups, SEASON_WEEKS } from './morning.mjs';
+import { endWeekBlocker, feedForecast, formatCash, OVERHEAD, saleGroups, SEASON_GOAL, SEASON_WEEKS } from './morning.mjs';
 
 const chapters = [
   {
@@ -159,7 +159,8 @@ function helpJournal(state, seenStories) {
 
   return {
     title: 'Help journal',
-    body: `<p>Use the map to visit a place. Check the Barn forecast, choose when to sell in Orders, and select End Week in the Office.</p>
+    body: `<h4>Season goals</h4><p>${SEASON_GOAL}</p>
+      <p>Use the map to visit a place. Check the Barn forecast, choose when to sell in Orders, and select End Week in the Office.</p>
       <p>Talk to Joe or Debbie in Week ${state.week} to add that conversation to the journal.</p>
       <h4>Conversations</h4><ol class="farm-journal">${weeks}</ol>`,
     actions: button('Replay season…', 'data-open="replay"')

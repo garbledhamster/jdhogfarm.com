@@ -243,6 +243,22 @@ async function farmDriver(t, input, options = {}) {
 
 registerOfficeBrowserTests(farmDriver);
 
+test('Orders explains how morning feeding changes sale readiness', async t => {
+  const farm = await farmDriver(t, 'pointer', { reducedMotion: 'reduce' });
+  await farm.build();
+  await farm.go('supply');
+  await farm.stock('1', 2);
+  await farm.go('orders');
+  assert.match(await farm.game.locator('.farm-scene').innerText(), /full morning.+adds one fed week/i);
+  assert.match(await farm.game.locator('.farm-scene').innerText(), /feeders.+2.+5.+market hogs.+6/is);
+  assert.equal(await farm.game.getByRole('button', { name: /sell feeders/i }).count(), 0);
+  await farm.feed();
+  await farm.go('orders');
+  await farm.game.getByRole('button', { name: /sell feeders.+Pen 1/i }).waitFor();
+  assert.equal(await farm.game.getByRole('button', { name: /sell feeders.+litter/i }).count(), 0);
+  assert.match(await farm.game.locator('.farm-scene').innerText(), /full morning.+adds one fed week/i);
+});
+
 for (const [name, input, expansions, marketSale, finalCash] of [
   ['one pen', 'keyboard', false, true, '$470'],
   ['two expansions', 'touch', true, true, '$680'],

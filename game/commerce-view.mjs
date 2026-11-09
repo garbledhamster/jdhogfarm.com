@@ -1,5 +1,5 @@
 import {
-  expansionPreview, feedForecast, formatCash, KIT_COST, PEN_CAPACITY, saleGroups, SALE_PRICES, SPARE_FORAGE, STARTER_COST
+  expansionPreview, feedForecast, formatCash, KIT_COST, PEN_CAPACITY, saleGroups, SALE_AGE, SALE_PRICES, SEASON_GOAL, SPARE_FORAGE, STARTER_COST
 } from './morning.mjs';
 
 const supplyArt = `<svg viewBox="0 0 960 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -76,9 +76,10 @@ function starterDecision(state, id) {
   const pen = state.plots.find(plot => plot.id === id);
   if (pen?.status !== 'fenced' || pen.pigs) return null;
   const quantity = 'farm-starter-quantity';
+  const firstPurchase = !state.litterBorn ? `<p><strong>Season goals.</strong> ${SEASON_GOAL}</p>` : '';
   return {
     title: `Starters for Pen ${pen.id}`,
-    body: `<p>Weaned starters cost ${formatCash(STARTER_COST)} each. Choose up to ${PEN_CAPACITY}.</p>
+    body: `${firstPurchase}<p>Weaned starters cost ${formatCash(STARTER_COST)} each. Choose up to ${PEN_CAPACITY}.</p>
       <p>Cash on hand ${formatCash(state.cash)}.</p>
       ${numericChoice(quantity, 'Number of starter pigs', PEN_CAPACITY, 2)}`,
     actions: control('Confirm starter purchase', `data-action="buy-starters" data-target="${pen.id}" data-quantity-from="${quantity}"`, true)
@@ -105,12 +106,14 @@ function saleView(state) {
   const receipt = sale ? `<p><strong>${saleLabels[sale.type]}</strong> · ${pigLabel(sale.quantity)} left the gate for ${formatCash(sale.amount)}.</p>` : '';
   const readiness = choices.length
     ? '<p>Choose a group at the pickup gate.</p>'
-    : '<p>Feeders need two through five fed weeks. Market hogs need six. No group is ready for a pickup yet.</p>';
+    : '<p>No group is ready for a pickup yet.</p>';
+  const fedWeeks = `<p>A full morning of feed adds one fed week to a group.
+    Feeders need ${SALE_AGE.feeder} to ${SALE_AGE.market - 1} fed weeks. Market hogs need ${SALE_AGE.market}.</p>`;
   return {
     art: pickupArt(sale),
     controls: `<div class="farm-stage-controls farm-commerce-controls">${choices.join('')}
       ${control('Go to Office', 'data-place="office"')}</div>`,
-    details: receipt + readiness
+    details: receipt + fedWeeks + readiness
   };
 }
 
