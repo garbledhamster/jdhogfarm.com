@@ -45,9 +45,25 @@
 }
 
 .farm-chore-controls progress {
+  appearance: none;
   inline-size: min(9rem, 65vw);
-  block-size: 0.5rem;
-  accent-color: #ffce67;
+  block-size: 0.55rem;
+  overflow: hidden;
+  border: 1px solid #67482f;
+  border-radius: 0.2rem;
+  background: #f5deb0;
+}
+
+.farm-chore-controls progress::-webkit-progress-bar {
+  background: transparent;
+}
+
+.farm-chore-controls progress::-webkit-progress-value {
+  background: #956036;
+}
+
+.farm-chore-controls progress::-moz-progress-bar {
+  background: #956036;
 }
 
 .farm-pasture-gate {

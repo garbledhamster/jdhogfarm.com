@@ -1,3 +1,5 @@
+import { barnSymbol } from './barn-art.mjs';
+
 // Still scenery adapted from the approved farm morning prototype.
 const definitions = `
         <defs>
@@ -45,20 +47,7 @@ const definitions = `
             <use href="#jd-oak-art" transform="translate(166 544) scale(1.28)"/>
             <use href="#jd-oak-art" transform="translate(837 543) scale(1.1)"/>
           </g>
-          <g id="jd-grain-barn">
-            <path d="M-16 112l139-68 148 55-135 75z" fill="#43572f" opacity=".36"/>
-            <path d="M0 31l127 62v68L0 103z" fill="#9c4634" stroke="#593329" stroke-width="3"/>
-            <path d="M127 93l113-57v71l-113 54z" fill="#c56b49" stroke="#593329" stroke-width="3"/>
-            <path d="M0 31l53-74L178 8l-51 85z" fill="#593d32" stroke="#432b26" stroke-width="4"/>
-            <path d="M53-43l117-48 82 118-74-19z" fill="#815a42" stroke="#432b26" stroke-width="4"/>
-            <path d="M127 93l51-85 62 28z" fill="#cf7851" stroke="#593329" stroke-width="3"/>
-            <path d="M15 53l20 9v57l-20-9zm25 11 19 9v57l-19-9zm25 12 19 9v55l-19-9zm25 12 19 9v54l-19-9z" fill="#b45940" opacity=".68"/>
-            <path d="M149 101l50-24v48l-50 23z" fill="#4d2e25" stroke="#f4bd76" stroke-width="4"/>
-            <path d="M154 102l40-20m-40 20 40 21m0-41-40 60" fill="none" stroke="#ab7147" stroke-width="3"/>
-            <path d="M206 67l18-9v21l-18 8z" fill="#493126" stroke="#eeba77" stroke-width="3"/>
-            <path d="M141 87l28-13v-9l-23 10z" fill="#f7cd87" stroke="#81442c" stroke-width="2"/>
-            <path d="M19 33l39-62m-9 77 38-63m-8 77 40-63m-9 76 40-63" fill="none" stroke="#ac8060" stroke-opacity=".42" stroke-width="3"/>
-          </g>
+          ${barnSymbol('jd-grain-barn')}
         </defs>
 `;
 
@@ -92,18 +81,7 @@ const plot = `
         <use href="#jd-oak-art" transform="translate(943 154) scale(.83)"/>
         <use href="#jd-oak-art" transform="translate(737 198) scale(.83)"/>
 
-        <g transform="translate(52 184)">
-          <path d="M-18 64l108-49 105 53-103 56z" fill="#415432" opacity=".4"/>
-          <path d="M0 8l92 44v57L0 64z" fill="#923e31" stroke="#623328" stroke-width="3"/>
-          <path d="M92 52l70-35v56l-70 36z" fill="#ba583b" stroke="#623328" stroke-width="3"/>
-          <path d="M-9 9l42-55 100 47-39 54z" fill="#593a2b" stroke="#482a22" stroke-width="3"/>
-          <path d="M33-46l82-36 58 97-40-14z" fill="#76513a" stroke="#482a22" stroke-width="3"/>
-          <path d="M92 52l41-51 29 16z" fill="#d67d51" stroke="#623328" stroke-width="2"/>
-          <path d="M20 36l39 19v41L20 77z" fill="#492a22" stroke="#df9c60" stroke-width="3"/>
-          <path d="M22 40l34 53m0-35L22 75" fill="none" stroke="#be8354" stroke-width="3"/>
-          <path d="M118 56l18-9v18l-18 9z" fill="#402d24" stroke="#e8ae72" stroke-width="3"/>
-          <path d="M12 9l29-39m-5 54 29-39m-7 50 29-39m-7 50 29-39" fill="none" stroke="#93705b" stroke-opacity=".55" stroke-width="2"/>
-        </g>
+        <use href="#jd-grain-barn" transform="translate(52 178) scale(.73)"/>
         <use href="#jd-oak-art" transform="translate(176 416) scale(.96)"/>
         <use href="#jd-oak-art" transform="translate(224 536) scale(1.17)"/>
         <use href="#jd-oak-art" transform="translate(900 564) scale(1.08)"/>

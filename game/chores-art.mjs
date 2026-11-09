@@ -1,3 +1,5 @@
+import { barnSymbol } from './barn-art.mjs';
+
 // Scene layers from the approved farm-morning prototype. Only foreground actors move.
 const outdoors = `          <pattern id="chore-turf" width="69" height="58" patternUnits="userSpaceOnUse">
             <path d="M8 16l4-5m-4 5-3-3m29 27 5-6m-5 6-3-5m20-23 4-6m-4 6-4-2" fill="none" stroke="#466b37" stroke-opacity=".3" stroke-width="2" stroke-linecap="round"/>
@@ -29,55 +31,33 @@ const outdoors = `          <pattern id="chore-turf" width="69" height="58" patt
             <use href="#chore-oak-art" transform="translate(837 543) scale(1.1)"/>
           </g>`;
 
-const grainBarn = `          <g id="chore-grain-barn">
-            <path d="M-16 112l139-68 148 55-135 75z" fill="#43572f" opacity=".36"/>
-            <path d="M0 31l127 62v68L0 103z" fill="#9c4634" stroke="#593329" stroke-width="3"/>
-            <path d="M127 93l113-57v71l-113 54z" fill="#c56b49" stroke="#593329" stroke-width="3"/>
-            <path d="M0 31l53-74L178 8l-51 85z" fill="#593d32" stroke="#432b26" stroke-width="4"/>
-            <path d="M53-43l117-48 82 118-74-19z" fill="#815a42" stroke="#432b26" stroke-width="4"/>
-            <path d="M127 93l51-85 62 28z" fill="#cf7851" stroke="#593329" stroke-width="3"/>
-            <path d="M15 53l20 9v57l-20-9zm25 11 19 9v57l-19-9zm25 12 19 9v55l-19-9zm25 12 19 9v54l-19-9z" fill="#b45940" opacity=".68"/>
-            <path d="M149 101l50-24v48l-50 23z" fill="#4d2e25" stroke="#f4bd76" stroke-width="4"/>
-            <path d="M154 102l40-20m-40 20 40 21m0-41-40 60" fill="none" stroke="#ab7147" stroke-width="3"/>
-            <path d="M206 67l18-9v21l-18 8z" fill="#493126" stroke="#eeba77" stroke-width="3"/>
-            <path d="M141 87l28-13v-9l-23 10z" fill="#f7cd87" stroke="#81442c" stroke-width="2"/>
-            <path d="M19 33l39-62m-9 77 38-63m-8 77 40-63m-9 76 40-63" fill="none" stroke="#ac8060" stroke-opacity=".42" stroke-width="3"/>
-          </g>`;
+const bucketPerson = `<g id="chore-bucket-person">
+    <ellipse cx="4" cy="5" rx="28" ry="9" fill="#3d4228" opacity=".29"/>
+    <path d="M-11-21l-2 20m21-20 3 19" fill="none" stroke="#395369" stroke-width="10" stroke-linecap="round"/>
+    <path d="M-16 0h9m12 0h10" fill="none" stroke="#543629" stroke-width="7" stroke-linecap="round"/>
+    <path d="M-20-44c9-9 25-10 36-2l6 28c-15 6-28 7-43 0z" fill="#b96937" stroke="#59382a" stroke-width="2.5"/>
+    <path d="M-17-44l3 21 8 3-2-29m20 2-1 22" fill="none" stroke="#e7a157" stroke-width="3"/>
+    <path d="M-11-46l7 5 7-7m-5 8 1 22" fill="none" stroke="#7c432d" stroke-width="2" stroke-linecap="round"/>
+    <path d="M17-39l15 13m-49-14-9 15" fill="none" stroke="#c97a44" stroke-width="9" stroke-linecap="round"/>
+    <path d="M27-30l6 5m-58-3-2 4" fill="none" stroke="#edb987" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-13-57q1-15 16-13 14 1 13 14-1 12-15 13-14 0-14-14z" fill="#e6ab77" stroke="#70462f" stroke-width="2"/>
+    <path d="M-10-57q0 10 5 12l5-4-5-9z" fill="#e1d0ae"/>
+    <path d="M-16-57q-3-17 14-20 16-1 21 12l9 4-5 6-24-3-14 2z" fill="#d6a151" stroke="#674627" stroke-width="2"/>
+    <path d="M-11-66q4-8 16-7" fill="none" stroke="#f0c674" stroke-width="2" stroke-linecap="round"/>
+    <path d="M24-18v-7q6-9 15 0l1 7" fill="none" stroke="#4b5247" stroke-width="3"/>
+    <path d="M21-20h22l-3 21q-8 5-16 0z" fill="#b3bbab" stroke="#555d51" stroke-width="2"/>
+    <path d="M23-16h18m-15 4 2 11" stroke="#e1debf" stroke-width="2.5" stroke-linecap="round"/>
+  </g>`;
 
-const bucketPerson = `          <g id="chore-bucket-person">
-            <ellipse cx="0" cy="5" rx="26" ry="10" fill="#3f4b2e" opacity=".29"/>
-            <path d="M-11-18v19m19-19v19" fill="none" stroke="#355268" stroke-width="10" stroke-linecap="round"/>
-            <path d="M-16 0h9m11 0h10" fill="none" stroke="#51372a" stroke-width="7" stroke-linecap="round"/>
-            <path d="M-19-45q18-9 36 0l4 28q-21 11-41 0z" fill="#8e4a32" stroke="#503229" stroke-width="2"/>
-            <path d="M-12-40l2 19m19-22 3 18" fill="none" stroke="#c77949" stroke-width="3"/>
-            <path d="M15-38l17 12M-16-39l-9 15" fill="none" stroke="#f0bb80" stroke-width="8" stroke-linecap="round"/>
-            <path d="M-13-56q1-15 16-13 14 1 13 14-1 12-15 13-14 0-14-14z" fill="#edbb86" stroke="#70462f" stroke-width="2"/>
-            <path d="M-15-56q-3-18 14-20 16-1 20 11l9 4-5 6-24-3-14 2z" fill="#e4ae51" stroke="#674627" stroke-width="2"/>
-            <path d="M24-18v-7q6-9 15 0l1 7" fill="none" stroke="#3e4540" stroke-width="3"/>
-            <path d="M21-20h22l-3 21q-8 5-16 0z" fill="#bfc3a9" stroke="#5b5e52" stroke-width="2"/>
-            <path d="M23-16h18" stroke="#ece1b9" stroke-width="3"/>
-          </g>`;
-
-const pigletPen = `          <pattern id="chore-soil" width="40" height="31" patternUnits="userSpaceOnUse">
+const soil = `          <pattern id="chore-soil" width="40" height="31" patternUnits="userSpaceOnUse">
             <path d="M5 8l5-2m16 15 7 2m-23 2 4-1m21-17 4 2" fill="none" stroke="#7f532f" stroke-opacity=".35" stroke-width="2" stroke-linecap="round"/>
             <path d="M15 13l7-2m7 15 4-1" fill="none" stroke="#ffe5a2" stroke-opacity=".4" stroke-width="2" stroke-linecap="round"/>
-          </pattern>
-          <g id="chore-post">
+          </pattern>`;
+
+const penPost = `<g id="chore-post">
             <path d="M-4 1v-32l6-3 5 3V1L2 4z" fill="#6e3e25"/>
             <path d="M2-30v34l5-3v-32z" fill="#57311f"/>
             <path d="M-4-31l6-3 5 3-5 3z" fill="#e0ae67"/>
-          </g>
-          <g id="chore-red-wattle">
-            <ellipse cx="3" cy="9" rx="25" ry="8" fill="#45271a" opacity=".25"/>
-            <path d="M-18 2v10m15-7v10m16-12v8m8-11v9" fill="none" stroke="#55281d" stroke-width="5" stroke-linecap="round"/>
-            <path d="M-19-5q-7-3-6-10 3-3 6 0 2 2 0 4" fill="none" stroke="#6e3323" stroke-width="2.4" stroke-linecap="round"/>
-            <path d="M-22-5q0-16 17-18 18-3 27 9l3 7-6 10Q5 10-13 3z" fill="#a64b30" stroke="#5c2b20" stroke-width="2"/>
-            <path d="M-19-10q7-14 24-10 11 1 15 10-15-7-37 1z" fill="#c36c46"/>
-            <path d="M19-10l8-2 8 7-2 6-11 2-7-6z" fill="#b56241" stroke="#5c2b20" stroke-width="1.5"/>
-            <path d="M17-14l2-11 7 4-1 11m-4 11 2 5 4-5" fill="#883c2a" stroke="#602c20" stroke-width="1.5" stroke-linejoin="round"/>
-            <path d="M28-4l6 1-1 5-6 1z" fill="#de9071"/>
-            <circle cx="25" cy="-6" r="1.65" fill="#281610"/>
-            <circle cx="32" cy="-1" r="1" fill="#693426"/>
           </g>`;
 
 function scene(definitions, attributes, content) {
@@ -88,12 +68,12 @@ function scene(definitions, attributes, content) {
 }
 
 export function renderBarnArt(grain, stage) {
-  return scene(grainBarn, `data-delivery-stage="${stage ?? 'idle'}" data-bin-stocked="${grain > 0}"`, `
+  return scene(barnSymbol('chore-grain-barn'), `data-delivery-stage="${stage ?? 'idle'}" data-bin-stocked="${grain > 0}"`, `
           <use href="#chore-backlot"/>
           <path d="M980 438q-225-29-365-89-107-49-245-16t-270 85" fill="none" stroke="#b79e66" stroke-width="93"/>
           <path d="M980 438q-225-29-365-89-107-49-245-16t-270 85" fill="none" stroke="#d4bb83" stroke-width="79"/>
           <path d="M980 439q-225-30-365-90-107-49-245-16t-270 85" fill="none" stroke="#f4dca4" stroke-width="3" stroke-dasharray="16 23 4 21"/>
-          <use href="#chore-grain-barn" transform="translate(299 207) scale(1.05)"/>
+          <use href="#chore-grain-barn" transform="translate(299 256) scale(.88)"/>
           <g transform="translate(551 365)">
             <ellipse cx="5" cy="14" rx="45" ry="14" fill="#634d30" opacity=".33"/>
             <path d="M-34-8l24-12 52 9v23L13 30l-47-13z" fill="#946338" stroke="#513721" stroke-width="3"/>
@@ -147,11 +127,24 @@ export function renderRouteArt(route, motion) {
   const heroPosition = routeTransform(route?.lane ?? 1, progress);
   const rockPosition = routeTransform(1, route?.obstacles[0].at ?? 0.5);
   const snakes = route?.obstacles.slice(1).map(snake).join('') ?? '';
-  return scene(bucketPerson, '', `
+  return scene(bucketPerson + soil + penPost, '', `
           <use href="#chore-backlot"/>
-          <path d="M281 620l124-444h150l124 444z" fill="#a38b5b"/>
-          <path d="M298 620l115-444h134l115 444z" fill="#d5b578"/>
-          <path d="M417 620l37-444m89 444-37-444" stroke="#aa8754" stroke-width="3" stroke-dasharray="16 15" opacity=".68"/>
+          <path d="M279 620q72-200 123-447h156q47 231 123 447z" fill="#a38c5b"/>
+          <path d="M296 620q70-200 116-447h136q46 231 116 447z" fill="#d1b77a"/>
+          <path d="M296 620q70-200 116-447h136q46 231 116 447z" fill="url(#chore-soil)" opacity=".72"/>
+          <path d="M420 620q22-185 34-444m85 444q-20-185-33-444" fill="none"
+            stroke="#ac9057" stroke-width="2.5" stroke-dasharray="15 21 5 24" stroke-linecap="round" opacity=".52"/>
+          <path d="M312 494l19-6m285 3 15 8m-281-87 20-9m219 5 20 8" fill="none"
+            stroke="#f1d595" stroke-width="3" stroke-linecap="round" opacity=".65"/>
+          <g data-route-landmark="piglet-pen">
+            <path d="M395 142l82-42 103 46-87 49z" fill="#b88750" stroke="#795234" stroke-width="3"/>
+            <path d="M395 130l82-42 103 46m-185 9 82-41 103 45" fill="none" stroke="#906139" stroke-width="5"/>
+            <path d="M395 129l82-42 103 46" fill="none" stroke="#d3a269" stroke-width="2.5"/>
+            <use href="#chore-post" transform="translate(395 145) scale(.74)"/>
+            <use href="#chore-post" transform="translate(477 105) scale(.74)"/>
+            <use href="#chore-post" transform="translate(580 148) scale(.74)"/>
+            <path d="M513 125l19-9 29 13-19 10z" fill="#624531" stroke="#d9a66c" stroke-width="3"/>
+          </g>
           <path d="M0 239q196-48 480-4t480-15" fill="none" stroke="#a1a271" stroke-width="72"/>
           <path d="M0 239q196-48 480-4t480-15" fill="none" stroke="#599394" stroke-width="58"/>
           <path d="M13 238q199-44 461-4t470-12" fill="none" stroke="#8cbdb1" stroke-width="5" stroke-dasharray="15 14 5 13" stroke-linecap="round"/>
@@ -199,9 +192,9 @@ const pigletPositions = [
 export function renderPigletArt({ pigs, fedWeeks, fed, bucketAtPen }) {
   const size = (70 + Math.min(6, fedWeeks) * 9) / 100;
   const sprites = pigletPositions.slice(0, pigs).map(({ x, y, facing, moveX, moveY }) =>
-    `<g transform="translate(${x} ${y})"><g data-piglet-sprite="" style="--feed-x:${moveX}px;--feed-y:${moveY}px"><use href="#chore-red-wattle" transform="scale(${size * facing} ${size})"/></g></g>`
+    `<g transform="translate(${x} ${y})"><g data-piglet-sprite="" style="--feed-x:${moveX}px;--feed-y:${moveY}px"><g transform="scale(${size * facing} ${size})"><image href="game/art/pig.svg" x="-33" y="-32" width="66" height="42.26"/></g></g></g>`
   ).join('');
-  return scene(pigletPen + bucketPerson, `data-trough-stocked="${fed}"`, `
+  return scene(soil + penPost + bucketPerson, `data-trough-stocked="${fed}"`, `
           <use href="#chore-backlot"/>
           <path d="M980 468q-265 4-469-66t-510-19" fill="none" stroke="#ccb07a" stroke-width="61"/>
           <path d="M284 312l238-127 206 109-233 145z" fill="#3e6035" opacity=".42"/>

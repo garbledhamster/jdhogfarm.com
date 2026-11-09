@@ -172,3 +172,28 @@ test('the first Barn visit keeps the bucket available when a grain load is unaff
   assert.match(barn.details, /short on cash for grain/u);
   assert.match(renderChoreDecision('grain-order', lowCash).actions, /data-action="order-grain" disabled/u);
 });
+
+test('a later morning puts grain first when the piglets would come up short', async () => {
+  const { createFarm, applyFarmAction } = await import('../game/morning.mjs');
+  const { renderChorePlace } = await import('../game/chores-view.mjs');
+  let state = createFarm();
+  for (const type of ['clear-plot', 'build-pen', 'buy-starters']) {
+    state = applyFarmAction(state, { type, id: '1', quantity: 2 }).state;
+  }
+  const morning = { ...state, week: 2, grain: 1 };
+  const barn = renderChorePlace('barn', morning, {});
+  assert.match(barn.controls, /farm-primary-action" type="button" data-open="grain-order"/u);
+  assert.match(barn.controls, /data-local-action="start-route"/u);
+  assert.match(barn.details, /Order grain before taking the bucket/u);
+});
+
+test('a piglet-only shortfall offers an affordable Barn recovery before feeding anyway', async () => {
+  const { createFarm } = await import('../game/morning.mjs');
+  const { renderChoreDecision } = await import('../game/chores-view.mjs');
+  const farm = createFarm();
+  const morning = { ...farm, week: 2, grain: 1, litter: { ...farm.litter, pigs: 3 } };
+  const { actions } = renderChoreDecision('feed-shortfall-bucket', morning);
+  assert.match(actions, /farm-primary-action" type="button" data-place="barn"/u);
+  assert.doesNotMatch(actions, /data-place="pasture"/u);
+  assert.match(actions, /data-allow-shortfall/u);
+});

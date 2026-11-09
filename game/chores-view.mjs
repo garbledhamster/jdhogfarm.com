@@ -61,7 +61,7 @@ function barnAction(state, route, forecast, orderFirst) {
 
 function barnView(state, { deliveryStage, route }) {
   const forecast = feedForecast(state);
-  const litterShort = state.week === 1 && !state.feeding && forecast.litterGrain < state.litter.pigs;
+  const litterShort = !state.feeding && forecast.litterGrain < state.litter.pigs;
   const orderFirst = litterShort && state.cash >= GRAIN_BUNDLE.cost;
   const order = state.shipment ? '' : button('Order grain', 'data-open="grain-order"', orderFirst);
   let status = '';
@@ -202,16 +202,22 @@ function grainDecision(state) {
 
 function shortageDecision(source, state) {
   const forecast = feedForecast(state);
-  const affected = forecast.groups.filter(group => group.missing).map(group =>
+  const shortGroups = forecast.groups.filter(group => group.missing);
+  const affected = shortGroups.map(group =>
     `<li>${groupName(group)} · short by ${units(group.missing)}</li>`
   ).join('');
   const body = `<p>We’re short by ${units(forecast.shortfall)}. A group needs its full share to grow.</p>
     <ul class="farm-feeding-groups">${affected}</ul>`;
-  const fix = source === 'barn'
-    ? button('Order more grain', 'data-open="grain-order"')
-    : button('Back to Barn', 'data-place="barn"');
-  const actions = fix + button('Check pasture', 'data-place="pasture"') +
-    button('Feed what you can', `data-action="settle-feed" data-source="${source}" data-allow-shortfall`, true);
+  const canOrder = state.cash >= GRAIN_BUNDLE.cost;
+  const growersShort = shortGroups.some(group => group.id !== 'litter');
+  const rotationHelps = growersShort && !state.paddocks.some(plot => plot.status === 'active')
+    && state.paddocks.some(plot => plot.status === 'ready');
+  const grain = source === 'barn'
+    ? button('Order more grain', 'data-open="grain-order"', canOrder)
+    : button('Back to Barn', 'data-place="barn"', canOrder);
+  const pasture = growersShort ? button('Check pasture', 'data-place="pasture"', !canOrder && rotationHelps) : '';
+  const actions = grain + pasture + button('Feed what you can',
+    `data-action="settle-feed" data-source="${source}" data-allow-shortfall`, !canOrder && !rotationHelps);
   return { title: 'Feed shortfall', body, actions };
 }
 
