@@ -54,6 +54,7 @@ let started = false;
 let frame = 0;
 let launcherTop;
 let prologuePage = 0;
+let readStoryWeek = 0;
 
 const clock = createClock(() => {
   const gameHadFocus = root.contains(document.activeElement);
@@ -159,6 +160,10 @@ function renderNotice() {
 
 function render() {
   const view = farm.farmView(state);
+  const unreadStory = !state.result && view.week !== readStoryWeek;
+  ui.talk.toggleAttribute('data-unread', unreadStory);
+  if (unreadStory) ui.talk.setAttribute('aria-description', `New dialogue for Week ${view.week}`);
+  else ui.talk.removeAttribute('aria-description');
   const values = {
     week: `Week ${view.week} of ${farm.SEASON_WEEKS}`,
     cash: farm.formatCash(state.cash),
@@ -227,6 +232,7 @@ function toggleClock() {
 
 function restart() {
   clock.reset();
+  readStoryWeek = 0;
   state = farm.createFarm();
   scene = 'pasture';
   panel = null;
@@ -295,9 +301,12 @@ root.addEventListener('click', event => {
     render();
   } else if (panelId) {
     panel = panelId;
-    if (panelId === 'story' && clock.running) {
-      clock.pause();
-      feedback = { message: 'The clock is paused while you talk. Select Resume when you’re ready.', kind: 'info' };
+    if (panelId === 'story') {
+      readStoryWeek = farm.farmView(state).week;
+      if (clock.running) {
+        clock.pause();
+        feedback = { message: 'The clock is paused while you talk. Select Resume when you’re ready.', kind: 'info' };
+      }
     }
     if (!ui.panel.contains(button)) {
       const region = ui.hotspots.contains(button) ? ui.hotspots : ui.scene;

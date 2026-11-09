@@ -562,3 +562,37 @@ test('Joe and Debbie’s scene avatars open their story and ledger', async t => 
   const ledger = game.getByRole('dialog', { name: 'Farm ledger', exact: true });
   assert.match(await ledger.innerText(), /Debbie[\s\S]*Cash activity/);
 });
+
+test('Joe and Debbie have a fresh exchange in every week of the season', async t => {
+  const { page, game, button } = await openGame(t, {
+    viewport: { width: 360, height: 640 }, hasTouch: true, isMobile: true
+  });
+  await button('2×').tap();
+  const chapter = game.getByRole('dialog', { name: 'Joe’s story', exact: true });
+  const titles = [
+    'The first morning', 'One week at a time', 'Someone’s coming for feeders',
+    'Give the grass a rest', 'The second order', 'Before we shut the gate'
+  ];
+  const debbieLines = new Set();
+
+  for (const [index, title] of titles.entries()) {
+    const week = index + 1;
+    const talk = button('Talk to Joe');
+    assert.match(await talk.getAttribute('aria-description') ?? '', new RegExp(`New dialogue for Week ${week}`));
+    await talk.tap();
+    assert.equal(await chapter.getByRole('heading', { name: `Week ${week} · ${title}` }).isVisible(), true);
+    const lines = await chapter.locator('.farm-speaker-line').allTextContents();
+    assert.equal(lines.length, 2);
+    assert.match(lines[0], /Joe\s+\S/);
+    assert.match(lines[1], /Debbie\s+\S/);
+    debbieLines.add(lines[1].trim());
+    await button('Close').tap();
+    assert.equal(await talk.getAttribute('aria-description'), null);
+    if (week < 6) {
+      await button(week === 1 ? 'Start season' : 'Resume').tap();
+      await runWeeks(page, 1);
+    }
+  }
+
+  assert.equal(debbieLines.size, 6);
+});

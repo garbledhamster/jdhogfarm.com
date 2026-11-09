@@ -359,7 +359,8 @@ export function renderPanel(panel, state, view) {
       const chapter = chapterFor(view.week);
       return {
         title: 'Joe’s story',
-        body: `<h4>${chapter.title}</h4>${speakerLine('Joe', chapter.text)}`
+        body: `<h4>Week ${view.week} · ${chapter.title}</h4>
+          ${speakerLine('Joe', chapter.text)}${speakerLine('Debbie', chapter.reply)}`
       };
     }
     case 'ledger':

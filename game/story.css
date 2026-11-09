@@ -25,6 +25,21 @@
   font-size: 0.85rem;
 }
 
+.farm-talk {
+  position: relative;
+}
+
+.farm-talk[data-unread]::after {
+  position: absolute;
+  inset: 0.2rem 0.2rem auto auto;
+  width: 0.42rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--farm-oxblood);
+  border-radius: 50%;
+  background: #f4c35c;
+  content: '';
+}
+
 .farm-prologue {
   display: grid;
   width: min(100%, 64rem);
@@ -180,6 +195,10 @@
   margin-bottom: 0.2rem;
 }
 
+.farm-speaker-line p {
+  margin: 0;
+}
+
 .farm-speaker-line img {
   width: clamp(3rem, 21%, 5.25rem);
   height: auto;
@@ -222,6 +241,10 @@
   .farm-countdown {
     align-items: end;
     padding-inline-end: 0.25rem;
+  }
+
+  .farm-speaker-line {
+    font-size: 1.05rem;
   }
 }
 

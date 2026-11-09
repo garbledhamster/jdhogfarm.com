@@ -24,27 +24,33 @@ export const prologue = [
 const chapters = [
   {
     title: 'The first morning',
-    text: 'I start out here under the oaks. Paddock A has enough grass for our four pigs this week. Once you’ve looked around, start the season. We’ll see how they’re growing when the first week is done.'
+    text: 'I start out here under the oaks. Paddock A has enough grass for all four pigs. Let’s check on them at the barn next week.',
+    reply: 'The bills come out at the end of each week. Give me a holler at the Office if you want a look at the ledger.'
   },
   {
     title: 'One week at a time',
-    text: 'You can tell more from a trip to the barn than you can from the calendar. If every pig got enough to eat, they each gained a fed week. The feed bin is there for the weeks when the grass can’t cover everybody.'
+    text: 'Take a look at the hogs. Each pig that got enough to eat gained a fed week. That’s how they get ready for an order.',
+    reply: 'Check the feed outlook while you’re at the barn. If the grass and feed we have cover the herd, keep your money in your pocket.'
   },
   {
     title: 'Someone’s coming for feeders',
-    text: 'That first pickup is getting close. We can send two pigs once they’ve had two fed weeks. If you’ve got two ready, confirm the pickup in Orders. We’ll keep feeding the other two for the later delivery.'
+    text: 'That first pickup is getting close. We can send two pigs once they’ve had two fed weeks. We’ll keep feeding the others for the later delivery.',
+    reply: 'Confirm the pickup in Orders when they’re ready. I’ll put the payment in the books. It’s due by the end of Week 4.'
   },
   {
     title: 'Give the grass a rest',
-    text: 'A good patch of grass only lasts so long. Once a paddock runs out, rest it and move the herd to a ready paddock. Debbie can show you what the move costs. If the first pickup is still open, this is its last week.'
+    text: 'A good patch of grass only lasts so long. If the hogs have eaten it down, let that paddock rest and put them on a ready one.',
+    reply: 'Compare what a fresh paddock costs with what you’d spend on feed. And if the pickup’s still open, this is the week to finish it.'
   },
   {
     title: 'The second order',
-    text: 'The whole-hog delivery needs two pigs with four fed weeks each. Take a look at Orders. If they’re ready, you can confirm the delivery now. If they need another fed week, check the grass and feed bin before the clock runs down.'
+    text: 'The whole-hog delivery needs two pigs with four fed weeks each. If they need another week, check the grass and feed bin before the clock runs down.',
+    reply: 'I’ve got the butcher’s order right here. If both hogs are ready, confirm the delivery now. That’s one less thing to do before we close up.'
   },
   {
     title: 'Before we shut the gate',
-    text: 'One last look around. Make sure the whole-hog delivery is confirmed, then stop by the Office. Debbie will go over the ledger with us when the week is done. We want both orders filled and enough cash left to keep going.'
+    text: 'I’ll check the gate one last time. If the whole-hog delivery is still open and the pigs are ready, go ahead and confirm it.',
+    reply: 'Meet me back at the Office. We’ll see what came in from the orders and what we spent. Thanks for sticking with us through the season.'
   }
 ];
 
