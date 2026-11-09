@@ -391,6 +391,10 @@ html:has(.farm-player[open]) {
   gap: 0.5rem;
 }
 
+.farm-summary[inert] .farm-office-actions {
+  visibility: hidden;
+}
+
 #farm-game :is(.farm-summary h3, .farm-panel h3) {
   color: #613324;
   font-size: inherit;
@@ -568,6 +572,14 @@ html:has(.farm-player[open]) {
 }
 
 @media (orientation: landscape) and (height <= 27rem) {
+  .farm-map-truck[data-map-truck='arriving'] {
+    translate: -24px 21px;
+  }
+
+  .farm-map-truck[data-map-truck='unloading'] {
+    translate: -14px 20px;
+  }
+
   .farm-prologue {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   }

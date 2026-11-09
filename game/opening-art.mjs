@@ -213,7 +213,7 @@ function mapActivity(plots, deliveryStage) {
       d="M0 23l54-23 42 25-57 30z" fill="${fill}" stroke="${fence}" stroke-width="5"/>`;
   }).join('');
   const truck = deliveryStage ? `<g class="farm-map-truck" data-map-truck="${deliveryStage}"
-    transform="translate(${deliveryStage === 'unloading' ? '374 264' : '402 270'}) scale(-1 1)">
+    transform="translate(${deliveryStage === 'unloading' ? '374 264' : '402 263'}) scale(-1 1)">
     <path d="M-31-19h35v24h-35zm35 6h19l10 13v5H4z" fill="#d79753" stroke="#603a2b" stroke-width="3"/>
     <path d="M10-9h11l6 8H10z" fill="#cde2d3"/>
     <path d="M-25-14h23" fill="none" stroke="#f5cf85" stroke-width="3"/>
