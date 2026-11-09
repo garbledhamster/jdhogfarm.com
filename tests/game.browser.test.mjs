@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { registerChoreBrowserTests } from './farm-chores.browser.mjs';
 import { registerOfficeBrowserTests } from './farm-office.browser.mjs';
+import { registerSaveBrowserTests } from './farm-save.browser.mjs';
 
 let server;
 let browser;
@@ -242,6 +243,7 @@ async function farmDriver(t, input, options = {}) {
 }
 
 registerOfficeBrowserTests(farmDriver);
+registerSaveBrowserTests(farmDriver);
 
 test('Orders explains how morning feeding changes sale readiness', async t => {
   const farm = await farmDriver(t, 'pointer', { reducedMotion: 'reduce' });
@@ -330,7 +332,8 @@ test('blocked opening art leaves a playable intro and a working homepage launche
   await game.getByRole('button', { name: 'Skip intro', exact: true }).press('Enter');
   assert.match(await game.locator('[data-stat="week"]').innerText(), /Week 1/);
   await game.getByRole('button', { name: 'Exit game', exact: true }).press('Enter');
-  assert.equal(await launch.evaluate(element => element === document.activeElement), true);
+  const resume = page.getByRole('button', { name: 'Continue season', exact: true });
+  assert.equal(await resume.evaluate(element => element === document.activeElement), true);
 });
 
 test('a grain shortage holds the litter while the pasture-fed starters grow', async t => {

@@ -3,15 +3,24 @@ import { paintChoreRoute } from './chores-art.mjs';
 import { updateCommercePreview } from './commerce-view.mjs';
 import { applyFarmAction, createFarm, formatCash, SEASON_WEEKS } from './morning.mjs';
 import { placeNames, prologue, renderDecision, renderPlace } from './morning-view.mjs';
+import { openSeasonSave } from './season-save.mjs';
 
 const root = document.getElementById('farm-game');
 const select = selector => root.querySelector(selector);
 const motion = window.matchMedia('(prefers-reduced-motion: no-preference)');
 const markupByRegion = new WeakMap();
+const seasonSave = openSeasonSave();
+const saveMessages = {
+  unreadable: 'Your saved season couldn’t be opened. You can start a new one.',
+  unavailable: 'This browser couldn’t read a saved season. You can start a new one.',
+  unwritten: 'Your latest progress wasn’t saved. You can keep playing here.',
+  changed: 'Another tab changed the saved season. Progress in this tab isn’t saved.'
+};
 
 const ui = {
   player: select('.farm-player'),
   launcher: select('.farm-launch button'),
+  saveStatus: root.querySelectorAll('.farm-save-status'),
   exit: select('.farm-exit'),
   help: select('.farm-help'),
   talk: select('.farm-talk'),
@@ -41,6 +50,8 @@ const ui = {
   stats: Object.fromEntries([...root.querySelectorAll('[data-stat]')].map(node => [node.dataset.stat, node]))
 };
 
+let savedSeason = seasonSave.season;
+let hasSavedSeason = Boolean(savedSeason);
 let state = createFarm();
 let place = 'pasture';
 let previousPlace = place;
@@ -62,6 +73,7 @@ const chores = createChores({
     if (result.error) return;
     state = result.state;
     notice = 'Grain ready. The truck filled the bin.';
+    saveProgress();
     render();
   },
   onDeliveryChange: render,
@@ -81,6 +93,18 @@ const chores = createChores({
 
 function setText(node, text) {
   if (node.textContent !== text) node.textContent = text;
+}
+
+function showSaveStatus(status) {
+  for (const node of ui.saveStatus) {
+    setText(node, saveMessages[status] ?? '');
+  }
+}
+
+function saveProgress() {
+  const status = seasonSave.write({ state, place, previousPlace, selectedPlot, seenStories: [...seenStories] });
+  if (!status) hasSavedSeason = true;
+  showSaveStatus(status);
 }
 
 function controlSelector(control) {
@@ -195,12 +219,34 @@ function renderIntro() {
   setText(ui.introNext, prologuePage === prologue.length - 1 ? 'Go to Pasture' : 'Continue');
 }
 
-function beginPlay() {
+function showPlayInterface() {
   ui.intro.hidden = true;
   ui.interface.hidden = false;
   ui.help.hidden = false;
   ui.talk.hidden = false;
+}
+
+function beginPlay() {
+  showPlayInterface();
+  saveProgress();
   focus(ui.sceneTitle);
+}
+
+function restoreSeason() {
+  ({ state, place, previousPlace, selectedPlot } = savedSeason);
+  seenStories = new Set(savedSeason.seenStories);
+  savedSeason = null;
+
+  if (state.result) {
+    place = 'office';
+    panel = 'recap';
+  } else if (state.bucket) {
+    place = 'route';
+  }
+
+  showPlayInterface();
+  render();
+  if (state.bucket) chores.routeAction('prepare-route');
 }
 
 function clearPanel() {
@@ -221,6 +267,7 @@ function goTo(destination, nextNotice = '') {
   place = destination;
   clearPanel();
   notice = nextNotice;
+  saveProgress();
   render();
   focusPlace();
 }
@@ -235,6 +282,7 @@ function openPanel(key, target, opener) {
     storyFromHelp = fromHelp;
     storyWeek = Number(opener.dataset.storyWeek ?? state.week);
     seenStories.add(storyWeek);
+    saveProgress();
   }
   render();
   if (!ui.panel.hidden) focus(ui.panelTitle);
@@ -302,6 +350,7 @@ function applyAction(button) {
     }
     panel = 'recap';
   }
+  saveProgress();
   render();
   if (!ui.panel.hidden) focus(ui.panelTitle);
   else focus(ui.controls.querySelector('button:not(:disabled)') ?? ui.sceneTitle);
@@ -325,6 +374,7 @@ function routeAction(type, target) {
 }
 
 function exitGame() {
+  if (hasSavedSeason) setText(ui.launcher, 'Continue season');
   ui.player.close();
   render();
   focus(ui.launcher);
@@ -339,7 +389,8 @@ root.addEventListener('click', event => {
     launcherTop = ui.launcher.getBoundingClientRect().top;
     ui.introPortrait.loading = 'eager';
     ui.player.showModal();
-    render();
+    if (savedSeason) restoreSeason();
+    else render();
     if (!ui.intro.hidden) focus(ui.introTitle);
     else if (!ui.panel.hidden) focus(ui.panelTitle);
     else focusPlace();
@@ -360,6 +411,7 @@ root.addEventListener('click', event => {
     if (open) openPanel(open, target, button);
   } else if (selectPlot) {
     selectedPlot = selectPlot;
+    saveProgress();
     render();
     focus(ui.controls.querySelector('[data-action]'));
   } else if (open) {
@@ -406,4 +458,6 @@ motion.addEventListener('change', render);
 renderIntro();
 if (ui.introPortrait.complete && !ui.introPortrait.naturalWidth) showIntroFallback();
 render();
+showSaveStatus(seasonSave.status);
+if (hasSavedSeason) setText(ui.launcher, 'Continue season');
 ui.launcher.hidden = false;

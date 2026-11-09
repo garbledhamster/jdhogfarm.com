@@ -72,7 +72,8 @@ test('keyboard opening and map preserve the staged free first pen', async t => {
   assert.equal(await button('Build first pen').count(), 0);
   assert.equal(await dialog.locator('[data-stat="cash"]').innerText(), '$1,000');
   await button('Exit game').press('Enter');
-  assert.equal(await launcher.evaluate(node => document.activeElement === node), true);
+  const resume = page.getByRole('button', { name: 'Continue season', exact: true });
+  assert.equal(await resume.evaluate(node => document.activeElement === node), true);
   await page.locator('#home').getByRole('link', { name: 'Ask about availability' }).waitFor();
 });
 
