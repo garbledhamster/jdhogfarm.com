@@ -4,6 +4,16 @@ import {
 } from './farm.mjs';
 
 const pigArt = new URL('./art/pig.svg', import.meta.url).href;
+
+// Ground points are in the 1200 × 530 illustrations' coordinate space.
+const pigSpots = {
+  a: [[278, 356, 1], [358, 294, -1], [432, 343, 1], [505, 277, -1],
+    [278, 303, -1], [353, 354, 1], [432, 287, 1], [507, 332, -1]],
+  b: [[657, 340, 1], [733, 279, -1], [810, 339, 1], [885, 260, -1],
+    [657, 282, -1], [735, 358, -1], [808, 267, 1], [886, 322, -1]],
+  barn: [[326, 379, 1], [424, 338, -1], [526, 373, 1], [622, 330, -1],
+    [327, 344, -1], [426, 382, -1], [525, 334, 1], [623, 366, -1]]
+};
 const labels = {
   active: 'Active',
   exhausted: 'Exhausted',
@@ -47,13 +57,22 @@ function maturity(fed) {
 }
 
 function herdArt(state, position) {
-  if (!position || !state.cohorts.length) return '';
+  const spots = pigSpots[position];
+  if (!spots || !state.cohorts.length) return '';
 
-  const herd = state.cohorts.flatMap(cohort => Array.from({ length: cohort.pigs }, () => cohort.fedWeeks)).slice(0, 8);
-  return `<div class="farm-herd-art farm-herd-art--${position}" aria-hidden="true">
-    ${herd.map(age => `<img class="farm-pig-art" data-growth="${age >= 4 ? 'mature' : age >= 2 ? 'feeder' : 'young'}"
-      src="${pigArt}" width="164" height="105" alt="">`).join('')}
-  </div>`;
+  const ages = state.cohorts.flatMap(cohort => Array.from({ length: cohort.pigs }, () => cohort.fedWeeks));
+  const pigs = ages.slice(0, spots.length)
+    .map((age, index) => ({ age, spot: spots[index] }))
+    .sort((a, b) => a.spot[1] - b.spot[1]);
+  return `<svg class="farm-herd-art" viewBox="0 0 1200 530" aria-hidden="true">
+    ${pigs.map(({ age, spot: [x, y, facing] }) => {
+      const width = age >= 4 ? 76 : age >= 2 ? 66 : 56;
+      const height = width * 105 / 164;
+      const flip = facing < 0 ? ` transform="translate(${x * 2} 0) scale(-1 1)"` : '';
+      return `<image class="farm-pig-art" href="${pigArt}" x="${x - width / 2}" y="${y - height * 94 / 105}"
+        width="${width}" height="${height}"${flip}></image>`;
+    }).join('')}
+  </svg>`;
 }
 
 export function renderHotspots(scene, state, view) {

@@ -61,54 +61,11 @@
 
 .farm-herd-art {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  display: grid;
-  width: 27%;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0 1%;
-  align-items: center;
-  justify-items: center;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.farm-herd-art--a {
-  top: 66%;
-  left: 27%;
-}
-
-.farm-herd-art--b {
-  top: 63%;
-  left: 72%;
-}
-
-.farm-herd-art--barn {
-  top: 67%;
-  left: 37%;
-  width: 36%;
-}
-
-.farm-pig-art {
+  inset: 0 0 auto;
+  display: block;
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 1px 2px rgb(59 24 7 / 45%));
-}
-
-.farm-pig-art:nth-child(4n + 2) {
-  transform: translateY(14%) scaleX(-1);
-}
-
-.farm-pig-art:nth-child(4n + 3) {
-  transform: translateY(-12%);
-}
-
-.farm-pig-art[data-growth='young'] {
-  width: 72%;
-}
-
-.farm-pig-art[data-growth='feeder'] {
-  width: 87%;
+  pointer-events: none;
 }
 
 .farm-scene-columns {
@@ -276,6 +233,29 @@
   color: #682412;
 }
 
+@media (width <= 36rem) {
+  .farm-art:is([data-view='pasture'], [data-view='barn']) {
+    aspect-ratio: auto;
+    padding-bottom: 3.75rem;
+    background-color: var(--farm-paper);
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: 100% auto;
+  }
+
+  .farm-art:is([data-view='pasture'], [data-view='barn'])::before {
+    display: block;
+    aspect-ratio: 1200 / 530;
+    content: '';
+  }
+
+  .farm-art:is([data-view='pasture'], [data-view='barn']) .farm-object {
+    top: auto;
+    bottom: 0.5rem;
+    transform: translateX(-50%);
+  }
+}
+
 @media (width <= 27rem) {
   .farm-object {
     top: auto;
@@ -285,13 +265,5 @@
 
   .farm-object--ledger {
     bottom: 12%;
-  }
-
-  .farm-herd-art {
-    width: 34%;
-  }
-
-  .farm-herd-art--barn {
-    width: 42%;
   }
 }

@@ -377,3 +377,34 @@ test('#99 narrow Orders artwork leaves room for the deadline label and focus out
     return target.top >= art.top + 6 && target.bottom <= art.bottom - 6;
   }), true, 'The complete delivery control and its focus outline fit inside the art');
 });
+
+test('hog art stays in the active enclosure and clear of scene controls on a narrow phone', async t => {
+  const { game, button } = await openGame(t, { viewport: { width: 320, height: 720 }, isMobile: true, hasTouch: true });
+  const pigs = game.locator('.farm-pig-art');
+  async function checkHerd(count, left, right) {
+    assert.equal(await pigs.count(), count);
+    const placement = await pigs.evaluateAll((sprites, bounds) => {
+      const art = sprites[0].closest('.farm-art').getBoundingClientRect();
+      const signs = [...sprites[0].closest('.farm-hotspots').querySelectorAll('button')].map(el => el.getBoundingClientRect());
+      const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+      return sprites.map(sprite => {
+        const pig = sprite.getBoundingClientRect();
+        const center = (pig.left + pig.width / 2 - art.left) / art.width;
+        return { inside: center > bounds.left && center < bounds.right, coveredByControl: signs.some(sign => overlaps(pig, sign)) };
+      });
+    }, { left, right });
+    assert.deepEqual(placement, Array.from({ length: count }, () => ({ inside: true, coveredByControl: false })));
+  }
+
+  await checkHerd(4, 0.19, 0.45);
+  await button('Paddock B').tap();
+  await button('Activate paddock').tap();
+  await checkHerd(4, 0.51, 0.82);
+  await button('Barn').tap();
+  for (let i = 0; i < 2; i += 1) {
+    await button('Herd').tap();
+    await button('Buy pigs').tap();
+    await button('Buy pigs').tap();
+  }
+  await checkHerd(8, 0.24, 0.6);
+});
