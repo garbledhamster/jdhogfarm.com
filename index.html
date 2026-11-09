@@ -39,6 +39,10 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@500&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="game/game.css">
+  <link rel="stylesheet" href="game/season.css">
+  <script type="module" src="game/game.mjs"></script>
+
   <!-- reCAPTCHA v3 Enterprise - No challenges, background verification only -->
   <script src="https://www.google.com/recaptcha/enterprise.js?render=6LfCoU4sAAAAANKG9A42zjb8IrLrj2vOuk-ESQCV" async defer></script>
   <style>
@@ -615,6 +619,74 @@
         <!-- Short farm introduction, loaded from data/home.md. -->
       </div>
       <a href="#contact" class="inline-block px-5 py-2 border-2 border-red-800 bg-[#ffcd54] text-red-800 rounded-full font-bold hover:bg-red-800 hover:text-[#ffcd54] transition">Ask about availability</a>
+    </section>
+
+    <section id="farm-game" aria-labelledby="farm-game-title">
+      <div class="farm-heading">
+        <h2 id="farm-game-title">Hog Farm Game</h2>
+        <p>Run the farm for six weeks. Keep your pigs fed, fill both orders on time, and finish with cash left. Look around while paused, then start the season.</p>
+      </div>
+      <noscript><p>Turn on JavaScript to play the game.</p></noscript>
+      <div class="farm-interface" hidden>
+        <div class="farm-dashboard">
+          <div class="farm-clock-row">
+            <div class="farm-clock-reading">
+              <p data-stat="week">Week 1 of 6</p>
+              <p class="farm-clock-state">Paused</p>
+            </div>
+            <div class="farm-time-controls" role="group" aria-label="Game clock">
+              <button class="farm-clock-toggle" type="button">Start season</button>
+              <button class="farm-speed" type="button" data-speed="1" aria-pressed="true">1×</button>
+              <button class="farm-speed" type="button" data-speed="2" aria-pressed="false">2×</button>
+            </div>
+          </div>
+          <progress class="farm-progress" aria-label="Week progress" max="100" value="0"></progress>
+          <dl class="farm-stats">
+            <div><dt>Cash</dt><dd data-stat="cash"></dd></div>
+            <div><dt>Herd</dt><dd data-stat="herd"></dd></div>
+            <div><dt>Stored feed</dt><dd data-stat="feed"></dd></div>
+            <div><dt>Feeders ready</dt><dd data-stat="feeders"></dd></div>
+            <div><dt>Whole hogs ready</dt><dd data-stat="whole"></dd></div>
+          </dl>
+        </div>
+        <div class="farm-places" role="group" aria-label="Farm places">
+          <button type="button" data-scene="pasture" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M8 21c0-6-2-9-5-12m9 12c0-9-1-14-4-18m7 18c1-7 2-11 6-15m-3 15c1-3 2-4 4-5"></path></svg>
+            <span>Pasture</span>
+            <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+          </button>
+          <button type="button" data-scene="barn" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12H3Zm5 0v-8h8v8m-8-8 8 8m0-8-8 8m3-12h2"></path></svg>
+            <span>Barn</span>
+            <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+          </button>
+          <button type="button" data-scene="orders" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5H5v16h14V5h-3M8 3h8v4H8zM8 12l2 2 5-5m-7 8h8"></path></svg>
+            <span>Orders</span>
+            <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+          </button>
+          <button type="button" data-scene="office" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v5H3zm2 5v6m14-6v6M7 4h10v6H7zm3 8h4"></path></svg>
+            <span>Office</span>
+            <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+          </button>
+        </div>
+        <p id="farm-notice" class="farm-notice" role="status" aria-atomic="true"></p>
+        <div class="farm-warnings"></div>
+        <div class="farm-art" data-view="pasture">
+          <div class="farm-hotspots"></div>
+        </div>
+        <div class="farm-scene"></div>
+        <section id="farm-panel" class="farm-panel" role="dialog" aria-labelledby="farm-panel-title" hidden>
+          <div class="farm-panel-heading">
+            <h3 id="farm-panel-title" tabindex="-1">Farm details</h3>
+            <button class="farm-panel-close" type="button" data-panel-close>Close</button>
+          </div>
+          <p class="farm-panel-feedback" hidden></p>
+          <div class="farm-panel-body"></div>
+        </section>
+      </div>
+      <p class="farm-fiction">The farm, prices and orders in this game are fictional.</p>
     </section>
 
     <!-- About Section -->

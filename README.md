@@ -6,7 +6,7 @@ Official website for J & D's Heritage Hog Farm, featuring information about whol
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js 20.19+ or 22.16+ (or a newer supported LTS)
 - Java (for Nu HTML Checker)
 
 ### Setup
@@ -82,7 +82,7 @@ Auto-fix all fixable issues:
 npm run lint:fix
 ```
 
-Run tests (includes all linters):
+Run the linters and farm simulation tests:
 ```bash
 npm test
 ```
@@ -94,6 +94,19 @@ The repository automatically runs linting tools on staged files before each comm
 - **lint-staged**: Run linters on staged files only
 
 Configuration is in `.lintstagedrc.json`.
+
+## Homepage game
+
+The homepage loads the game from `game/`. The farm rules and clock are separate from the browser controls and scene rendering. Each page load starts a fresh fictional season.
+
+To test the game in Chromium, install the Playwright browser once and run the browser checks. The checks start a local static server with Python 3. They intercept inquiry writes.
+
+```bash
+npx playwright install chromium --only-shell
+npm run test:browser
+```
+
+For a manual preview, serve the repository root with `python3 -m http.server 8000 --bind 127.0.0.1` and open `http://127.0.0.1:8000/#farm-game`. To run the same browser checks against a deployed candidate, set `GAME_URL` to its homepage URL.
 
 ## Project Structure
 

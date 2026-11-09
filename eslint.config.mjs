@@ -25,5 +25,20 @@ export default [
       "semi": ["error", "always"],
       "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
     }
+  },
+  {
+    files: ["game/**/*.mjs", "tests/**/*.mjs"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: { ...globals.browser, ...globals.node }
+    },
+    rules: {
+      "no-undef": "error",
+      "no-unused-vars": "error",
+      "no-unreachable": "error",
+      "semi": ["error", "always"],
+      "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
+    }
   }
 ];
