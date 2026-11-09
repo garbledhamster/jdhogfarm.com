@@ -68,6 +68,11 @@
   pointer-events: none;
 }
 
+.farm-pig-art {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 .farm-scene-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -233,8 +238,9 @@
   color: #682412;
 }
 
-@media (width <= 36rem) {
-  .farm-art:is([data-view='pasture'], [data-view='barn']) {
+@media (width < 42rem) and (orientation: portrait), (width < 31rem), (orientation: landscape) and (height <= 31rem) {
+  .farm-art {
+    width: min(100%, calc((100cqh - 3.75rem) * 1200 / 530));
     aspect-ratio: auto;
     padding-bottom: 3.75rem;
     background-color: var(--farm-paper);
@@ -243,27 +249,19 @@
     background-size: 100% auto;
   }
 
-  .farm-art:is([data-view='pasture'], [data-view='barn'])::before {
+  .farm-art::before {
     display: block;
     aspect-ratio: 1200 / 530;
     content: '';
   }
 
-  .farm-art:is([data-view='pasture'], [data-view='barn']) .farm-object {
+  .farm-art .farm-object {
     top: auto;
     bottom: 0.5rem;
+    min-inline-size: 5.25rem;
+    padding-inline: 0.35rem;
     transform: translateX(-50%);
-  }
-}
-
-@media (width <= 27rem) {
-  .farm-object {
-    top: auto;
-    bottom: 0.5rem;
-    transform: translateX(-50%);
-  }
-
-  .farm-object--ledger {
-    bottom: 12%;
+    font-size: clamp(0.75rem, 2.25vw, 0.88rem);
+    text-wrap: wrap;
   }
 }

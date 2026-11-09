@@ -4,15 +4,20 @@ import { renderHotspots, renderPanel, renderScene, renderWarnings } from './seas
 
 const markupByRegion = new WeakMap();
 const root = document.getElementById('farm-game');
+const motion = window.matchMedia('(prefers-reduced-motion: no-preference)');
 const select = selector => root.querySelector(selector);
 const ui = {
-  interface: select('.farm-interface'),
+  player: select('.farm-player'),
+  launcher: select('.farm-launch button'),
+  exit: select('.farm-exit'),
+  summary: select('.farm-summary'),
   art: select('.farm-art'),
   hotspots: select('.farm-hotspots'),
   scene: select('.farm-scene'),
   panel: select('.farm-panel'),
   panelTitle: select('#farm-panel-title'),
   panelBody: select('.farm-panel-body'),
+  panelActions: select('.farm-decision-actions'),
   panelFeedback: select('.farm-panel-feedback'),
   notice: select('#farm-notice'),
   warnings: select('.farm-warnings'),
@@ -32,6 +37,7 @@ let feedback = null;
 let latestEvents = [];
 let started = false;
 let frame = 0;
+let launcherTop;
 
 const clock = createClock(() => {
   const gameHadFocus = root.contains(document.activeElement);
@@ -147,20 +153,26 @@ function render() {
   setMarkup(ui.warnings, renderWarnings(state, view));
   ui.art.dataset.view = scene;
   const selectedPlace = ui.scenes.find(button => button.dataset.scene === scene);
-  setMarkup(ui.hotspots, renderHotspots(scene, state, view), selectedPlace);
+  setMarkup(ui.hotspots, renderHotspots(scene, state, view, motion.matches), selectedPlace);
+  for (const hotspot of ui.hotspots.querySelectorAll('[data-panel]')) {
+    hotspot.setAttribute('aria-expanded', String(hotspot.dataset.panel === panel));
+  }
   setMarkup(ui.scene, renderScene(scene, state, view), selectedPlace);
 
   const details = panel && renderPanel(panel, state, view);
   ui.panel.hidden = !details;
+  ui.summary.hidden = Boolean(details);
   if (details) {
     setText(ui.panelTitle, details.title);
     setMarkup(ui.panelBody, details.body, ui.panelTitle);
+    setMarkup(ui.panelActions, details.actions ?? '', ui.panelTitle);
+    ui.panelActions.hidden = !details.actions;
   }
   renderNotice();
 }
 
 function focusPanel() {
-  ui.panel.scrollIntoView({ block: 'start', behavior: 'instant' });
+  ui.panelBody.scrollTop = 0;
   ui.panelTitle.focus({ preventScroll: true });
 }
 
@@ -173,7 +185,7 @@ function closePanel() {
   const replacement = previous?.key && previous.region.querySelector(previous.key);
   const opener = previous?.element.isConnected ? previous.element : replacement;
   const selectedPlace = ui.scenes.find(button => button.dataset.scene === scene);
-  (opener?.getClientRects().length && !opener.disabled ? opener : selectedPlace)?.focus();
+  (opener?.getClientRects().length && !opener.disabled ? opener : selectedPlace)?.focus({ preventScroll: true });
 }
 
 function toggleClock() {
@@ -200,14 +212,25 @@ function restart() {
   latestEvents = [];
   started = false;
   render();
-  ui.time.focus();
+  ui.time.focus({ preventScroll: true });
 }
 
 root.addEventListener('click', event => {
-  const button = event.target.closest('button');
+  const animal = event.target.closest('[data-scene-object]');
+  const button = event.target.closest('button') ?? (animal
+    ? ui.hotspots.querySelector(`[data-panel="${CSS.escape(animal.dataset.sceneObject)}"]`)
+    : null);
   if (!button || button.disabled) return;
+  ui.notice.removeAttribute('data-feedback');
   const { speed, scene: place, panel: panelId, action, target } = button.dataset;
-  if (button === ui.time) {
+  if (button === ui.launcher) {
+    launcherTop = ui.launcher.getBoundingClientRect().top;
+    ui.player.showModal();
+    if (!ui.panel.hidden) focusPanel();
+    else (ui.time.disabled ? ui.exit : ui.time).focus({ preventScroll: true });
+  } else if (button === ui.exit) {
+    exitGame();
+  } else if (button === ui.time) {
     toggleClock();
   } else if (speed) {
     clock.setSpeed(Number(speed));
@@ -238,16 +261,31 @@ root.addEventListener('click', event => {
     if (!result.error) latestEvents = state.events.slice(previousEventCount);
     feedback = result.error ? { message: result.error, kind: 'warning' } : null;
     if (result.error) render();
-    else if (panel) closePanel();
-    else render();
+    else {
+      if (panel) closePanel();
+      else render();
+      ui.notice.dataset.feedback = 'applied';
+    }
   }
 });
 
-root.addEventListener('keydown', event => {
-  if (event.key !== 'Escape' || ui.panel.hidden) return;
+function exitGame() {
+  if (clock.running) {
+    clock.pause();
+    feedback = { message: 'Season paused. Select Resume when you return.', kind: 'info' };
+  }
+  renderClock();
+  renderNotice();
+  ui.player.close();
+  ui.launcher.focus({ preventScroll: true });
+  // The site header can resize during play. Restore the launcher’s screen position.
+  window.scrollBy({ top: ui.launcher.getBoundingClientRect().top - launcherTop, behavior: 'instant' });
+}
+
+ui.player.addEventListener('cancel', event => {
   event.preventDefault();
-  event.stopPropagation();
-  closePanel();
+  if (ui.panel.hidden) exitGame();
+  else closePanel();
 });
 
 document.addEventListener('visibilitychange', () => {
@@ -258,26 +296,6 @@ document.addEventListener('visibilitychange', () => {
   renderNotice();
 });
 
-function keepFaqClearOfGame() {
-  const faq = document.getElementById('faq-button-container');
-  if (!faq) return;
-
-  const narrow = window.matchMedia('(max-width: 639px)');
-  const update = () => {
-    if (!narrow.matches) return;
-    const game = ui.interface.getBoundingClientRect();
-    const floatingButton = faq.getBoundingClientRect();
-    faq.toggleAttribute('data-farm-overlap',
-      game.top < floatingButton.bottom && game.bottom > floatingButton.top
-      && game.left < floatingButton.right && game.right > floatingButton.left);
-  };
-
-  window.addEventListener('scroll', update, { passive: true });
-  window.addEventListener('resize', update);
-  new ResizeObserver(update).observe(ui.interface);
-  update();
-}
-
+motion.addEventListener('change', render);
 render();
-ui.interface.hidden = false;
-keepFaqClearOfGame();
+ui.launcher.hidden = false;

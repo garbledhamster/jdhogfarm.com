@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164 105">
+  <style>
+    @media (prefers-reduced-motion: no-preference) {
+      .pig-body { animation: pig-breathe 3.8s ease-in-out infinite; }
+      .pig-highlight { animation: pig-highlight-breathe 3.8s ease-in-out infinite; }
+
+      .pig-tail {
+        transform-origin: 26px 43px;
+        animation: pig-tail-twitch 7.6s ease-in-out infinite;
+      }
+
+      .pig-ear {
+        transform-origin: 124px 31px;
+        animation: pig-ear-flick 11.2s ease-in-out infinite;
+      }
+    }
+
+    /* Change only the back and belly contour, keeping the hooves planted. */
+    @keyframes pig-breathe {
+      50% {
+        d: path("M30 26q15-18 44-16.5 26 .5 42 16.5l15 2 11 16 6 14-7 14-23 4-9 9-25 5-25-6-11-7-7 12 1 4-11 1-3-6 3-17q-14-11-14-23 0-12 13-22z");
+      }
+    }
+
+    @keyframes pig-highlight-breathe {
+      50% {
+        d: path("M34 27q25-21 60-9 12 6 18 13m-89 7q-6 8-2 17m30 22q14 11 43 9");
+      }
+    }
+
+    @keyframes pig-tail-twitch {
+      0%, 57%, 66%, 100% { transform: rotate(0deg); }
+      60% { transform: rotate(-17deg); }
+      63% { transform: rotate(8deg); }
+    }
+
+    @keyframes pig-ear-flick {
+      0%, 32%, 39%, 100% { transform: rotate(0deg); }
+      34% { transform: rotate(-14deg); }
+      36% { transform: rotate(7deg); }
+    }
+  </style>
+  <defs>
+    <linearGradient id="hide" x2=".25" y2="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(17 12.9333334) scale(131 81.06666565)"><stop stop-color="#ce844b"/><stop offset=".52" stop-color="#a84f30"/><stop offset="1" stop-color="#793527"/></linearGradient>
+    <linearGradient id="snout" x2="0" y2="1"><stop stop-color="#d99162"/><stop offset="1" stop-color="#a25242"/></linearGradient>
+  </defs>
+
+  <ellipse cx="85" cy="94" rx="68" ry="7" fill="#32281b" opacity=".22"/>
+  <path d="M46 66q0 15-7 25l7 3 7-3 9-22m52 3 5 20 10 1 2-4-4-17" fill="#783a28" stroke="#582d25" stroke-width="2.4" stroke-linejoin="round"/>
+  <path class="pig-tail" d="M26 43q-17-2-17-13 1-7 7-5 6 3 0 8" fill="none" stroke="#8a412d" stroke-width="3" stroke-linecap="round"/>
+  <path class="pig-body" d="M30 26q15-14 44-13 26 0 42 13l15 2 11 16 6 14-7 14-23 4-9 9-25 3-25-4-11-7-7 12 1 4-11 1-3-6 3-17q-14-11-14-23 0-12 13-22z" fill="url(#hide)" stroke="#582d25" stroke-width="2.7" stroke-linejoin="round"/>
+  <path class="pig-highlight" d="M34 27q25-17 60-6 12 4 18 10m-89 7q-6 8-2 17m30 22q14 9 43 7" fill="none" stroke="#edac65" opacity=".62" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M105 66q-3 12 2 26l10 1 3-4-5-2 1-14" fill="#985035" stroke="#592e24" stroke-width="2.4" stroke-linejoin="round"/>
+  <path d="M137 58q8-6 20-4l-1 12-10 6-11-4z" fill="url(#snout)" stroke="#69332a" stroke-width="2.2"/>
+  <path d="M151 58v3m4-3v2" stroke="#69332a" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M119 61q-3 11 2 14 5-2 3-12m5 2q-1 10 3 11 5-3 3-11" fill="#cb674f" stroke="#793a31" stroke-width="1.5"/>
+  <path d="M116 29q-4-13 3-18 9 6 10 16l-5 14z" fill="#b95e43" stroke="#6f342a" stroke-width="2"/>
+  <g class="pig-ear">
+    <path d="M104 36q7-11 20-9l3 7q-7 9-18 16-6-4-5-14z" fill="#cb7758" stroke="#783c2e" stroke-width="2"/>
+    <path d="M108 37q6-5 13-6l-8 13z" fill="#9f503d"/>
+  </g>
+  <circle cx="134" cy="45" r="2.5" fill="#2f201b"/>
+  <circle cx="134.5" cy="44.5" r=".75" fill="#f4d38b"/>
+  <path d="m42 38 7-4m-8 13 7-3m7 8 6-3m18-21 7 2m-14 4 5 1m13 7 6 1m-30 20 7-1m-22 4 4 2m28-1h6m-16 6 4 1" fill="none" stroke="#6c3629" opacity=".56" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

@@ -3,7 +3,8 @@ import {
   PADDOCK_FORAGE, PIG_PAIR, PRODUCTIVE_WEEKS, RECOVERY_WEEKS, SEASON_WEEKS
 } from './farm.mjs';
 
-const pigArt = new URL('./art/pig.svg', import.meta.url).href;
+const pigStill = new URL('./art/pig.svg', import.meta.url).href;
+const pigMotion = new URL('./art/pig-motion.svg', import.meta.url).href;
 
 // Ground points are in the 1200 × 530 illustrations' coordinate space.
 const pigSpots = {
@@ -56,9 +57,12 @@ function maturity(fed) {
   return 'Growing';
 }
 
-function herdArt(state, position) {
+function herdArt(state, position, animate) {
   const spots = pigSpots[position];
   if (!spots || !state.cohorts.length) return '';
+
+  const target = position === 'barn' ? 'herd' : `paddock-${position.toUpperCase()}`;
+  const pigArt = animate ? pigMotion : pigStill;
 
   const ages = state.cohorts.flatMap(cohort => Array.from({ length: cohort.pigs }, () => cohort.fedWeeks));
   const pigs = ages.slice(0, spots.length)
@@ -69,24 +73,24 @@ function herdArt(state, position) {
       const width = age >= 4 ? 76 : age >= 2 ? 66 : 56;
       const height = width * 105 / 164;
       const flip = facing < 0 ? ` transform="translate(${x * 2} 0) scale(-1 1)"` : '';
-      return `<image class="farm-pig-art" href="${pigArt}" x="${x - width / 2}" y="${y - height * 94 / 105}"
+      return `<image class="farm-pig-art" data-scene-object="${target}" href="${pigArt}" x="${x - width / 2}" y="${y - height * 94 / 105}"
         width="${width}" height="${height}"${flip}></image>`;
     }).join('')}
   </svg>`;
 }
 
-export function renderHotspots(scene, state, view) {
+export function renderHotspots(scene, state, view, animate) {
   switch (scene) {
     case 'pasture': {
       const active = state.paddocks.find(plot => plot.status === 'active');
-      const pigs = herdArt(state, active?.id.toLowerCase());
+      const pigs = herdArt(state, active?.id.toLowerCase(), animate);
       return pigs + state.paddocks.map(plot => objectButton(
         `Paddock ${plot.id}`, `paddock-${plot.id}`, plot.id.toLowerCase(),
         labels[plot.status], plot.status
       )).join('');
     }
     case 'barn':
-      return herdArt(state, 'barn')
+      return herdArt(state, 'barn', animate)
         + objectButton('Herd', 'herd', 'herd', pigCount(view.herd))
         + objectButton('Feed bin', 'feed', 'feed', `${unitCount(state.feed)} stored`);
     case 'orders':
@@ -169,11 +173,11 @@ export function renderWarnings(state, view) {
 
 function mutation(state, type, label, id = '') {
   const error = farmActionError(state, { type, id });
-  return `${error ? `<p class="farm-action-reason">${error}</p>` : ''}
-    <div class="farm-decision-actions">
-      <button class="farm-small-button farm-primary-action" type="button" data-action="${type}" data-target="${id}"${error ? ' disabled' : ''}>${label}</button>
-      <button class="farm-small-button" type="button" data-panel-close>Cancel</button>
-    </div>`;
+  return {
+    reason: error ? `<p class="farm-action-reason">${error}</p>` : '',
+    actions: `<button class="farm-small-button farm-primary-action" type="button" data-action="${type}" data-target="${id}"${error ? ' disabled' : ''}>${label}</button>
+      <button class="farm-small-button" type="button" data-panel-close>Cancel</button>`
+  };
 }
 
 function purchaseProjection(state, type) {
@@ -205,15 +209,16 @@ function paddockPanel(state, id, view) {
   if (!plot) return null;
 
   let decision = '';
+  let controls;
   if (plot.status === 'ready') {
     const active = state.paddocks.find(candidate => candidate.status === 'active');
     decision = `<p>Pay ${formatCash(PADDOCK_COST)} to get ${PADDOCK_FORAGE} forage units a week for ${weekCount(PRODUCTIVE_WEEKS)}.
-      ${active ? `Paddock ${active.id} will start resting.` : ''}</p>
-      ${mutation(state, 'activate', 'Activate paddock', id)}`;
+      ${active ? `Paddock ${active.id} will start resting.` : ''}</p>`;
+    controls = mutation(state, 'activate', 'Activate paddock', id);
   } else if (plot.status === 'active' || plot.status === 'exhausted') {
     decision = `<p>Rest this paddock for ${weekCount(RECOVERY_WEEKS)} at no cost.
-      ${plot.status === 'active' ? 'It will stop supplying forage when you confirm.' : ''}</p>
-      ${mutation(state, 'rest', 'Rest paddock', id)}`;
+      ${plot.status === 'active' ? 'It will stop supplying forage when you confirm.' : ''}</p>`;
+    controls = mutation(state, 'rest', 'Rest paddock', id);
   } else {
     decision = `<p>It will be ready after ${weekCount(RECOVERY_WEEKS - plot.restedWeeks)} of rest.</p>`;
   }
@@ -229,7 +234,8 @@ function paddockPanel(state, id, view) {
     title: `Paddock ${id}`,
     body: `<p><strong>${labels[plot.status]}</strong> · ${detail}</p>
       <p>${state.result ? 'The season has ended.' : `Covers ${Math.min(forage, view.herd)} of ${view.herd} pigs this week.`}</p>
-      ${decision}`
+      ${decision}${controls?.reason ?? ''}`,
+    actions: controls?.actions
   };
 }
 
@@ -283,10 +289,8 @@ function recapPanel(state) {
         ${state.orders.map(order => `<dt>${order.label}</dt><dd>${order.status === 'open' ? 'Open when the season ended' : labels[order.status]}</dd>`).join('')}
         <dt>Supplemental feed</dt><dd>${unitCount(state.feed)}</dd>
       </dl>
-      ${state.result !== 'won' && warnings.length ? `<h4>What happened</h4>${eventList(warnings)}` : ''}
-      <div class="farm-decision-actions">
-        <button class="farm-small-button farm-primary-action" type="button" data-action="restart">Restart season</button>
-      </div>`
+      ${state.result !== 'won' && warnings.length ? `<h4>What happened</h4>${eventList(warnings)}` : ''}`,
+    actions: '<button class="farm-small-button farm-primary-action" type="button" data-action="restart">Restart season</button>'
   };
 }
 
@@ -295,41 +299,45 @@ export function renderPanel(panel, state, view) {
   if (panel.startsWith('order-')) {
     const order = state.orders.find(candidate => candidate.id === panel.at(-1));
     if (!order) return null;
+    const controls = mutation(state, 'fulfill', order.id === 'A' ? 'Confirm pickup' : 'Confirm delivery', order.id);
     return {
       title: order.label,
       body: `${orderFacts(order, state, view)}
         <p>Confirm the fictional handoff to remove ${pigCount(order.quantity)} and receive ${formatCash(order.payment)}.</p>
-        ${mutation(state, 'fulfill', order.id === 'A' ? 'Confirm pickup' : 'Confirm delivery', order.id)}`
+        ${controls.reason}`,
+      actions: controls.actions
     };
   }
 
   switch (panel) {
-    case 'feed':
+    case 'feed': {
+      const controls = mutation(state, 'buy-feed', 'Buy feed');
       return {
         title: 'Feed bin',
-        body: `<p><strong>${unitCount(state.feed)} in storage</strong></p>
+        body: `<p>Pay ${formatCash(FEED_BUNDLE.cost)} to add ${unitCount(FEED_BUNDLE.units)} of supplemental feed.</p>
+          <p><strong>${unitCount(state.feed)} in storage</strong></p>
           <p>${state.result ? 'The season has ended.' : forecastText(view)}</p>
-          <p>Pay ${formatCash(FEED_BUNDLE.cost)} to add ${unitCount(FEED_BUNDLE.units)} of supplemental feed.</p>
-          ${purchaseProjection(state, 'buy-feed')}
-          ${mutation(state, 'buy-feed', 'Buy feed')}`
+          ${purchaseProjection(state, 'buy-feed')}${controls.reason}`,
+        actions: controls.actions
       };
+    }
     case 'herd':
       return {
         title: 'Herd',
         body: `${renderCohorts(state)}
-          <p>A fully fed week adds one week of growth. Feeders need two fed weeks and whole hogs need four.</p>
-          ${state.result ? '' : `<div class="farm-decision-actions">
-            <button class="farm-small-button farm-primary-action" type="button" data-panel="buy-pigs">Buy pigs</button>
-          </div>`}`
+          <p>A fully fed week adds one week of growth. Feeders need two fed weeks and whole hogs need four.</p>`,
+        actions: state.result ? '' : '<button class="farm-small-button farm-primary-action" type="button" data-panel="buy-pigs">Buy pigs</button>'
       };
-    case 'buy-pigs':
+    case 'buy-pigs': {
+      const controls = mutation(state, 'buy-pigs', 'Buy pigs');
       return {
         title: 'Buy pigs',
         body: `<p>Pay ${formatCash(PIG_PAIR.cost)} for ${pigCount(PIG_PAIR.pigs)} at zero fed weeks.
           They will need ${unitCount(PIG_PAIR.pigs)} more feed each week.</p>
-          ${purchaseProjection(state, 'buy-pigs')}
-          ${mutation(state, 'buy-pigs', 'Buy pigs')}`
+          ${purchaseProjection(state, 'buy-pigs')}${controls.reason}`,
+        actions: controls.actions
       };
+    }
     case 'ledger':
       return ledgerPanel(state, view);
     case 'recap':

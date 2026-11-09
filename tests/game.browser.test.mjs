@@ -31,7 +31,7 @@ after(async () => {
 });
 
 async function openGame(t, options = {}) {
-  const { fixtures = false, ...contextOptions } = options;
+  const { fixtures = false, launch = !fixtures, keyboard = false, ...contextOptions } = options;
   const context = await browser.newContext({ ignoreHTTPSErrors: true, ...contextOptions });
   t.after(() => context.close());
   const page = await context.newPage();
@@ -43,7 +43,10 @@ async function openGame(t, options = {}) {
   await page.clock.install({ time: new Date('2026-11-08T18:00:00Z') });
   await page.clock.pauseAt(new Date('2026-11-08T18:01:00Z'));
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  const game = page.getByRole('region', { name: 'Hog Farm Game' });
+  const launcher = page.getByRole('button', { name: 'Open game', exact: true });
+  if (launch && keyboard) await launcher.press('Enter');
+  else if (launch) await launcher.click();
+  const game = page.getByRole(launch ? 'dialog' : 'region', { name: 'Hog Farm Game', exact: true });
   const button = name => game.getByRole('button', { name, exact: true });
   const value = async key => (await game.locator(`[data-stat="${key}"]`).innerText()).trim();
   await game.waitFor();
@@ -68,11 +71,11 @@ test('#95 homepage starts paused and shares one farm across four scenes', async 
   assert.match(await game.innerText(), /Whole.hog delivery/i);
   await button('Barn').click();
   assert.match(await value('cash'), /\$1,000/);
-  await page.clock.runFor(30000);
+  await page.clock.fastForward(30000);
   assert.match(await value('week'), /1/);
 
   await button('Start season').click();
-  await page.clock.runFor(19999);
+  await page.clock.fastForward(19999);
   assert.match(await value('week'), /1/);
   await page.clock.runFor(1);
   assert.match(await value('week'), /2/);
@@ -82,7 +85,7 @@ test('#95 homepage starts paused and shares one farm across four scenes', async 
   await button('Ledger').click();
   assert.match(await game.getByRole('dialog').innerText(), /Week 1[^\n]*Weekly overhead[\s\S]*-\$80/);
   await page.keyboard.press('Escape');
-  await page.clock.runFor(20000);
+  await page.clock.fastForward(20000);
   assert.match(await value('cash'), /\$840/);
   assert.match(await value('feeders'), /\b4\b/);
 });
@@ -90,14 +93,14 @@ test('#95 homepage starts paused and shares one farm across four scenes', async 
 test('#95 clock preserves partial progress on pause, speed change and hidden-tab pause', async t => {
   const { page, game, button, value } = await openGame(t);
   await button('Start season').click();
-  await page.clock.runFor(5000);
+  await page.clock.fastForward(5000);
   await button('Pause').click();
-  await page.clock.runFor(60000);
+  await page.clock.fastForward(60000);
   assert.match(await value('week'), /1/);
 
   await button('2×').click();
   await button('Resume').click();
-  await page.clock.runFor(2500);
+  await page.clock.fastForward(2500);
   await page.evaluate(() => {
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
@@ -105,7 +108,7 @@ test('#95 clock preserves partial progress on pause, speed change and hidden-tab
   });
   await button('Resume').waitFor();
   assert.match(await game.innerText(), /paused.*(?:tab|hidden)|(?:tab|hidden).*paused/i);
-  await page.clock.runFor(60000);
+  await page.clock.fastForward(60000);
   await page.evaluate(() => {
     Reflect.deleteProperty(document, 'hidden');
     Reflect.deleteProperty(document, 'visibilityState');
@@ -113,7 +116,7 @@ test('#95 clock preserves partial progress on pause, speed change and hidden-tab
   });
   assert.match(await value('week'), /1/);
   await button('Resume').click();
-  await page.clock.runFor(4999);
+  await page.clock.fastForward(4999);
   assert.match(await value('week'), /1/);
   await page.clock.runFor(1);
   assert.match(await value('week'), /2/);
@@ -242,7 +245,7 @@ for (const input of ['keyboard', 'touch']) {
   test(`#99 wins the reference season with ${input} and keeps game actions local`, async t => {
     const context = input === 'touch'
       ? { viewport: { width: 360, height: 640 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' }
-      : { viewport: { width: 1280, height: 850 } };
+      : { viewport: { width: 1280, height: 850 }, keyboard: true };
     const { page, game, button, value } = await openGame(t, context);
     const activate = async (name, scope = game) => {
       const control = scope.getByRole('button', { name, exact: true });
@@ -330,7 +333,7 @@ test('#99 no-action run shows missed orders and shortage, then restarts the enti
   await runWeeks(page, 2);
   assert.match(await value('cash'), /\$520/);
   assert.match(await game.innerText(), /Feeder pickup[\s\S]*Missed[\s\S]*Whole.hog delivery[\s\S]*Missed/i);
-  await page.clock.runFor(20000);
+  await page.clock.fastForward(20000);
   assert.match(await value('cash'), /\$520/);
   await button('Restart season').click();
   await button('Start season').waitFor();
@@ -358,7 +361,7 @@ test('#99 bankruptcy records the overhead and stops a running season', async t =
   assert.match(await value('cash'), /-\$80|−\$80/);
   assert.match(await game.innerText(), /bankrupt/i);
   assert.match(await game.innerText(), /overhead/i);
-  await page.clock.runFor(30000);
+  await page.clock.fastForward(30000);
   assert.match(await value('cash'), /-\$80|−\$80/);
   await button('Restart season').waitFor();
 });
@@ -407,4 +410,85 @@ test('hog art stays in the active enclosure and clear of scene controls on a nar
     await button('Buy pigs').tap();
   }
   await checkHerd(8, 0.24, 0.6);
+});
+
+test('the viewport player fits short phones, landscape and desktop without moving the homepage', async t => {
+  for (const [width, height] of [[320, 568], [667, 375], [1280, 720]]) {
+    const { page } = await openGame(t, { launch: false, viewport: { width, height }, hasTouch: width < 800, isMobile: width < 800 });
+    const launch = page.getByRole('button', { name: 'Open game', exact: true });
+    await launch.scrollIntoViewIfNeeded();
+    await launch.evaluate(el => el.addEventListener('click', () => {
+      el.dataset.testLaunchTop = String(el.getBoundingClientRect().top);
+    }, { capture: true, once: true }));
+    await launch.click();
+    const launchTop = Number(await launch.getAttribute('data-test-launch-top'));
+    const player = page.getByRole('dialog', { name: 'Hog Farm Game', exact: true });
+    const control = name => player.getByRole('button', { name, exact: true });
+
+    async function fits(name) {
+      assert.equal(await control(name).evaluate(el => {
+        const box = el.getBoundingClientRect();
+        return box.left >= 0 && box.right <= innerWidth && box.top >= 0 && box.bottom <= innerHeight
+          && el.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+      }), true, `${name} fits at ${width} × ${height}`);
+    }
+
+    assert.equal(await player.evaluate(el => el.matches(':modal')), true);
+    assert.equal(await page.locator('html').evaluate(el => getComputedStyle(el).overflowY), 'hidden');
+    await fits('Exit game');
+    await fits('Start season');
+    await fits('Office');
+    await fits('Paddock B');
+    await control('Barn').click();
+    await fits('Feed bin');
+    await control('Feed bin').click();
+    await fits('Buy feed');
+    await fits('Cancel');
+    await control('Buy feed').click();
+    await control('Start season').click();
+    await page.clock.fastForward(4000);
+    await control('Exit game').click();
+    await player.waitFor({ state: 'hidden' });
+    const returnedTop = await launch.evaluate(el => el.getBoundingClientRect().top);
+    assert.ok(Math.abs(returnedTop - launchTop) <= 2, `Launcher returns to the same viewport position at ${width} × ${height}`);
+    assert.equal(await launch.evaluate(el => el === document.activeElement), true);
+    await page.clock.fastForward(30000);
+    await launch.click();
+    await fits('Resume');
+    assert.match(await player.locator('[data-stat="cash"]').innerText(), /\$900/);
+    await control('Resume').click();
+    await page.clock.fastForward(15999);
+    assert.match(await player.locator('[data-stat="week"]').innerText(), /Week 1/);
+    await page.clock.runFor(1);
+    assert.match(await player.locator('[data-stat="week"]').innerText(), /Week 2/);
+    await page.keyboard.press('Escape');
+    await player.waitFor({ state: 'hidden' });
+  }
+});
+
+test('tapping a hog opens its enclosure controls', async t => {
+  const { page, game, button } = await openGame(t, { viewport: { width: 360, height: 640 }, isMobile: true, hasTouch: true });
+  async function tapHog() {
+    const box = await game.locator('.farm-pig-art').first().boundingBox();
+    assert.ok(box);
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  }
+
+  await tapHog();
+  assert.equal(await game.getByRole('dialog', { name: 'Paddock A', exact: true }).isVisible(), true);
+  await button('Close').tap();
+  await button('Barn').tap();
+  await tapHog();
+  assert.equal(await game.getByRole('dialog', { name: 'Herd', exact: true }).isVisible(), true);
+});
+
+test('game artwork switches to still assets when reduced motion is enabled', async t => {
+  const { page, game } = await openGame(t, { reducedMotion: 'no-preference' });
+  const pig = game.locator('.farm-pig-art').first();
+  const backdrop = game.locator('.farm-art');
+  assert.match(await pig.getAttribute('href'), /pig-motion\.svg$/);
+  assert.match(await backdrop.evaluate(el => getComputedStyle(el).backgroundImage), /pasture-motion\.svg/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await game.locator('.farm-pig-art[href$="/pig.svg"]').first().waitFor();
+  assert.match(await backdrop.evaluate(el => getComputedStyle(el).backgroundImage), /pasture\.svg/);
 });
