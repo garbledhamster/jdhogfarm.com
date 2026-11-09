@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createChores } from '../game/chores.mjs';
 import * as farm from '../game/morning.mjs';
 
 function act(state, type, fields) {
@@ -143,6 +144,44 @@ test('end week needs settled feeding and no truck, posts one bill and retains st
   assert.equal(state.history[0].feeding, firstFeeding);
   assert.equal(state.history[0].transactions.at(-1).amount, -80);
   reject(state, 'end-week', { week: 1 }, /week/i);
+});
+
+test('Week 2 grain shortage: feeding now versus ordering grain first', () => {
+  const weekTwo = close(feed(orderGrain(start(2))));
+  assert.equal(weekTwo.week, 2);
+  assert.equal(weekTwo.litter.pigs, 3);
+  assert.equal(weekTwo.plots[0].pigs, 2);
+  assert.equal(weekTwo.grain, 1);
+  assert.equal(farm.feedForecast(weekTwo).shortfall, 2);
+
+  function orderThenFeed() {
+    let state = act(weekTwo, 'order-grain');
+    const scheduled = [];
+    const chores = createChores({
+      schedule: callback => scheduled.push(callback),
+      onDelivery: id => { state = act(state, 'deliver-grain', { id }); }
+    });
+    chores.sync({ week: state.week, shipment: state.shipment, active: false });
+    assert.equal(state.grain, 1);
+    while (scheduled.length) scheduled.shift()();
+    assert.equal(state.grain, 5);
+    return feed(state);
+  }
+
+  const feedNow = feed(weekTwo, true);
+  assert.equal(feedNow.feeding.shortfall, 2);
+  assert.equal(feedNow.litter.fedWeeks, 1);
+  assert.equal(feedNow.plots[0].fedWeeks, 3);
+  assert.equal(feedNow.grain, 0);
+
+  const restockFirst = orderThenFeed();
+  assert.equal(restockFirst.feeding.shortfall, 0);
+  assert.equal(restockFirst.litter.fedWeeks, 2);
+  assert.equal(restockFirst.plots[0].fedWeeks, 3);
+  assert.equal(restockFirst.grain, 2);
+
+  assert.deepEqual(feed(weekTwo, true), feedNow);
+  assert.deepEqual(orderThenFeed(), restockFirst);
 });
 
 test('paddocks provide three productive mornings and recover after two closed rest weeks', () => {
