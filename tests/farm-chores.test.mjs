@@ -63,10 +63,28 @@ test('a stale delivery callback cannot unload a replay shipment with the same id
   assert.deepEqual(deliveries, [1]);
 });
 
+test('a prepared bucket waits at the entrance until the player starts walking', () => {
+  const { chores, advance, tasks } = setup();
+  chores.sync({ week: 1, active: false, hasBucket: true });
+  assert.equal(chores.routeAction('prepare-route'), true);
+  chores.sync({ week: 1, active: true, hasBucket: true });
+  advance(10000);
+  assert.equal(chores.route.status, 'ready');
+  assert.equal(chores.route.progress, 0);
+  assert.equal(tasks.size, 0);
+
+  assert.equal(chores.routeAction('walk-route'), true);
+  assert.equal(chores.routeAction('walk-route'), false);
+  advance(1000);
+  assert.equal(chores.route.status, 'walking');
+  assert.ok(chores.route.progress > 0);
+});
+
 test('the bucket route preserves the lane and progress while the map or another tab is open', () => {
   const { chores, advance, arrivals } = setup();
   chores.sync({ week: 1, active: true });
-  chores.routeAction('start-route');
+  chores.routeAction('prepare-route');
+  chores.routeAction('walk-route');
   chores.routeAction('route-lane', 0);
   advance(1000);
   const atMap = chores.route;
@@ -87,7 +105,8 @@ test('the bucket route preserves the lane and progress while the map or another 
 test('a collision stops route progress until Retry or Walk with Joe', () => {
   const { chores, advance, arrivals } = setup();
   chores.sync({ week: 1, active: true });
-  chores.routeAction('start-route');
+  chores.routeAction('prepare-route');
+  chores.routeAction('walk-route');
   advance(3000);
   assert.equal(chores.route.status, 'blocked');
   assert.equal(chores.route.hit, 'rock');
@@ -107,14 +126,16 @@ test('a collision stops route progress until Retry or Walk with Joe', () => {
 test('later routes add snakes and always leave a manual lane open', () => {
   const { chores, advance } = setup();
   chores.sync({ week: 2, active: true });
-  chores.routeAction('start-route');
+  chores.routeAction('prepare-route');
+  chores.routeAction('walk-route');
   assert.deepEqual(chores.route.obstacles.map(obstacle => obstacle.id), ['rock', 'snake']);
   chores.routeAction('route-lane', 2);
   advance(4500);
   assert.equal(chores.route.hit, 'snake');
   chores.sync({ week: 3, active: true });
   assert.equal(chores.route, null);
-  chores.routeAction('start-route');
+  chores.routeAction('prepare-route');
+  chores.routeAction('walk-route');
   assert.deepEqual(chores.route.obstacles.map(obstacle => obstacle.id), ['rock', 'snake', 'moving-snake']);
   const movingLane = chores.route.obstacles.at(-1).lane;
   chores.routeAction('route-lane', 0);
@@ -147,7 +168,8 @@ test('the route illustration moves the bucket carrier up the path and over the c
 test('clearing the bucket cancels its route without cancelling a truck shipment', () => {
   const { chores, advance, arrivals, deliveries } = setup();
   chores.sync({ week: 3, active: true, hasBucket: true, shipment: { id: 9 } });
-  chores.routeAction('start-route');
+  chores.routeAction('prepare-route');
+  chores.routeAction('walk-route');
   chores.routeAction('route-lane', 0);
   advance(500);
   chores.sync({ week: 3, active: false, hasBucket: false, shipment: { id: 9 } });

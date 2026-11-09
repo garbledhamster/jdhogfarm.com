@@ -97,22 +97,24 @@ function routeView({ route, motion }) {
     };
   }
 
+  const ready = route.status === 'ready';
   const blocked = route.status === 'blocked';
   const laneButtons = laneNames.map((name, lane) => button(name,
     `aria-label="${name} lane" aria-pressed="${route.lane === lane}" data-local-action="route-lane" data-target="${lane}"` +
-      (blocked || route.assisted ? ' disabled' : '')
+      (ready || blocked || route.assisted ? ' disabled' : '')
   )).join('');
+  const start = ready ? button('Start walking', 'data-local-action="walk-route"', true) : '';
   const retry = blocked ? button('Retry route', 'data-local-action="retry-route"', true) : '';
   const assist = route.assisted ? '' : button('Walk with Joe', 'data-local-action="assist-route"');
   const snakeHint = route.obstacles.length > 1 ? ' Watch for snakes on the right.' : '';
-  let prompt = `A rock blocks the middle.${snakeHint} Tap a lane or use the arrow keys.`;
+  let prompt = `${ready ? 'Start when you’re ready. ' : ''}A rock blocks the middle.${snakeHint} Tap a lane or use the arrow keys.`;
   if (blocked) prompt = `You met ${hazardNames[route.hit]}. Retry or walk with Joe.`;
   else if (route.assisted) prompt = 'Joe is walking with you to the piglet pen.';
   return {
     art: renderRouteArt(route, motion),
     controls: controls('route', `<progress data-chore-progress max="100" value="${Math.floor(route.progress * 100)}" aria-label="Route progress"></progress>
       <div class="farm-route-lanes" role="group" aria-label="Choose a lane">${laneButtons}</div>
-      <div class="farm-route-options">${retry}${assist}</div>`),
+      <div class="farm-route-options">${start}${retry}${assist}</div>`),
     details: `<p>${prompt}</p>`
   };
 }

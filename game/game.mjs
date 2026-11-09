@@ -67,7 +67,11 @@ const chores = createChores({
   onDeliveryChange: render,
   onRouteChange(route, { progressOnly }) {
     if (progressOnly) paintChoreRoute(ui.stage, route, motion.matches);
-    else render();
+    else {
+      const collision = place === 'route' && route.status === 'blocked' && ui.controls.contains(document.activeElement);
+      render();
+      if (collision) focusPlace();
+    }
   },
   onArrive() {
     goTo('piglets');
@@ -102,6 +106,16 @@ function setMarkup(node, markup = '', fallback) {
 
 function focus(node) {
   node?.focus({ preventScroll: true });
+}
+
+function focusPlace() {
+  const route = place === 'route' && chores.route;
+  const selector = route && {
+    ready: '[data-local-action="walk-route"]',
+    blocked: '[data-local-action="retry-route"]',
+    walking: '[data-local-action="route-lane"][aria-pressed="true"]:enabled'
+  }[route.status];
+  focus((selector && ui.controls.querySelector(selector)) || ui.sceneTitle);
 }
 
 function render() {
@@ -208,7 +222,7 @@ function goTo(destination, nextNotice = '') {
   clearPanel();
   notice = nextNotice;
   render();
-  focus(ui.sceneTitle);
+  focusPlace();
 }
 
 function openPanel(key, target, opener) {
@@ -303,8 +317,11 @@ function routeAction(type, target) {
     }
     state = reservation.state;
     goTo('route');
+    chores.routeAction('prepare-route');
+    focusPlace();
+    return;
   }
-  chores.routeAction(type, Number(target));
+  if (chores.routeAction(type, Number(target)) && type !== 'route-lane') focusPlace();
 }
 
 function exitGame() {
@@ -323,7 +340,9 @@ root.addEventListener('click', event => {
     ui.introPortrait.loading = 'eager';
     ui.player.showModal();
     render();
-    focus(!ui.intro.hidden ? ui.introTitle : ui.panel.hidden ? ui.sceneTitle : ui.panelTitle);
+    if (!ui.intro.hidden) focus(ui.introTitle);
+    else if (!ui.panel.hidden) focus(ui.panelTitle);
+    else focusPlace();
   } else if (button === ui.exit) {
     exitGame();
   } else if (button === ui.introSkip) {
@@ -369,7 +388,10 @@ ui.player.addEventListener('keydown', event => {
   if (place !== 'route' || panel || !['ArrowLeft', 'ArrowRight'].includes(event.key) || !chores.route) return;
   const shift = event.key === 'ArrowLeft' ? -1 : 1;
   const lane = Math.max(0, Math.min(2, chores.route.lane + shift));
-  if (chores.routeAction('route-lane', lane)) event.preventDefault();
+  if (chores.routeAction('route-lane', lane)) {
+    event.preventDefault();
+    if (ui.controls.contains(document.activeElement)) focusPlace();
+  }
 });
 
 document.addEventListener('visibilitychange', render);

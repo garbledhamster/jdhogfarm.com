@@ -24,6 +24,7 @@ export function createChores({
 } = {}) {
   let week;
   let active = false;
+  let hasBucket = false;
   let route = null;
   let routeTimer = null;
   let delivery = null;
@@ -76,9 +77,9 @@ export function createChores({
     else publishRoute(true);
   }
 
-  function startRoute() {
+  function enterRoute(status) {
     stopRoute();
-    route = { status: 'walking', lane: 1, progress: 0, assisted: false, hit: null };
+    route = { status, lane: 1, progress: 0, assisted: false, hit: null };
     publishRoute();
     queueRoute();
     return true;
@@ -86,12 +87,12 @@ export function createChores({
 
   function routeAction(type, target) {
     switch (type) {
-      case 'start-route':
-        return !route && startRoute();
-      case 'refill-route':
-        return startRoute();
+      case 'prepare-route':
+        return hasBucket && enterRoute('ready');
+      case 'walk-route':
+        return route?.status === 'ready' && enterRoute('walking');
       case 'retry-route':
-        return route?.status === 'blocked' && startRoute();
+        return route?.status === 'blocked' && enterRoute('walking');
       case 'route-lane':
         if (route?.status !== 'walking' || route.assisted || ![0, 1, 2].includes(target)) return false;
         if (route.lane !== target) {
@@ -137,7 +138,8 @@ export function createChores({
     get route() { return routeSnapshot(); },
     get deliveryStage() { return delivery?.stage ?? null; },
     routeAction,
-    sync({ week: currentWeek, shipment, active: routeVisible, hasBucket = true }) {
+    sync({ week: currentWeek, shipment, active: routeVisible, hasBucket: reserved = true }) {
+      hasBucket = reserved;
       if (week !== currentWeek || !hasBucket) {
         stopRoute();
         route = null;
@@ -153,6 +155,7 @@ export function createChores({
       stopDelivery();
       route = null;
       active = false;
+      hasBucket = false;
     }
   };
 }

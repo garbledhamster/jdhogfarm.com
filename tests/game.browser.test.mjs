@@ -362,6 +362,7 @@ test('replaying a paused bucket run clears the farm and leaves no route callback
   await farm.go('barn');
   await farm.buyGrain();
   await farm.local('start-route');
+  await farm.local('walk-route');
   await farm.page.clock.runFor(1000);
   await farm.click('Farm map');
   await farm.click('Help journal');
