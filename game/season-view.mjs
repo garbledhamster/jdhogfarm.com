@@ -90,7 +90,7 @@ function personArt(name, action, x, y, width, height) {
 function speakerLine(name, copy) {
   const person = name.toLowerCase();
   return `<div class="farm-speaker-line">
-    <img src="game/art/${person}-portrait.webp" alt="" width="600" height="600">
+    <img src="game/art/${person}-portrait.webp" alt="" width="640" height="512">
     <p><strong>${name}</strong> ${copy}</p>
   </div>`;
 }
@@ -115,7 +115,7 @@ export function renderHotspots(scene, state, view, animate) {
         orderStatus(order, state, view), order.status
       )).join('');
     case 'office':
-      return personArt('debbie', 'ledger', 595, 155, 210, 190)
+      return personArt('debbie', 'ledger', 852, 300, 160, 200)
         + objectButton('Ledger', 'ledger', 'ledger', `${formatCash(state.cash)} balance`);
     default:
       return '';
