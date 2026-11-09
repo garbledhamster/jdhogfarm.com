@@ -301,7 +301,19 @@ for (const [name, input, expansions, marketSale, finalCash] of [
           await farm.stock('1', 2);
         }
       }
-      await farm.closeWeek();
+      if (week === 6 && input === 'pointer') {
+        await farm.page.setViewportSize({ width: 320, height: 568 });
+        await farm.go('office');
+        await farm.pick('ledger');
+        const scrollBeforeClose = await farm.game.locator('.farm-panel-body').evaluate(body => {
+          body.scrollTop = body.scrollHeight;
+          return body.scrollTop;
+        });
+        assert.ok(scrollBeforeClose > 0);
+        await farm.action('end-week');
+      } else {
+        await farm.closeWeek();
+      }
     }
 
     assert.equal(await farm.value('cash'), finalCash);
@@ -311,6 +323,7 @@ for (const [name, input, expansions, marketSale, finalCash] of [
     const recap = farm.game.getByRole('dialog', { name: 'Season recap', exact: true });
     const exchange = recap.getByRole('region', { name: 'Closing exchange' });
     await exchange.waitFor({ timeout: 2500 });
+    assert.equal(await recap.locator('.farm-panel-body').evaluate(body => body.scrollTop), 0);
     assert.match(await exchange.innerText(), marketSale ? /both sales/i : /without a market hog sale/i);
     assert.ok((await exchange.innerText()).includes(finalCash));
     const openLedger = recap.getByRole('button', { name: 'Closing ledger' });
@@ -325,8 +338,14 @@ for (const [name, input, expansions, marketSale, finalCash] of [
     assert.match(await lastBill.innerText(), /-\$80/);
     assert.ok((await lastBill.innerText()).includes(finalCash));
     assert.equal(await ledger.getByRole('button', { name: 'Replay season', exact: true }).count(), 1);
+    const scrolled = await ledger.locator('.farm-panel-body').evaluate(body => {
+      body.scrollTop = body.scrollHeight;
+      return body.scrollTop;
+    });
+    assert.ok(scrolled > 0);
     await farm.click('Back to recap');
     await exchange.waitFor();
+    assert.equal(await recap.locator('.farm-panel-body').evaluate(body => body.scrollTop), 0);
     await farm.action('replay');
     assert.equal(await farm.value('cash'), '$1,000');
     assert.match(await farm.value('week'), /Week 1/);

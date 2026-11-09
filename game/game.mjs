@@ -199,13 +199,13 @@ function renderDecisionPanel(decision) {
   }
 
   const key = `${panel}:${panelTarget ?? ''}`;
-  const previousInput = ui.panel.dataset.decisionKey === key
-    ? ui.panelBody.querySelector('input[type="number"]')
-    : null;
+  const sameDecision = ui.panel.dataset.decisionKey === key;
+  const previousInput = sameDecision ? ui.panelBody.querySelector('input[type="number"]') : null;
   ui.panel.dataset.decisionKey = key;
   setText(ui.panelTitle, decision.title);
   setMarkup(ui.panelBody, decision.body, ui.panelTitle);
   setMarkup(ui.panelActions, decision.actions, ui.panelTitle);
+  if (!sameDecision) ui.panelBody.scrollTop = 0;
   if (previousInput) {
     const currentInput = ui.panelBody.querySelector(`#${CSS.escape(previousInput.id)}`);
     if (currentInput) {
