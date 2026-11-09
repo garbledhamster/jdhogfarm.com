@@ -111,3 +111,23 @@ test('recap grounds a replay choice in the recorded sale and feeding result', ()
   assert.match(recap.actions, /data-action="replay"/);
   assert.match(renderOfficePlace('office', state, context).controls, /data-open="recap"/);
 });
+
+test('the closing exchange names a missed feeder sale and zero closing cash', () => {
+  const sixthMorning = { ...fedFirstMorning(), week: 6, cash: 80, sales: { feeder: 0, market: 1 } };
+  const closed = act(sixthMorning, 'end-week', { week: 6 });
+  assert.equal(closed.result, 'lost');
+  assert.equal(closed.cash, 0);
+  const recap = renderOfficeDecision('recap', closed, context);
+  assert.match(recap.body, /Joe<\/strong>.+without a feeder sale/);
+  assert.match(recap.body, /Debbie<\/strong>.+last bill used the rest of our cash/);
+});
+
+test('the closing exchange describes a cash-only loss after both sales', () => {
+  const sixthMorning = { ...fedFirstMorning(), week: 6, cash: 79, sales: { feeder: 1, market: 1 } };
+  const closed = act(sixthMorning, 'end-week', { week: 6 });
+  assert.equal(closed.result, 'lost');
+  assert.equal(closed.cash, -1);
+  const recap = renderOfficeDecision('recap', closed, context);
+  assert.match(recap.body, /Joe<\/strong>.+made both sales/);
+  assert.match(recap.body, /Debbie<\/strong>.+short by \$1 after the last bill/);
+});

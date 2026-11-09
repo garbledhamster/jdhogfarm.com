@@ -308,6 +308,25 @@ for (const [name, input, expansions, marketSale, finalCash] of [
     assert.match(await farm.game.innerText(), marketSale
       ? /season won|you did it|successful season|both sales/i
       : /no market|missed market|market.+needed/i);
+    const recap = farm.game.getByRole('dialog', { name: 'Season recap', exact: true });
+    const exchange = recap.getByRole('region', { name: 'Closing exchange' });
+    await exchange.waitFor({ timeout: 2500 });
+    assert.match(await exchange.innerText(), marketSale ? /both sales/i : /without a market hog sale/i);
+    assert.ok((await exchange.innerText()).includes(finalCash));
+    const openLedger = recap.getByRole('button', { name: 'Closing ledger' });
+    const ledgerButton = await openLedger.elementHandle();
+    assert.equal(await exchange.evaluate((node, button) =>
+      node.closest('.farm-panel-body') === button.closest('.farm-panel-body') &&
+      Boolean(node.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING), ledgerButton), true);
+    await farm.click('Closing ledger');
+    const ledger = farm.game.getByRole('dialog', { name: 'Closing ledger', exact: true });
+    assert.equal(await ledger.getByRole('rowheader', { name: 'Weekly bill', exact: true }).count(), 6);
+    const lastBill = ledger.getByRole('table', { name: 'Week 6 ledger' }).getByRole('row', { name: /Weekly bill/ });
+    assert.match(await lastBill.innerText(), /-\$80/);
+    assert.ok((await lastBill.innerText()).includes(finalCash));
+    assert.equal(await ledger.getByRole('button', { name: 'Replay season', exact: true }).count(), 1);
+    await farm.click('Back to recap');
+    await exchange.waitFor();
     await farm.action('replay');
     assert.equal(await farm.value('cash'), '$1,000');
     assert.match(await farm.value('week'), /Week 1/);

@@ -119,11 +119,11 @@ export function renderOfficePlace(place, state, context) {
   };
 }
 
-function ledgerRows(state) {
-  const entries = state.ledger.filter(entry => entry.week === state.week);
+function ledgerRows(state, week = state.week) {
+  const entries = state.ledger.filter(entry => entry.week === week);
   if (!entries.length) return '<p>No purchases or sales this morning.</p>';
   return `<table class="farm-office-ledger">
-    <caption>Week ${state.week} ledger</caption>
+    <caption>Week ${week} ledger</caption>
     <thead><tr><th scope="col">Entry</th><th scope="col">Change</th><th scope="col">Balance</th></tr></thead>
     <tbody>${entries.map(entry => {
       const quantity = entry.quantity ? ` × ${entry.quantity}` : '';
@@ -202,6 +202,22 @@ function recapAdvice(state) {
   return 'Try reinvesting part of the first feeder sale in a pen kit. Preview how much grain the extra pigs will need.';
 }
 
+function endingExchange(state) {
+  const missedSale = !state.sales.feeder && !state.sales.market ? 'a feeder sale or a market hog sale'
+    : !state.sales.feeder ? 'a feeder sale'
+      : !state.sales.market ? 'a market hog sale' : '';
+  const joe = missedSale ? `We closed without ${missedSale}.` : 'We made both sales.';
+  const cashLeft = `There’s ${formatCash(state.cash)} left after the last bill.`;
+  const debbie = state.result === 'won' ? `${cashLeft} Time to shut the gate for the season.`
+    : state.cash > 0 ? cashLeft
+      : state.cash === 0 ? 'The last bill used the rest of our cash. We needed money left to finish the season.'
+        : `We’re short by ${formatCash(-state.cash)} after the last bill. We needed money left to finish the season.`;
+  return `<section class="farm-office-content farm-ending-exchange" aria-label="Closing exchange">
+    ${portraitLine('Joe', missedSale ? 'joe-concerned' : 'joe', joe)}
+    ${portraitLine('Debbie', state.result === 'won' ? 'debbie-settled' : 'debbie', debbie)}
+  </section>`;
+}
+
 function seasonRecap(state) {
   const won = state.result === 'won';
   const lastBill = state.ledger.findLast(entry => entry.type === 'overhead');
@@ -219,19 +235,28 @@ function seasonRecap(state) {
     title: 'Season recap',
     body: `<section class="farm-office-content" aria-label="Season result">
       <h4>${won ? 'You finished the season' : 'The season fell short'}</h4>
+      ${endingExchange(state)}
+      <div class="farm-office-actions">${button('Closing ledger', 'data-open="ledger"', true)}</div>
       <ul class="farm-recap-results">${results.map(result => `<li>${result}</li>`).join('')}</ul>
-      <p>${won ? 'Both sales are in the books, with cash left after six weeks.'
-        : 'To finish a season, make both kinds of sale and have cash left after the sixth bill.'}</p>
       </section>
       <h4>Each week after the bill</h4><ol class="farm-recap-weeks">${history}</ol>
       <h4>On your next run</h4><p>${recapAdvice(state)}</p>`,
-    actions: button('Replay season', 'data-action="replay"', true)
+    actions: button('Replay season', 'data-action="replay"')
+  };
+}
+
+function closingLedger(state) {
+  return {
+    title: 'Closing ledger',
+    body: `<p>Cash after the last bill <strong>${formatCash(state.cash)}</strong></p>
+      ${state.history.map(({ week }) => ledgerRows(state, week)).join('')}`,
+    actions: button('Back to recap', 'data-open="recap"') + button('Replay season', 'data-action="replay"', true)
   };
 }
 
 export function renderOfficeDecision(panel, state, context) {
   switch (panel) {
-    case 'ledger': return state.result ? seasonRecap(state) : renderLedger(state, context);
+    case 'ledger': return state.result ? closingLedger(state) : renderLedger(state, context);
     case 'help': return helpJournal(state, context.seenStories);
     case 'story': return renderStory(state, context.storyWeek);
     case 'recap': return state.result ? seasonRecap(state) : null;

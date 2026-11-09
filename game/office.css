@@ -75,6 +75,15 @@
   margin-bottom: 0.25rem;
 }
 
+.farm-ending-exchange .farm-story-line {
+  grid-template-columns: 3rem minmax(0, 1fr);
+}
+
+.farm-ending-exchange .farm-story-line strong {
+  display: inline;
+  margin: 0 0.25rem 0 0;
+}
+
 .farm-journal,
 .farm-recap-results,
 .farm-recap-weeks {
