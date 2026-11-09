@@ -2,6 +2,53 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 export function registerOfficeBrowserTests(farmDriver) {
+  for (const [width, height] of [[320, 568], [667, 375]]) {
+    test(`Office puts the next morning shortage before End Week at ${width} × ${height}`, async t => {
+      const farm = await farmDriver(t, 'keyboard', { reducedMotion: 'reduce' });
+      await farm.build();
+      await farm.go('supply');
+      await farm.stock('1', 2);
+      await farm.feed();
+      await farm.sell('feeder', '1', 1);
+      await farm.page.setViewportSize({ width, height });
+      await farm.go('office');
+
+      async function checkForecast(container, inBooks = false) {
+        const warning = container.getByText(/Next morning.+Short by 2 units/is);
+        const endWeek = container.getByRole('button', { name: 'End Week', exact: true });
+        const endHandle = await endWeek.elementHandle();
+        const layout = await warning.evaluate((forecast, end) => {
+          const bounds = forecast.getBoundingClientRect();
+          const closeBounds = end.getBoundingClientRect();
+          const area = forecast.closest('.farm-panel-body, .farm-information').getBoundingClientRect();
+          const closeArea = end.closest('.farm-panel, .farm-information').getBoundingClientRect();
+          return {
+            precedesInDOM: Boolean(forecast.compareDocumentPosition(end) & Node.DOCUMENT_POSITION_FOLLOWING),
+            precedesOnScreen: bounds.bottom <= closeBounds.top,
+            readable: bounds.top >= area.top - 1 && bounds.bottom <= area.bottom + 1,
+            closeVisible: closeBounds.top >= closeArea.top - 1 && closeBounds.bottom <= closeArea.bottom + 1
+          };
+        }, endHandle);
+        assert.deepEqual(layout, {
+          precedesInDOM: true, precedesOnScreen: true, readable: true, closeVisible: true
+        });
+        if (inBooks) {
+          await farm.page.keyboard.press('Tab');
+          assert.equal(await container.getByRole('button', { name: 'Close', exact: true }).evaluate(node =>
+            node === document.activeElement), true);
+        }
+        await farm.page.keyboard.press('Tab');
+        assert.equal(await warning.evaluate(node => node === document.activeElement), true);
+        await farm.page.keyboard.press('Tab');
+        assert.equal(await endWeek.evaluate(node => node === document.activeElement), true);
+      }
+
+      await checkForecast(farm.game.locator('.farm-summary'));
+      await farm.pick('ledger');
+      await checkForecast(farm.game.getByRole('dialog', { name: /Debbie’s books/ }), true);
+    });
+  }
+
   test('Office activation bursts close only the current week when the farm is empty', async t => {
     const farm = await farmDriver(t, 'pointer', { reducedMotion: 'reduce' });
     await farm.build();

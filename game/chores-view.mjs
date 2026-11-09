@@ -7,10 +7,10 @@ const age = weeks => `${weeks} fed ${weeks === 1 ? 'week' : 'weeks'}`;
 const button = (label, attributes, primary = false) => `<button class="farm-small-button${primary ? ' farm-primary-action' : ''}" type="button" ${attributes}>${label}</button>`;
 const controls = (name, content) => `<div class="farm-chore-controls farm-chore-controls--${name}">${content}</div>`;
 
-export function renderFeedForecast(state, forecast = feedForecast(state)) {
+export function renderFeedForecast(state, forecast = feedForecast(state), { focusable = false } = {}) {
   const heading = state.feeding ? 'Next morning' : 'This morning';
   const warning = forecast.shortfall ? ` <strong>Short by ${units(forecast.shortfall)}.</strong>` : '';
-  return `<p class="farm-feed-forecast"><strong>${heading}</strong> · ${forecast.demand} to feed ·
+  return `<p class="farm-feed-forecast"${focusable ? ' tabindex="0"' : ''}><strong>${heading}</strong> · ${forecast.demand} to feed ·
     ${forecast.forage} from grass · ${forecast.grainAvailable} grain in the bin.${warning}</p>`;
 }
 

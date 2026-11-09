@@ -63,6 +63,16 @@ test('Office reflects expansion demand for the next morning after feeding has cl
   assert.match(ledger.body, /5 to feed/);
 });
 
+test('Week 6 Office and books show closing cash without a next morning forecast', () => {
+  const state = { ...fedFirstMorning(), week: 6 };
+  const office = renderOfficePlace('office', state, context);
+  const ledger = renderOfficeDecision('ledger', state, context);
+  for (const markup of [office.details, ledger.body]) {
+    assert.match(markup, /Closing cash.+\$620/s);
+    assert.doesNotMatch(markup, /Next morning/);
+  }
+});
+
 test('Help reopens seen weeks, preserves all six illustrated conversations and links to Replay', () => {
   const start = createFarm();
   const journal = renderOfficeDecision('help', start, { ...context, seenStories: new Set([1, 3]) });

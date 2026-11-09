@@ -83,16 +83,17 @@ function officeArt(state) {
 }
 
 function officeFacts(state) {
+  const finalWeek = state.week === SEASON_WEEKS;
   return `<dl class="farm-office-facts">
     <div><dt>Cash now</dt><dd>${formatCash(state.cash)}</dd></div>
-    <div><dt>Next bill</dt><dd>${formatCash(OVERHEAD)}</dd></div>
-    <div><dt>After the bill</dt><dd>${formatCash(state.cash - OVERHEAD)}</dd></div>
+    <div><dt>${finalWeek ? 'Last bill' : 'Next bill'}</dt><dd>${formatCash(OVERHEAD)}</dd></div>
+    <div><dt>${finalWeek ? 'Closing cash' : 'After the bill'}</dt><dd>${formatCash(state.cash - OVERHEAD)}</dd></div>
   </dl>`;
 }
 
 function nextMorningForecast(state) {
   return state.feeding && state.week < SEASON_WEEKS
-    ? renderFeedForecast(state, feedForecast(state, { next: true }))
+    ? renderFeedForecast(state, feedForecast(state, { next: true }), { focusable: true })
     : '';
 }
 
@@ -107,11 +108,14 @@ export function renderOfficePlace(place, state, context) {
     };
   }
   const next = nextOfficeAction(state, context);
+  const forecast = nextMorningForecast(state);
+  const facts = officeFacts(state);
   return {
     art,
     controls: `<div class="farm-office-controls">${button('Debbie’s books', 'data-open="ledger"', true)}</div>`,
-    details: `<div class="farm-office-content">${officeFacts(state)}<p>${next.note}</p>
-      <div class="farm-office-actions">${next.actions}</div>${nextMorningForecast(state)}</div>`
+    details: `<div class="farm-office-content">${forecast || facts}
+      <div class="farm-office-actions">${next.actions}</div>
+      <p>${next.note}</p>${forecast ? facts : ''}</div>`
   };
 }
 
@@ -140,9 +144,9 @@ function renderLedger(state, context) {
   const next = nextOfficeAction(state, context);
   return {
     title: `Debbie’s books · Week ${state.week}`,
-    body: `${officeFacts(state)}
+    body: `${nextMorningForecast(state)}${officeFacts(state)}
       <section class="farm-office-content" aria-label="Morning feeding">
-        <h4>Morning feeding</h4>${feedingReport(state)}${nextMorningForecast(state)}
+        <h4>Morning feeding</h4>${feedingReport(state)}
       </section>
       ${ledgerRows(state)}<p>${next.note}</p>`,
     actions: next.actions
