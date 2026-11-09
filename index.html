@@ -650,7 +650,7 @@
               <span class="farm-prologue-speaker">Joe Rice</span>
               <span class="farm-prologue-step">1 of 3</span>
             </div>
-            <h3 class="farm-prologue-title" tabindex="-1">We could use a hand</h3>
+            <h3 class="farm-prologue-title" tabindex="-1">A new piece of ground</h3>
             <blockquote class="farm-prologue-text" tabindex="0"></blockquote>
             <div class="farm-prologue-actions">
               <button class="farm-small-button farm-primary-action farm-prologue-next" type="button">Continue</button>
@@ -660,74 +660,38 @@
         </section>
         <div class="farm-interface" hidden>
           <div class="farm-dashboard">
-            <div class="farm-clock-row">
-              <div class="farm-clock-reading">
-                <p data-stat="week">Week 1 of 6</p>
-                <p class="farm-clock-state">Manual</p>
-              </div>
-              <button class="farm-small-button farm-primary-action farm-end-week" type="button">End Week</button>
-              <div class="farm-countdown" role="timer" aria-label="Time until the next week" hidden>
-                <strong>1:00</strong><span>Next week</span>
-              </div>
-              <div class="farm-time-controls" role="group" aria-label="Optional game clock">
-                <button class="farm-clock-toggle" type="button">Start clock</button>
-                <label for="farm-speed">Speed <span class="farm-speed-value" aria-hidden="true">1×</span></label>
-                <input id="farm-speed" class="farm-speed" type="range" min="1" max="4" step="1" value="1">
-              </div>
-            </div>
-            <progress class="farm-progress" aria-label="Week progress" max="100" value="0" hidden></progress>
+            <button class="farm-small-button farm-map-toggle" type="button" data-place="map" aria-label="Farm map" aria-pressed="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zm6-3v15m6-12v15"></path>
+              </svg>
+              Map
+            </button>
+            <p data-stat="week">Week 1 of 6</p>
             <dl class="farm-stats">
               <div><dt>Cash</dt><dd data-stat="cash"></dd></div>
-              <div><dt>Herd</dt><dd data-stat="herd"></dd></div>
-              <div><dt>Feed</dt><dd data-stat="feed"></dd></div>
-              <div><dt>Feeders</dt><dd data-stat="feeders"></dd></div>
-              <div><dt>Whole hogs</dt><dd data-stat="whole"></dd></div>
+              <div><dt>Pigs</dt><dd data-stat="herd"></dd></div>
+              <div><dt>Grain</dt><dd data-stat="grain"></dd></div>
             </dl>
           </div>
-          <div class="farm-places" role="group" aria-label="Farm places">
-            <button type="button" data-scene="pasture" aria-pressed="true">
-              <img src="game/art/pasture.svg" width="1200" height="530" alt="" loading="lazy">
-              <span>Pasture</span>
-              <span class="farm-place-badge" aria-hidden="true">!</span>
-            </button>
-            <button type="button" data-scene="barn" aria-pressed="false">
-              <img src="game/art/barn.svg" width="1200" height="530" alt="" loading="lazy">
-              <span>Barn</span>
-              <span class="farm-place-badge" aria-hidden="true">!</span>
-            </button>
-            <button type="button" data-scene="orders" aria-pressed="false">
-              <img src="game/art/orders.svg" width="1200" height="530" alt="" loading="lazy">
-              <span>Orders</span>
-              <span class="farm-place-badge" aria-hidden="true">!</span>
-            </button>
-            <button type="button" data-scene="office" aria-pressed="false">
-              <img src="game/art/office.svg" width="1200" height="530" alt="" loading="lazy">
-              <span>Office</span>
-              <span class="farm-place-badge" aria-hidden="true">!</span>
-            </button>
-          </div>
-          <div class="farm-stage">
+          <div class="farm-stage" data-view="pasture">
             <div class="farm-playfield">
-              <div class="farm-art" data-view="pasture">
-                <div class="farm-hotspots"></div>
-              </div>
+              <div class="farm-artwork" aria-hidden="true"></div>
+              <div class="farm-hotspots"></div>
             </div>
             <div class="farm-information">
-              <p id="farm-notice" class="farm-notice" role="status" aria-atomic="true"></p>
-              <section class="farm-summary" aria-label="Scene details" tabindex="0">
-                <p class="farm-coach"><strong>Joe</strong> <span></span></p>
-                <div class="farm-warnings"></div>
+              <section class="farm-summary" aria-labelledby="farm-scene-title">
+                <h3 id="farm-scene-title" tabindex="-1">Pasture</h3>
                 <div class="farm-scene"></div>
               </section>
               <div id="farm-panel" class="farm-panel" role="dialog" aria-labelledby="farm-panel-title" hidden>
                 <div class="farm-panel-heading">
                   <h3 id="farm-panel-title" tabindex="-1">Farm details</h3>
-                  <button class="farm-panel-close" type="button" data-panel-close>Close</button>
+                  <button class="farm-small-button farm-panel-close" type="button" data-panel-close>Close</button>
                 </div>
-                <p class="farm-panel-feedback" hidden></p>
-                <section class="farm-panel-body" aria-label="Decision details" tabindex="0"></section>
-                <div class="farm-decision-actions" hidden></div>
+                <div class="farm-panel-body"></div>
+                <div class="farm-decision-actions"></div>
               </div>
+              <p id="farm-notice" class="farm-notice" role="status" aria-atomic="true"></p>
             </div>
           </div>
         </div>
