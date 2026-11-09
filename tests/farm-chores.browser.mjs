@@ -41,6 +41,9 @@ export function registerChoreBrowserTests(openGame) {
     assert.equal(await start.evaluate(node => document.activeElement === node), true);
     const progress = () => game.locator('[data-chore-progress]').evaluate(node => node.value);
     const carrier = game.locator('[data-chore-hero]');
+    for (const landmark of ['creek-bridge', 'pen-gate', 'piglet-pen']) {
+      await game.locator(`[data-farm-landmark="${landmark}"]`).waitFor();
+    }
     const entrance = await carrier.getAttribute('transform');
     await page.clock.runFor(10000);
     assert.equal(await progress(), 0);
@@ -113,6 +116,60 @@ export function registerChoreBrowserTests(openGame) {
     await button('Pour feed').click();
     assert.equal(await value('grain'), '1');
     await game.getByText('grew to 1 fed week.', { exact: false }).waitFor();
+  });
+
+  test('map labels stay beside their destinations and show the live grain truck in both orientations', async t => {
+    const fixture = await openGame(t, {
+      isMobile: true, hasTouch: true, viewport: { width: 320, height: 568 }, reducedMotion: 'reduce'
+    });
+    const { page, game, button } = fixture;
+    await visit(fixture, 'barn');
+    await orderGrain(fixture);
+    await button('Farm map').tap();
+    const map = game.getByRole('navigation', { name: 'Places on the farm' });
+    const barn = button('Barn');
+    assert.match(await barn.innerText(), /truck on the road/i);
+    assert.equal(await map.locator('[data-map-truck="arriving"]').count(), 1);
+
+    for (const [width, height] of [[320, 568], [667, 375]]) {
+      await page.setViewportSize({ width, height });
+      const layout = await map.evaluate(nav => {
+        const field = nav.closest('.farm-playfield').getBoundingClientRect();
+        return [...nav.querySelectorAll('.farm-map-pin[data-place]:not([data-place="route"])')].map(pin => {
+          const label = pin.getBoundingClientRect();
+          const art = pin.parentElement.querySelector('[data-map-place-art]')?.getBoundingClientRect();
+          return {
+            place: pin.dataset.place,
+            targetFits: label.left >= field.left && label.right <= field.right &&
+              label.top >= field.top && label.bottom <= field.bottom && label.height >= 44,
+            artFits: Boolean(art && art.width > 0 && art.height > 0 &&
+              art.left >= field.left && art.right <= field.right &&
+              art.top >= field.top && art.bottom <= field.bottom),
+            hasReadableText: pin.scrollWidth <= pin.clientWidth + 1
+          };
+        });
+      });
+      assert.equal(layout.length, 6);
+      for (const place of layout) {
+        assert.deepEqual(place, { place: place.place, targetFits: true, artFits: true, hasReadableText: true });
+      }
+      for (const landmark of ['creek-bridge', 'pen-gate', 'piglet-pen']) {
+        await map.locator(`[data-farm-landmark="${landmark}"]`).waitFor();
+      }
+    }
+    await barn.focus();
+    await page.clock.runFor(500);
+    assert.match(await barn.innerText(), /unloading grain/i);
+    assert.equal(await barn.evaluate(node => node === document.activeElement), true);
+    assert.equal(await map.locator('[data-map-truck="unloading"]').count(), 1);
+    await page.clock.runFor(800);
+    assert.match(await barn.innerText(), /grain ready/i);
+    assert.equal(await map.locator('[data-map-truck]').count(), 0);
+    await page.keyboard.press('Enter');
+    await game.getByRole('heading', { name: 'Barn', exact: true }).waitFor();
+    await button('Farm map').tap();
+    await button('Piglet pen').tap();
+    await game.getByRole('heading', { name: 'Piglet pen', exact: true }).waitFor();
   });
 
   test('grain delivery finishes once across map visits with reduced motion', async t => {

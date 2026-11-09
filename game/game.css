@@ -1,6 +1,7 @@
 @import url('commerce.css');
 @import url('chores.css');
 @import url('office.css');
+@import url('map.css');
 
 #farm-game {
   --farm-ink: #471f13;
@@ -366,17 +367,6 @@ html:has(.farm-player[open]) {
   pointer-events: auto;
 }
 
-.farm-map-pins {
-  position: absolute;
-  inset: 0.5rem;
-}
-
-.farm-map-pin {
-  min-width: min(6rem, 27vw);
-  box-shadow: 0 3px 0 #64412a;
-  text-align: center;
-}
-
 .farm-information {
   z-index: 1;
   max-height: min(32dvh, 15rem);
@@ -579,14 +569,6 @@ html:has(.farm-player[open]) {
 }
 
 @media (orientation: landscape) and (height <= 27rem) {
-  .farm-map-truck[data-map-truck='arriving'] {
-    translate: -24px 21px;
-  }
-
-  .farm-map-truck[data-map-truck='unloading'] {
-    translate: -14px 20px;
-  }
-
   .farm-prologue {
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   }

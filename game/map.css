@@ -1,0 +1,90 @@
+.farm-map-pins {
+  position: absolute;
+  inset: 0.4rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.farm-map-stop {
+  display: grid;
+  min-block-size: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  gap: 0.1rem;
+}
+
+.farm-map-stop svg {
+  inline-size: min(100%, 15rem);
+  block-size: 100%;
+  min-block-size: 0;
+  overflow: visible;
+}
+
+.farm-map-pin,
+.farm-map-return {
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.farm-map-pins .farm-map-pin {
+  min-inline-size: min(5rem, 100%);
+  padding-inline: 0.35rem;
+  box-shadow: 0 2px 0 #64412a;
+}
+
+.farm-map-pin[data-map-cue] {
+  border-color: #664122;
+  background: #ffdf89;
+}
+
+.farm-map-pin small {
+  display: block;
+  margin-top: 0.15rem;
+  color: #5f331e;
+  font-size: 0.82em;
+}
+
+.farm-map-landmark-label {
+  align-self: center;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #e1b776;
+  border-radius: 0.25rem;
+  background: #583b28;
+  color: #ffedc0;
+  font-size: 0.6875rem;
+  text-align: center;
+}
+
+.farm-map-back {
+  display: grid;
+  place-items: end center;
+}
+
+@media (orientation: landscape) and (height <= 550px) {
+  .farm-map-stop {
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .farm-map-back {
+    place-items: center;
+  }
+
+  .farm-map-road {
+    translate: -8.5% 0;
+  }
+}
+
+@media (width <= 360px) {
+  .farm-map-pins {
+    font-size: 0.6875rem;
+  }
+
+  .farm-map-landmark-label {
+    font-size: 0.625rem;
+  }
+}

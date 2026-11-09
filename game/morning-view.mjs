@@ -1,4 +1,5 @@
 import { openingArt } from './opening-art.mjs';
+import { mapPlaceArt } from './map-art.mjs';
 import { herdDetails, renderCommerceDecision, renderCommercePlace, spareGrassDetail } from './commerce-view.mjs';
 import { applyFarmAction, feedForecast, saleGroups, SEASON_GOAL } from './morning.mjs';
 import { renderChoreDecision, renderChorePlace, renderPastureGate } from './chores-view.mjs';
@@ -39,10 +40,8 @@ export const prologue = [
   }
 ];
 
-const mapLocations = ['barn', 'pasture', 'piglets', 'supply', 'orders', 'office'];
-
-function barnCue(state, forecast) {
-  if (state.shipment) return 'Truck on the road';
+function barnCue(state, forecast, deliveryStage) {
+  if (state.shipment) return deliveryStage === 'unloading' ? 'Unloading grain' : 'Truck on the road';
   if (state.lastDelivery?.week === state.week && state.grain) return 'Grain ready';
   if (!state.feeding && forecast.shortfall) return `Feed short by ${forecast.shortfall}`;
   return '';
@@ -80,7 +79,7 @@ function mapView(state, { previousPlace, route, deliveryStage }) {
   const feederReady = saleGroups(state, 'feeder').length;
   const pasture = state.result ? null : pastureCue(state, forecast);
   const cues = state.result ? {} : {
-    barn: barnCue(state, forecast),
+    barn: barnCue(state, forecast, deliveryStage),
     pasture: pasture?.text,
     piglets: route?.status === 'arrived' && !state.feeding ? 'Bucket at the pen' : '',
     supply: state.plots.some(plot => plot.status === 'fenced' && !plot.pigs) ? 'Buy starters'
@@ -92,19 +91,27 @@ function mapView(state, { previousPlace, route, deliveryStage }) {
     const cue = cues[place];
     const remainingShort = place === 'barn' && cue === 'Grain ready' && !state.feeding && forecast.shortfall
       ? ` · short by ${forecast.shortfall}` : '';
-    return `<button class="farm-map-pin farm-map-pin--${place}" type="button" data-place="${place}"
-      aria-label="${placeNames[place]}"${place === 'pasture' ? pasture?.attributes ?? '' : ''}${cue ? ` data-map-cue="${place}" aria-description="${cue}${remainingShort}"` : ''}>
-      <span>${placeNames[place]}</span>${cue ? `<small><span>${cue}</span>${remainingShort}</small>` : ''}
-    </button>`;
+    return `<div class="farm-map-stop">
+      ${mapPlaceArt(place, { plots: state.plots, deliveryStage: state.shipment && (deliveryStage || 'arriving') })}
+      <button class="farm-map-pin" type="button" data-place="${place}"
+        aria-label="${placeNames[place]}"${place === 'pasture' ? pasture?.attributes ?? '' : ''}${cue ? ` data-map-cue="${place}" aria-description="${cue}${remainingShort}"` : ''}>
+        <span>${placeNames[place]}</span>${cue ? `<small>${cue}${remainingShort}</small>` : ''}
+      </button>
+    </div>`;
   };
-  const routePin = routePaused ? `<button class="farm-map-pin farm-map-pin--route" type="button"
-    data-place="route" data-map-cue="route"${previousPlace === 'route' ? ' aria-label="Return to Feed run"' : ''}>Resume feed run</button>` : '';
+  const routePin = routePaused ? `<button class="farm-map-pin" type="button"
+    data-place="route" data-map-cue="route" aria-description="Pen gate"
+    aria-label="${previousPlace === 'route' ? 'Return to Feed run' : 'Resume feed run'}">
+    <span>Resume feed run</span><small>Pen gate</small>
+  </button>` : '<span class="farm-map-landmark-label">Pen gate</span>';
   const back = routePaused && previousPlace === 'route' ? ''
     : `<button class="farm-map-return farm-small-button" type="button" data-place="back">Return to ${placeNames[previousPlace]}</button>`;
   return {
-    art: openingArt('map', first.status, { plots: state.plots, deliveryStage: state.shipment && (deliveryStage || 'arriving') }),
+    art: openingArt('map', first.status),
     controls: `<nav class="farm-map-pins" aria-label="Places on the farm">
-      ${mapLocations.map(pin).join('')}${routePin}${back}
+      ${pin('supply')}${pin('barn')}${pin('office')}
+      ${pin('pasture')}<div class="farm-map-stop">${mapPlaceArt('bridge')}<span class="farm-map-landmark-label">Creek bridge</span></div>${pin('orders')}
+      <div class="farm-map-back">${back}</div><div class="farm-map-stop">${mapPlaceArt('gate')}${routePin}</div>${pin('piglets')}
     </nav>`,
     details: '<p>Pick a place to visit.</p>'
   };

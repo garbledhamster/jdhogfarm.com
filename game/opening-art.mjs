@@ -31,22 +31,6 @@ const definitions = `
             <ellipse cy="-13" rx="10" ry="5" fill="#e5b777" stroke="#6c4229" stroke-width="2"/>
             <ellipse cy="-13" rx="5" ry="2" fill="none" stroke="#bd8754" stroke-width="1"/>
           </g>
-          <g id="jd-backlot">
-            <path fill="#83a24f" d="M0 0h960v620H0z"/>
-            <path fill="#759347" d="M0 149L356 56l302 61 302-55v115l-247 40-353-73L0 252zM0 437l168-52 219 77 273-36 300 112v82H0z"/>
-            <path fill="url(#jd-turf)" d="M0 0h960v620H0z"/>
-            <use href="#jd-oak-art" transform="translate(154 248) scale(1.2)"/>
-            <use href="#jd-oak-art" transform="translate(241 181) scale(.92)"/>
-            <use href="#jd-oak-art" transform="translate(320 147) scale(.85)"/>
-            <use href="#jd-oak-art" transform="translate(404 135) scale(.8)"/>
-            <use href="#jd-oak-art" transform="translate(503 153) scale(.88)"/>
-            <use href="#jd-oak-art" transform="translate(618 142) scale(.94)"/>
-            <use href="#jd-oak-art" transform="translate(711 173) scale(.83)"/>
-            <use href="#jd-oak-art" transform="translate(805 227) scale(1.23)"/>
-            <use href="#jd-oak-art" transform="translate(900 264) scale(.97)"/>
-            <use href="#jd-oak-art" transform="translate(166 544) scale(1.28)"/>
-            <use href="#jd-oak-art" transform="translate(837 543) scale(1.1)"/>
-          </g>
           ${barnSymbol('jd-grain-barn')}
         </defs>
 `;
@@ -136,26 +120,22 @@ const plot = `
 
 const map = `
         <g data-scene-art="map">
-          <use href="#jd-backlot"/>
-          <path d="M786 111q-86 101-37 191t-83 231q-32 37-29 97" fill="none" stroke="#a29e6e" stroke-width="59"/>
-          <path d="M786 111q-86 101-37 191t-83 231q-32 37-29 97" fill="none" stroke="#559292" stroke-width="46"/>
-          <path d="M780 127q-75 88-30 168t-77 232" fill="none" stroke="#90baa1" stroke-width="5" stroke-dasharray="16 15 5 14" stroke-linecap="round"/>
-          <path d="M370 246q17 71 109 67t124-66m-124 66q35 19 43 68" fill="none" stroke="#b19b64" stroke-width="26" stroke-linecap="round"/>
-          <path d="M370 246q17 71 109 67t124-66m-124 66q35 19 43 68" fill="none" stroke="#dbbf82" stroke-width="19" stroke-linecap="round"/>
-          <path d="M389 278q44 42 90 35 63 1 103-39m-103 39q29 20 36 49" fill="none" stroke="#f5da9d" stroke-width="2.5" stroke-dasharray="8 8" stroke-linecap="round"/>
-          <use href="#jd-grain-barn" transform="translate(321 208) scale(.43)"/>
-          <path d="M544 222l66-40 67 35-69 44z" fill="#a9b858" stroke="#e9ce77" stroke-width="3"/>
-          <g class="map-wooded">
-            <use href="#jd-oak-art" transform="translate(589 222) scale(.39)"/>
-            <use href="#jd-oak-art" transform="translate(626 218) scale(.34)"/>
-          </g>
-          <path class="map-cleared" d="M551 222l59-35 59 30-61 38z" fill="#c4945f"/>
-          <path class="map-fenced" d="M551 214l59-35 59 30-61 38z" fill="none" stroke="#7d4f31" stroke-width="5" stroke-linejoin="round"/>
-          <path d="M470 371l61-31 70 35-60 34z" fill="#c4945f" stroke="#6d462d" stroke-width="5"/>
-          <path d="M470 360l61-31 70 35-60 34z" fill="none" stroke="#c38751" stroke-width="4" stroke-linejoin="round"/>
-          <!-- map activity -->
-          <use href="#jd-oak-art" transform="translate(425 462) scale(.66)"/>
-          <use href="#jd-oak-art" transform="translate(629 446) scale(.62)"/>
+          <path d="M0 0h960v620H0z" fill="#87a559"/>
+          <path d="M0 0h960v108l-311 35L412 89 188 134 0 98zm0 448 184-31 202 50 270-69 304 64v158H0z" fill="#749249"/>
+          <path d="M0 0h960v620H0z" fill="url(#jd-turf)"/>
+          <path class="farm-map-road" d="M158 151q150-26 321 2t322-4M160 353q47-93 193-111t127-89m318 184-55 137-97 39M507 527q118-20 282-21" fill="none" stroke="#bfab6f" stroke-width="21" stroke-linecap="round"/>
+          <path class="farm-map-road" d="M158 151q150-26 321 2t322-4M160 353q47-93 193-111t127-89m318 184-55 137-97 39M507 527q118-20 282-21" fill="none" stroke="#dfc789" stroke-width="13" stroke-linecap="round"/>
+          <path class="farm-map-road" d="M465 150q-1 97 22 156t24 215l284-11" fill="none" stroke="#d4ad67" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M966 231q-173-48-323 3T398 340 0 371" fill="none" stroke="#a0ab75" stroke-width="76"/>
+          <path d="M966 231q-173-48-323 3T398 340 0 371" fill="none" stroke="#609590" stroke-width="60"/>
+          <path d="M960 230q-170-45-317 4T398 340 4 371" fill="none" stroke="#9cc1a7" stroke-width="5" stroke-dasharray="16 15 5 14" stroke-linecap="round"/>
+          <path class="farm-map-road" d="M460 190q6 38 15 61m14 114q21 34 21 140l258 7" fill="none" stroke="#f4d398" stroke-width="6" stroke-dasharray="10 13" stroke-linecap="round" stroke-linejoin="round"/>
+          <use href="#jd-oak-art" transform="translate(26 115) scale(.72)"/>
+          <use href="#jd-oak-art" transform="translate(324 109) scale(.69)"/>
+          <use href="#jd-oak-art" transform="translate(634 119) scale(.7)"/>
+          <use href="#jd-oak-art" transform="translate(933 149) scale(.77)"/>
+          <use href="#jd-oak-art" transform="translate(332 504) scale(.86)"/>
+          <use href="#jd-oak-art" transform="translate(915 590) scale(.75)"/>
         </g>
 `;
 
@@ -182,29 +162,11 @@ function breedingArt() {
   </g>`;
 }
 
-function mapActivity(plots, deliveryStage) {
-  const grass = plots.some(plot => plot.status === 'grazing');
-  const extra = plots.slice(1).filter(plot => plot.status !== 'locked').map(plot => {
-    const fill = plot.status === 'grazing' ? '#8aa64f' : plot.status === 'available' ? '#a1ac58' : '#c28f57';
-    const fence = plot.status === 'fenced' ? '#704426' : '#d8bb76';
-    return `<path data-map-plot="${plot.id}" data-stage="${plot.status}" transform="translate(${plot.id === '2' ? '575 265' : '655 300'})"
-      d="M0 23l54-23 42 25-57 30z" fill="${fill}" stroke="${fence}" stroke-width="5"/>`;
-  }).join('');
-  const truck = deliveryStage ? `<g class="farm-map-truck" data-map-truck="${deliveryStage}"
-    transform="translate(${deliveryStage === 'unloading' ? '374 264' : '402 263'}) scale(-1 1)">
-    <path d="M-31-19h35v24h-35zm35 6h19l10 13v5H4z" fill="#d79753" stroke="#603a2b" stroke-width="3"/>
-    <path d="M10-9h11l6 8H10z" fill="#cde2d3"/>
-    <path d="M-25-14h23" fill="none" stroke="#f5cf85" stroke-width="3"/>
-    <circle cx="-19" cy="6" r="6" fill="#412e23"/><circle cx="23" cy="6" r="6" fill="#412e23"/>
-  </g>` : '';
-  return `<g${grass ? ' data-map-spare-grass="true"' : ''}>${extra}${truck}</g>`;
-}
-
-export function openingArt(place, stage, { pigs = 0, fedWeeks = 0, breeders, plots = [], deliveryStage, arriving = false } = {}) {
-  const scene = place === 'map' ? map.replace('<!-- map activity -->', mapActivity(plots, deliveryStage)) : plot
+export function openingArt(place, stage, { pigs = 0, fedWeeks = 0, breeders, arriving = false } = {}) {
+  const scene = place === 'map' ? map : plot
     .replace('<!-- growers -->', pigs ? growerArt(pigs, fedWeeks, arriving) : '')
     .replace('<!-- breeders -->', breeders ? breedingArt() : '');
-  return `<svg viewBox="0 0 960 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true" data-plot-art="${stage}">
+  return `<svg viewBox="0 0 960 620" preserveAspectRatio="${place === 'map' ? 'none' : 'xMidYMid slice'}" aria-hidden="true" data-plot-art="${stage}">
     ${definitions}${scene}
   </svg>`;
 }

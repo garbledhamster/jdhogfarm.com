@@ -163,7 +163,28 @@
   100% { transform: translate(var(--feed-x), var(--feed-y)); }
 }
 
+@media (width <= 360px) {
+  .farm-chore-controls--route button {
+    padding-inline: 0.45rem;
+    font-size: 0.6875rem;
+  }
+}
+
 @media (orientation: landscape) and (height <= 550px) {
+  .farm-stage[data-view="route"] .farm-playfield {
+    background: #83a24f;
+  }
+
+  .farm-stage[data-view="route"] .farm-artwork {
+    container-type: size;
+  }
+
+  .farm-stage[data-view="route"] .farm-artwork > svg {
+    inline-size: min(100%, 174cqh);
+    margin-inline-start: max(0px, calc((100% - 174cqh) * 0.35));
+    overflow: visible;
+  }
+
   .farm-chore-controls--route,
   .farm-chore-controls--piglets {
     inset-inline-start: auto;

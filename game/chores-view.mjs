@@ -99,9 +99,9 @@ function routeView({ route, motion }) {
 
   const ready = route.status === 'ready';
   const blocked = route.status === 'blocked';
-  const laneButtons = laneNames.map((name, lane) => button(name,
+  const laneButtons = ready ? '' : laneNames.map((name, lane) => button(name,
     `aria-label="${name} lane" aria-pressed="${route.lane === lane}" data-local-action="route-lane" data-target="${lane}"` +
-      (ready || blocked || route.assisted ? ' disabled' : '')
+      (blocked || route.assisted ? ' disabled' : '')
   )).join('');
   const start = ready ? button('Start walking', 'data-local-action="walk-route"', true) : '';
   const retry = blocked ? button('Retry route', 'data-local-action="retry-route"', true) : '';
@@ -113,7 +113,7 @@ function routeView({ route, motion }) {
   return {
     art: renderRouteArt(route, motion),
     controls: controls('route', `<progress data-chore-progress max="100" value="${Math.floor(route.progress * 100)}" aria-label="Route progress"></progress>
-      <div class="farm-route-lanes" role="group" aria-label="Choose a lane">${laneButtons}</div>
+      ${laneButtons ? `<div class="farm-route-lanes" role="group" aria-label="Choose a lane">${laneButtons}</div>` : ''}
       <div class="farm-route-options">${start}${retry}${assist}</div>`),
     details: `<p>${prompt}</p>`
   };

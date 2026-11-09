@@ -1,4 +1,5 @@
 import { barnSymbol } from './barn-art.mjs';
+import { creekBridge, penGate, pigletPen } from './landmark-art.mjs';
 
 // Scene layers from the approved farm-morning prototype. Only foreground actors move.
 const outdoors = `          <pattern id="chore-turf" width="69" height="58" patternUnits="userSpaceOnUse">
@@ -127,7 +128,10 @@ export function renderRouteArt(route, motion) {
   const heroPosition = routeTransform(route?.lane ?? 1, progress);
   const rockPosition = routeTransform(1, route?.obstacles[0].at ?? 0.5);
   const snakes = route?.obstacles.slice(1).map(snake).join('') ?? '';
-  return scene(bucketPerson + soil + penPost, '', `
+  return scene(bucketPerson + soil, '', `
+          <path fill="#83a24f" d="M-1800 0h4560v620h-4560z"/>
+          <path fill="#759347" d="M-1800 80L0 149v103l-1800-82zM960 62l1800 38v105L960 177zM-1800 448 0 437v183h-1800zM960 548l1800-40v112H960z"/>
+          <path fill="url(#chore-turf)" d="M-1800 0h4560v620h-4560z"/>
           <use href="#chore-backlot"/>
           <path d="M279 620q72-200 123-447h156q47 231 123 447z" fill="#a38c5b"/>
           <path d="M296 620q70-200 116-447h136q46 231 116 447z" fill="#d1b77a"/>
@@ -136,24 +140,12 @@ export function renderRouteArt(route, motion) {
             stroke="#ac9057" stroke-width="2.5" stroke-dasharray="15 21 5 24" stroke-linecap="round" opacity=".52"/>
           <path d="M312 494l19-6m285 3 15 8m-281-87 20-9m219 5 20 8" fill="none"
             stroke="#f1d595" stroke-width="3" stroke-linecap="round" opacity=".65"/>
-          <g data-route-landmark="piglet-pen">
-            <path d="M395 142l82-42 103 46-87 49z" fill="#b88750" stroke="#795234" stroke-width="3"/>
-            <path d="M395 130l82-42 103 46m-185 9 82-41 103 45" fill="none" stroke="#906139" stroke-width="5"/>
-            <path d="M395 129l82-42 103 46" fill="none" stroke="#d3a269" stroke-width="2.5"/>
-            <use href="#chore-post" transform="translate(395 145) scale(.74)"/>
-            <use href="#chore-post" transform="translate(477 105) scale(.74)"/>
-            <use href="#chore-post" transform="translate(580 148) scale(.74)"/>
-            <path d="M513 125l19-9 29 13-19 10z" fill="#624531" stroke="#d9a66c" stroke-width="3"/>
-          </g>
-          <path d="M0 239q196-48 480-4t480-15" fill="none" stroke="#a1a271" stroke-width="72"/>
-          <path d="M0 239q196-48 480-4t480-15" fill="none" stroke="#599394" stroke-width="58"/>
-          <path d="M13 238q199-44 461-4t470-12" fill="none" stroke="#8cbdb1" stroke-width="5" stroke-dasharray="15 14 5 13" stroke-linecap="round"/>
-          <path d="M401 207h158l25 69H376z" fill="#976540" stroke="#523725" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M396 219h169m-175 11h178m-182 11h187m-191 11h195m-199 11h204" stroke="#d8a165" stroke-width="5"/>
-          <path d="M401 204l-25 69m183-69 25 69" stroke="#5d3a28" stroke-width="6" stroke-linecap="round"/>
-          <path d="M407 186h147l-4-25H410z" fill="#a67e4d" stroke="#5d3a28" stroke-width="3"/>
-          <path d="M415 188v-38m20 38v-38m86 38v-38m26 38v-38" stroke="#6c462f" stroke-width="5"/>
-          <path d="M414 160h24m84 0h27" stroke="#c69658" stroke-width="4"/>
+          ${pigletPen('translate(481 142)')}
+          <path d="M-1800 298q1460 20 1800-59 196-48 480-4t480-15q259-66 1800-115" fill="none" stroke="#a1a271" stroke-width="72"/>
+          <path d="M-1800 298q1460 20 1800-59 196-48 480-4t480-15q259-66 1800-115" fill="none" stroke="#599394" stroke-width="58"/>
+          <path d="M-1800 299q1460 20 1800-59 199-44 474-6t486-14q259-66 1800-115" fill="none" stroke="#8cbdb1" stroke-width="5" stroke-dasharray="15 14 5 13" stroke-linecap="round"/>
+          ${creekBridge('translate(480 238)')}
+          ${penGate('translate(480 178)')}
           <g data-chore-obstacle="rock" transform="${rockPosition}">
             <ellipse cx="7" cy="2" rx="27" ry="9" fill="#594b39" opacity=".4"/>
             <path d="M-26 0l5-21 22-11 21 9 8 20-13 9-31 1z" fill="#77756a" stroke="#554e3e" stroke-width="3"/>
