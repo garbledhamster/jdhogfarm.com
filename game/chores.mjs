@@ -79,7 +79,7 @@ export function createChores({
 
   function enterRoute(status) {
     stopRoute();
-    route = { status, lane: 1, progress: 0, assisted: false, hit: null };
+    route = { status, lane: 1, progress: status === 'arrived' ? 1 : 0, assisted: false, hit: null };
     publishRoute();
     queueRoute();
     return true;
@@ -89,6 +89,8 @@ export function createChores({
     switch (type) {
       case 'prepare-route':
         return hasBucket && enterRoute('ready');
+      case 'restore-arrived-route':
+        return hasBucket && enterRoute('arrived');
       case 'walk-route':
         return route?.status === 'ready' && enterRoute('walking');
       case 'retry-route':

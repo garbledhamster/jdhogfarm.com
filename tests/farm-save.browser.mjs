@@ -87,6 +87,12 @@ export function registerSaveBrowserTests(farmDriver) {
     await farm.page.clock.runFor(2500);
     await heading(farm, 'Piglet pen').waitFor();
     assert.match(await farm.game.innerText(), /bucket reached the pen with 3 units/i);
+
+    await continueSeason(farm);
+    await heading(farm, 'Piglet pen').waitFor({ timeout: 2500 });
+    assert.equal(await farm.value('grain'), '4');
+    await farm.game.getByRole('button', { name: 'Pour feed' }).waitFor();
+
     await farm.action('settle-feed');
     assert.equal(await farm.value('grain'), '1');
     assert.match(await farm.game.innerText(), /Piglets.+grew to 1 fed week/i);

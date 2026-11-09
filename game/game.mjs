@@ -102,7 +102,8 @@ function showSaveStatus(status) {
 }
 
 function saveProgress() {
-  const status = seasonSave.write({ state, place, previousPlace, selectedPlot, seenStories: [...seenStories] });
+  const bucketArrived = Boolean(state.bucket && chores.route?.status === 'arrived');
+  const status = seasonSave.write({ state, place, previousPlace, selectedPlot, bucketArrived, seenStories: [...seenStories] });
   if (!status) hasSavedSeason = true;
   showSaveStatus(status);
 }
@@ -142,13 +143,17 @@ function focusPlace() {
   focus((selector && ui.controls.querySelector(selector)) || ui.sceneTitle);
 }
 
-function render() {
+function syncChores() {
   chores.sync({
     week: state.week,
     shipment: state.shipment,
     hasBucket: Boolean(state.bucket),
     active: ui.player.open && !document.hidden && place === 'route' && !panel
   });
+}
+
+function render() {
+  syncChores();
   const context = {
     previousPlace, selectedPlot, panel, panelTarget, storyWeek, storyFromHelp, seenStories, recentAction,
     motion: motion.matches, route: chores.route, deliveryStage: chores.deliveryStage
@@ -233,6 +238,7 @@ function beginPlay() {
 }
 
 function restoreSeason() {
+  const { bucketArrived } = savedSeason;
   ({ state, place, previousPlace, selectedPlot } = savedSeason);
   seenStories = new Set(savedSeason.seenStories);
   savedSeason = null;
@@ -240,13 +246,17 @@ function restoreSeason() {
   if (state.result) {
     place = 'office';
     panel = 'recap';
-  } else if (state.bucket) {
+  } else if (state.bucket && !bucketArrived) {
     place = 'route';
   }
 
   showPlayInterface();
-  render();
-  if (state.bucket) chores.routeAction('prepare-route');
+  if (state.bucket) {
+    syncChores();
+    chores.routeAction(bucketArrived ? 'restore-arrived-route' : 'prepare-route');
+  } else {
+    render();
+  }
 }
 
 function clearPanel() {
@@ -365,9 +375,9 @@ function routeAction(type, target) {
       return;
     }
     state = reservation.state;
-    goTo('route');
+    syncChores();
     chores.routeAction('prepare-route');
-    focusPlace();
+    goTo('route');
     return;
   }
   if (chores.routeAction(type, Number(target)) && type !== 'route-lane') focusPlace();

@@ -114,6 +114,7 @@ function decode(raw) {
       typeof saved.place === 'string' && Object.hasOwn(placeNames, saved.place) &&
       typeof saved.previousPlace === 'string' && Object.hasOwn(placeNames, saved.previousPlace) &&
       saved.previousPlace !== 'map' && (saved.selectedPlot === null || plotIds.includes(saved.selectedPlot)) &&
+      typeof saved.bucketArrived === 'boolean' && (!saved.bucketArrived || saved.state.bucket !== null) &&
       Array.isArray(saved.seenStories) && saved.seenStories.length <= SEASON_WEEKS &&
       saved.seenStories.every(week => whole(week, 1, saved.state.week))) return saved;
   } catch {
