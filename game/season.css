@@ -36,12 +36,20 @@
   box-shadow: 0 0 0 5px #183d51;
 }
 
-.farm-object--a,
+.farm-object--a {
+  --object-x: 31%;
+  --object-y: 84%;
+}
+
+.farm-object--b {
+  --object-x: 76%;
+  --object-y: 70%;
+}
+
 .farm-object--pickup {
   --object-x: 26%;
 }
 
-.farm-object--b,
 .farm-object--delivery {
   --object-x: 74%;
 }
@@ -263,5 +271,13 @@
     transform: translateX(-50%);
     font-size: clamp(0.75rem, 2.25vw, 0.88rem);
     text-wrap: wrap;
+  }
+
+  .farm-object--a {
+    --object-x: 25%;
+  }
+
+  .farm-object--b {
+    --object-x: 75%;
   }
 }

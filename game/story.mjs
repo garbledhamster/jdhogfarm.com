@@ -1,23 +1,23 @@
-import { eligibleForOrder, formatCash, PADDOCK_COST } from './farm.mjs';
+import { eligibleForOrder, farmView, FEED_BUNDLE, formatCash, PADDOCK_COST } from './farm.mjs';
 
 export const prologue = [
   {
     speaker: 'Joe Rice',
-    portrait: 'joe',
+    art: 'opening-hogs', alt: 'Joe beside a hog at the fence',
     title: 'We could use a hand',
-    text: 'Morning. Debbie’s getting the books ready, and I’m headed out to check the hogs. Come with me? We’ve got four pigs to look after and six weeks to get the work done.'
+    text: 'Morning. We could use a hand with these four hogs. We’ve got six weeks to raise them and fill two orders.'
   },
   {
     speaker: 'Debbie Rice',
-    portrait: 'debbie',
+    art: 'opening-ledger', alt: 'Debbie at her ledger in the office',
     title: 'Two orders on the books',
-    text: 'I’ve got two orders written down. The feeder pickup is due by Week 4, and the whole-hog delivery by Week 6. I’ll be in the Office if you want to look at the ledger before you spend anything.'
+    text: 'I’ve got two orders on the books. The feeder pickup is due in Week 4 and the whole-hog delivery in Week 6.'
   },
   {
     speaker: 'Joe Rice',
-    portrait: 'joe',
+    art: 'opening-tractor', alt: 'Joe on the tractor by the pasture gate',
     title: 'Let’s start with the grass',
-    text: 'Let’s check the pasture first. The clock waits for Start season. Tap a pig or a sign to see what needs doing, and use Talk to Joe for a new conversation each week.'
+    text: 'Let’s check the pasture first. Open Paddock A and see how the grass covers our four hogs. When you’re ready, select End Week.'
   }
 ];
 
@@ -56,7 +56,7 @@ const chapters = [
   {
     title: 'Before we shut the gate',
     text: 'I’ll check the gate one last time. Thanks for seeing the season through with us.',
-    reply: 'If the hogs are ready, confirm the delivery before the clock runs out. This week’s growth comes too late for the order.',
+    reply: 'If the hogs are ready, confirm the delivery before you end the week. This week’s growth comes too late for the order.',
     order: 'B',
     fulfilledReply: 'The delivery’s in the books. Come by the Office and we’ll see what’s left after the last bill.'
   }
@@ -64,38 +64,63 @@ const chapters = [
 
 export function chapterFor(week, state) {
   const chapter = chapters[week - 1];
+  const view = farmView(state);
+  const portraits = {
+    joe: characterVariant('joe', state, view),
+    debbie: characterVariant('debbie', state, view)
+  };
   if (state.result) return {
     title: chapter.title,
     text: 'The season’s over. Thanks for lending us a hand.',
-    reply: 'Open the season recap and we’ll go over the books together.'
+    reply: 'Open the season recap and we’ll go over the books together.',
+    portraits
   };
   const order = state.orders.find(candidate => candidate.id === chapter.order);
-  return order?.status === 'fulfilled' ? { ...chapter, reply: chapter.fulfilledReply } : chapter;
+  const result = { title: chapter.title, text: chapter.text, reply: chapter.reply, portraits };
+  if (order?.status === 'fulfilled') result.reply = chapter.fulfilledReply;
+  if (order?.status === 'open' && eligibleForOrder(state, order) < order.quantity) {
+    const label = order.label.toLowerCase();
+    result.reply = view.week === order.deadline
+      ? `We’re short of eligible pigs for the ${label}. It closes this week, and any growth we get when the week ends comes too late.`
+      : `We still need ${order.quantity} pigs with ${order.minFedWeeks} fed weeks each for the ${label}. It’s due at the end of Week ${order.deadline}.`;
+  }
+  const { shortfall } = view.forecast;
+  if (shortfall) {
+    result.text = `We’re short by ${shortfall} ${shortfall === 1 ? 'feed unit' : 'feed units'} this week. ${shortageChoice(state)}`;
+  }
+  return result;
 }
 
-export function nextChore(scene, state, view, started) {
+function shortageChoice(state) {
+  const canRotate = state.cash >= PADDOCK_COST && state.paddocks.some(plot => plot.status === 'ready');
+  const canBuyFeed = state.cash >= FEED_BUNDLE.cost;
+  if (canRotate && canBuyFeed) return 'Check a ready paddock or the feed bin before ending the week.';
+  if (canRotate) return 'Check the ready paddock before ending the week.';
+  if (canBuyFeed) return 'Check the feed bin before ending the week.';
+  return 'Check the ledger and any open orders before ending the week.';
+}
+
+export function nextChore(scene, state, view, inspectedFirstPaddock = false) {
   if (state.result) return 'Open the season recap to see how we did.';
 
   switch (scene) {
     case 'pasture': {
       const active = state.paddocks.find(plot => plot.status === 'active');
-      if (!active) return 'We’re out of grass. Check a ready paddock before the next week.';
-      if (state.completedWeeks === 0) {
-        if (view.forecast.shortfall) return 'The grass and feed won’t cover the herd. Check the Barn.';
-        return started
-          ? 'The herd has enough to eat this week. Check the active paddock to see what it supplies.'
-          : 'The herd has enough to eat this week. Press Start season.';
+      if (view.forecast.shortfall) return shortageChoice(state);
+      if (state.completedWeeks === 0 && active?.id === 'A' && view.herd === 4) {
+        return inspectedFirstPaddock ? 'The grass covers all four hogs. Select End Week when you’re ready.' : 'Open Paddock A to see how its grass covers all four hogs. Then select End Week when you’re ready.';
       }
       if (state.completedWeeks === 1) return 'We’ve finished the first week. Go to the Barn to check the herd.';
       const feederOrder = state.orders.find(order => order.id === 'A' && order.status === 'open');
       if (feederOrder && eligibleForOrder(state, feederOrder) >= feederOrder.quantity) {
         return 'The feeders are ready. Go to Orders to confirm the pickup.';
       }
-      if (active.productiveWeeks === 1) return 'One week of grass left here. Check the other paddock.';
+      if (active?.productiveWeeks === 1) return 'One week of grass left here. Check the other paddock.';
+      if (!active) return 'Neither paddock is active. Check the feed outlook in the Barn.';
       return 'Check the active paddock before the grass runs out.';
     }
     case 'barn':
-      if (view.forecast.shortfall) return 'We’re short on feed. Open the feed bin before the week ends.';
+      if (view.forecast.shortfall) return shortageChoice(state);
       return 'Check the herd to see which pigs are ready for an order.';
     case 'orders': {
       const open = state.orders.filter(order => order.status === 'open');
@@ -113,3 +138,10 @@ export const seasonLines = {
   lost: 'We’ve still got some money, but we let an order slip. Before we try again, let’s see which week got away from us.',
   bankrupt: 'We ran out of money before we finished. Debbie’s got the last bill in the ledger. Let’s see what we can do differently next time.'
 };
+
+export function characterVariant(person, state, view) {
+  if (person === 'joe' && !state.result && view.forecast.shortfall) return 'joe-concerned';
+  const featured = state.orders.find(order => order.id === (view.week <= 4 ? 'A' : 'B'));
+  if (person === 'debbie' && featured?.status === 'fulfilled') return 'debbie-settled';
+  return person;
+}

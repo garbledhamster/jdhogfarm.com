@@ -223,6 +223,7 @@ test('growth on the deadline tick cannot reopen a missed order', () => {
   const deadline = tickFarm(state);
   assert.equal(farmView(deadline).whole, 4);
   assert.equal(deadline.orders[1].status, 'missed');
+  assert.ok(deadline.events.some(event => event.week === 6 && /0 of 2 pigs were eligible before the week ended/.test(event.message)));
 
   const rejected = action(deadline, 'fulfill', 'B');
   assert.ok(rejected.error);

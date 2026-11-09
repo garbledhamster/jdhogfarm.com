@@ -1,4 +1,4 @@
-export const WEEK_MS = 20_000;
+export const WEEK_MS = 60_000;
 export const SEASON_WEEKS = 6;
 export const OVERHEAD = 80;
 export const PADDOCK_COST = 50;
@@ -186,12 +186,16 @@ function fulfillOrder(state, id, week) {
   return recordEvent(paid, week, `${order.label} fulfilled. ${order.quantity} pigs left the herd. Balance ${formatCash(paid.cash)}.`);
 }
 
-function resolveDeadlines(state, week) {
+function resolveDeadlines(state, week, beforeSettlement) {
   let next = state;
   const orders = state.orders.map(order => {
     if (order.status !== 'open') return order;
     if (order.deadline === week) {
-      next = recordEvent(next, week, `Missed deadline. ${order.label} closed without payment.`, 'warning');
+      const eligible = eligibleForOrder(beforeSettlement, order);
+      const cause = eligible < order.quantity
+        ? `${eligible} of ${order.quantity} pigs were eligible before the week ended.`
+        : 'Enough pigs were eligible, but the order was never confirmed.';
+      next = recordEvent(next, week, `Missed deadline. ${order.label} closed without payment. ${cause}`, 'warning');
       return { ...order, status: 'missed' };
     }
     if (order.deadline === week + 1) {
@@ -223,7 +227,7 @@ export function tickFarm(state) {
     return recordEvent(bankrupt, week, `Weekly overhead of ${formatCash(OVERHEAD)} left ${formatCash(next.cash)}. The farm went bankrupt.`, 'warning');
   }
 
-  next = resolveDeadlines(next, week);
+  next = resolveDeadlines(next, week, state);
   if (week < SEASON_WEEKS) return next;
 
   const won = next.orders.every(order => order.status === 'fulfilled');

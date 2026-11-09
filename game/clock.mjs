@@ -9,13 +9,17 @@ export function createClock(onTick, {
   let elapsed = 0;
   let startedAt = null;
   let timer;
+  let generation = 0;
 
   function total() {
     return elapsed + (startedAt === null ? 0 : (now() - startedAt) * speed);
   }
 
   function queueTick() {
-    timer = schedule(resolveTick, Math.ceil(Math.max(0, WEEK_MS - total()) / speed));
+    const current = ++generation;
+    timer = schedule(() => {
+      if (current === generation && startedAt !== null) resolveTick();
+    }, Math.ceil(Math.max(0, WEEK_MS - total()) / speed));
   }
 
   function resolveTick() {
@@ -42,14 +46,19 @@ export function createClock(onTick, {
       if (startedAt === null) return;
       elapsed = Math.min(WEEK_MS, total());
       startedAt = null;
+      generation += 1;
       cancel(timer);
     },
     setSpeed(nextSpeed) {
-      if (nextSpeed === speed || ![1, 2].includes(nextSpeed)) return;
+      if (nextSpeed === speed || ![1, 2, 3, 4].includes(nextSpeed)) return;
       const wasRunning = startedAt !== null;
       this.pause();
       speed = nextSpeed;
       if (wasRunning) this.play();
+    },
+    clearProgress() {
+      this.pause();
+      elapsed = 0;
     },
     reset() {
       this.pause();

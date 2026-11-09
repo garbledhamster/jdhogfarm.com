@@ -2,7 +2,7 @@ import {
   applyFarmAction, eligibleForOrder, farmActionError, farmView, FEED_BUNDLE, formatCash, OVERHEAD, PADDOCK_COST,
   PADDOCK_FORAGE, PIG_PAIR, PRODUCTIVE_WEEKS, RECOVERY_WEEKS, SEASON_WEEKS
 } from './farm.mjs';
-import { chapterFor, seasonLines } from './story.mjs';
+import { chapterFor, characterVariant, seasonLines } from './story.mjs';
 
 const pigStill = new URL('./art/pig.svg', import.meta.url).href;
 const pigMotion = new URL('./art/pig-motion.svg', import.meta.url).href;
@@ -80,18 +80,18 @@ function herdArt(state, position, animate) {
   </svg>`;
 }
 
-function personArt(name, action, x, y, width, height) {
+function personArt(name, action, x, y, width, height, state, view) {
   return `<svg class="farm-herd-art" viewBox="0 0 1200 530" aria-hidden="true">
-    <image class="farm-character-art" data-scene-object="${action}" href="game/art/${name}-avatar.webp"
+    ${name === 'debbie' ? '<ellipse cx="925" cy="485" rx="41" ry="8" fill="#302018" opacity="0.22"></ellipse>' : ''}
+    <image class="farm-character-art" data-scene-object="${action}" href="game/art/${characterVariant(name, state, view)}-avatar.webp"
       x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMax meet"></image>
   </svg>`;
 }
 
-function speakerLine(name, copy) {
-  const person = name.toLowerCase();
+function speakerLine(name, copy, portrait = name.toLowerCase()) {
   return `<div class="farm-speaker-line">
-    <img src="game/art/${person}-portrait.webp" alt="" width="640" height="512">
-    <p><strong>${name}</strong> ${copy}</p>
+    <img src="game/art/${portrait}-portrait.webp" alt="" width="640" height="512">
+    <p><strong>${name}</strong> “${copy}”</p>
   </div>`;
 }
 
@@ -100,7 +100,7 @@ export function renderHotspots(scene, state, view, animate) {
     case 'pasture': {
       const active = state.paddocks.find(plot => plot.status === 'active');
       const pigs = herdArt(state, active?.id.toLowerCase(), animate);
-      return pigs + personArt('joe', 'story', 35, 310, 165, 206) + state.paddocks.map(plot => objectButton(
+      return pigs + personArt('joe', 'story', 35, 310, 165, 206, state, view) + state.paddocks.map(plot => objectButton(
         `Paddock ${plot.id}`, `paddock-${plot.id}`, plot.id.toLowerCase(),
         labels[plot.status], plot.status
       )).join('');
@@ -115,7 +115,7 @@ export function renderHotspots(scene, state, view, animate) {
         orderStatus(order, state, view), order.status
       )).join('');
     case 'office':
-      return personArt('debbie', 'ledger', 852, 300, 160, 200)
+      return personArt('debbie', 'ledger', 827, 201, 196, 286, state, view)
         + objectButton('Ledger', 'ledger', 'ledger', `${formatCash(state.cash)} balance`);
     default:
       return '';
@@ -177,6 +177,8 @@ export function renderWarnings(state, view) {
   if (state.result) return '';
 
   const warnings = [];
+  const nextOrder = state.orders.find(order => order.status === 'open');
+  if (nextOrder) warnings.push(`Next deadline: ${nextOrder.label}, end of Week ${nextOrder.deadline}.`);
   const active = state.paddocks.find(plot => plot.status === 'active');
   if (active?.productiveWeeks === 1) warnings.push('Pasture has one productive week left.');
   if (!active) warnings.push('No paddock is supplying forage.');
@@ -275,9 +277,13 @@ function eventList(events) {
 
 function ledgerPanel(state, view) {
   const entries = [...state.ledger].reverse();
+  const portrait = characterVariant('debbie', state, view);
+  const copy = state.result ? 'Here’s what came in and what went out this season.'
+    : portrait === 'debbie-settled' ? 'I’ve entered the payment. Let’s leave enough for the next bill.'
+      : 'Here’s what’s come in and what’s gone out. Leave enough for the next bill before you buy anything.';
   return {
     title: 'Farm ledger',
-    body: `${speakerLine('Debbie', 'Here’s what’s come in and what’s gone out. Leave enough for the next bill before you buy anything.')}${officePlan(state, view)}
+    body: `${speakerLine('Debbie', copy, portrait)}${officePlan(state, view)}
       <h4>Cash activity</h4>
       <ol class="farm-cash-list">${entries.map(entry => `
         <li><span><strong>Week ${entry.week}</strong> · ${entry.label}</span>
@@ -297,7 +303,18 @@ function recapPanel(state) {
     lost: 'You reached the end of the season with orders missed.',
     bankrupt: 'The farm went bankrupt.'
   }[state.result];
-  const warnings = state.events.filter(event => event.kind === 'warning').slice(-5).reverse();
+  const causes = state.events.filter(event => {
+    if (state.result === 'won') return state.orders.some(order => event.message.startsWith(`${order.label} fulfilled.`));
+    if (state.result === 'bankrupt') return event.message.includes('went bankrupt.');
+    return event.message.startsWith('Missed deadline.');
+  });
+  const missedPickup = state.orders.find(order => order.id === 'A')?.status === 'missed';
+  const boughtFeed = state.ledger.some(entry => entry.label === 'Bought supplemental feed');
+  const experiment = state.result === 'won'
+    ? boughtFeed ? 'Try rotating to a ready paddock instead of buying supplemental feed.' : 'Try using supplemental feed instead of rotating the paddock.'
+    : state.result === 'bankrupt'
+      ? 'On your next run, check the next $80 bill in the ledger before making a purchase.'
+      : missedPickup ? 'On your next run, check Orders after two fed weeks and confirm the pickup before Week 4 ends.' : 'On your next run, keep the remaining herd fed and confirm delivery before Week 6 ends.';
   return {
     title: 'Season recap',
     body: `${speakerLine('Joe', seasonLines[state.result])}<p class="farm-outcome" data-outcome="${state.result}"><strong>${outcome}</strong></p>
@@ -306,12 +323,12 @@ function recapPanel(state) {
         ${state.orders.map(order => `<dt>${order.label}</dt><dd>${order.status === 'open' ? 'Open when the season ended' : labels[order.status]}</dd>`).join('')}
         <dt>Supplemental feed</dt><dd>${unitCount(state.feed)}</dd>
       </dl>
-      ${state.result !== 'won' && warnings.length ? `<h4>What happened</h4>${eventList(warnings)}` : ''}`,
+      ${causes.length ? `<h4>What happened</h4>${eventList(causes)}` : ''}<p><strong>Try next time:</strong> ${experiment}</p>`,
     actions: '<button class="farm-small-button farm-primary-action" type="button" data-action="restart">Restart season</button>'
   };
 }
 
-export function renderPanel(panel, state, view) {
+export function renderPanel(panel, state, view, context = {}) {
   if (panel.startsWith('paddock-')) return paddockPanel(state, panel.at(-1), view);
   if (panel.startsWith('order-')) {
     const order = state.orders.find(candidate => candidate.id === panel.at(-1));
@@ -355,12 +372,37 @@ export function renderPanel(panel, state, view) {
         actions: controls.actions
       };
     }
+    case 'week-result': {
+      const result = context.weekResult;
+      if (!result) return null;
+      const { week, forecast, events, orders, source } = result;
+      const growth = forecast.shortfall ? 'The herd did not gain a fed week.' : forecast.demand ? 'The herd gained one fed week.' : 'There were no pigs to feed.';
+      return {
+        title: `Week ${week} results`,
+        body: `<p>${forecast.demand} feed units needed; ${forecast.forage} from pasture and ${forecast.feedUsed} from storage.${forecast.shortfall ? ` Short by ${forecast.shortfall} units.` : ''} ${growth}</p>
+          <p>Weekly overhead: ${formatCash(OVERHEAD)}. ${week === 1 && !forecast.shortfall && forecast.demand ? `${source === 'clock' ? 'The completed week' : 'Your End Week decision'} fed the herd and posted the $80 bill to the ledger.` : ''}</p>
+          <h4>Orders</h4><p>${orders.map(order => `${order.label}: ${labels[order.status]}`).join(' · ')}</p>
+          ${events.length ? eventList(events) : ''}`,
+        actions: `<button class="farm-small-button farm-primary-action" type="button" data-action="continue-week">${state.result ? 'See season recap' : 'Continue'}</button>`
+      };
+    }
+    case 'help':
+      return {
+        title: 'Help journal',
+        body: `<p><strong>This place:</strong> ${{ pasture: 'Inspect paddocks to see their forage or change where the herd grazes.', barn: 'Check the herd and feed outlook, or buy feed and pigs.', orders: 'Inspect deadlines and confirm eligible fictional orders.', office: 'Open the ledger to see cash, bills and events.' }[context.scene]}</p>
+          <p><strong>Goal:</strong> Fill both fictional orders and finish Week 6 with cash left.</p>
+          <p><strong>Feeding:</strong> Each pig needs one unit each week. Pasture is used first, then stored feed. If the herd is short, no pigs gain a fed week.</p>
+          <p><strong>Orders:</strong> Confirm an eligible order before ending its due week. That week’s growth comes too late.</p>
+          <p><strong>Time:</strong> End Week when ready, or start the optional clock and choose a speed. Opening a panel pauses it; resume when ready.</p>
+          <h4>Conversations you’ve seen</h4>${Object.keys(context.stories ?? {}).length ? Object.keys(context.stories).map(week => `<button class="farm-small-button" type="button" data-story-week="${week}">Week ${week}</button>`).join(' ') : '<p>Open Talk to Joe to hear this week’s conversation.</p>'}`
+      };
     case 'story': {
-      const chapter = chapterFor(view.week, state);
+      const storyWeek = context.storyWeek ?? view.week;
+      const chapter = context.stories?.[storyWeek] ?? chapterFor(storyWeek, state);
       return {
         title: 'Joe’s story',
-        body: `<h4>Week ${view.week} · ${chapter.title}</h4>
-          ${speakerLine('Joe', chapter.text)}${speakerLine('Debbie', chapter.reply)}`
+        body: `<h4>Week ${storyWeek} · ${chapter.title}</h4>
+          ${speakerLine('Joe', chapter.text, chapter.portraits.joe)}${speakerLine('Debbie', chapter.reply, chapter.portraits.debbie)}`
       };
     }
     case 'ledger':

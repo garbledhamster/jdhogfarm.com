@@ -21,6 +21,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .farm-character-art {
+    transform-box: fill-box;
+    transform-origin: 50% 97%;
+    animation: farm-character-idle 6.5s ease-in-out infinite;
+  }
+
   #farm-game :is(.farm-object, .farm-small-button, .farm-panel-close):not(:disabled) {
     transition:
       background-color 140ms ease-out,
@@ -37,6 +43,16 @@
 
   #farm-game .farm-notice[data-feedback='applied']:not([data-tone='warning']) {
     animation: farm-notice-highlight 380ms ease-out;
+  }
+}
+
+@keyframes farm-character-idle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+
+  52% {
+    transform: rotate(0.5deg);
   }
 }
 

@@ -1,6 +1,6 @@
 import * as farm from './farm.mjs';
 import { createClock } from './clock.mjs';
-import { nextChore, prologue } from './story.mjs';
+import { chapterFor, nextChore, prologue } from './story.mjs';
 import { renderHotspots, renderPanel, renderScene, renderWarnings } from './season-view.mjs';
 
 const markupByRegion = new WeakMap();
@@ -12,6 +12,8 @@ const ui = {
   launcher: select('.farm-launch button'),
   exit: select('.farm-exit'),
   talk: select('.farm-talk'),
+  help: select('.farm-help'),
+  endWeek: select('.farm-end-week'),
   interface: select('.farm-interface'),
   intro: select('.farm-prologue'),
   introPortrait: select('.farm-prologue-portrait img'),
@@ -40,7 +42,8 @@ const ui = {
   countdown: select('.farm-countdown'),
   countdownValue: select('.farm-countdown strong'),
   scenes: [...root.querySelectorAll('[data-scene]')],
-  speeds: [...root.querySelectorAll('[data-speed]')],
+  speed: select('.farm-speed'),
+  speedValue: select('.farm-speed-value'),
   stats: Object.fromEntries([...root.querySelectorAll('[data-stat]')].map(element => [element.dataset.stat, element]))
 };
 
@@ -55,22 +58,35 @@ let frame = 0;
 let launcherTop;
 let prologuePage = 0;
 let readStoryWeek = 0;
+let stories = {};
+let storyWeek = null;
+let storyFromHelp = false;
+let weekResult = null;
+let settling = false;
+let inspectedFirstPaddock = false;
 
 const clock = createClock(() => {
-  const gameHadFocus = root.contains(document.activeElement);
+  settleWeek('clock');
+  return false;
+});
+
+function settleWeek(source = 'manual') {
+  if (settling || state.result || panel || !ui.player.open || ui.interface.hidden) return;
+  settling = true;
+  clock.clearProgress();
+  const week = state.completedWeeks + 1;
+  const forecast = farm.farmView(state).forecast;
   const previousEventCount = state.events.length;
   state = farm.tickFarm(state);
   latestEvents = state.events.slice(previousEventCount);
+  weekResult = { week, forecast, source, events: latestEvents, orders: state.orders.map(order => ({ ...order })) };
   feedback = null;
-  if (state.result) {
-    clock.pause();
-    panel = 'recap';
-    panelTrigger = null;
-  }
+  panel = 'week-result';
+  panelTrigger = null;
   render();
-  if (state.result && gameHadFocus && !ui.panel.hidden) focusPanel();
-  return !state.result;
-});
+  focusPanel();
+  settling = false;
+}
 
 function setText(element, content) {
   if (element.textContent !== content) element.textContent = content;
@@ -101,7 +117,7 @@ function drawProgress() {
   const progress = state.result ? 100 : Math.floor(clock.progress() * 100);
   if (ui.progress.value !== progress) ui.progress.value = progress;
   const seconds = Math.ceil((1 - clock.progress()) * farm.WEEK_MS / clock.speed / 1000);
-  setText(ui.countdownValue, `0:${String(seconds).padStart(2, '0')}`);
+  setText(ui.countdownValue, `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`);
   if (clock.running && !frame) {
     frame = requestAnimationFrame(() => {
       frame = 0;
@@ -114,14 +130,16 @@ function drawProgress() {
 }
 
 function renderClock() {
-  setText(ui.time, clock.running ? 'Pause' : started ? 'Resume' : 'Start season');
-  setText(ui.clockState, state.result ? 'Season ended' : clock.running ? 'Running' : 'Paused');
-  ui.time.disabled = Boolean(state.result);
-  ui.countdown.hidden = Boolean(state.result);
-  for (const button of ui.speeds) {
-    button.setAttribute('aria-pressed', String(Number(button.dataset.speed) === clock.speed));
-    button.disabled = Boolean(state.result);
-  }
+  setText(ui.time, clock.running ? 'Pause' : started ? 'Resume' : 'Start clock');
+  setText(ui.clockState, state.result ? 'Season ended' : clock.running ? 'Running' : started ? 'Paused' : 'Manual');
+  ui.time.disabled = Boolean(state.result || panel);
+  ui.endWeek.disabled = Boolean(state.result || panel);
+  ui.speed.disabled = Boolean(state.result);
+  ui.speed.value = String(clock.speed);
+  ui.speed.setAttribute('aria-valuetext', `${clock.speed} times speed`);
+  setText(ui.speedValue, `${clock.speed}×`);
+  ui.countdown.hidden = !started || Boolean(state.result);
+  ui.progress.hidden = !started;
   drawProgress();
 }
 
@@ -177,7 +195,7 @@ function render() {
   renderClock();
   renderPlaces(view);
   setText(ui.coachSpeaker, scene === 'office' ? 'Debbie' : 'Joe');
-  setText(ui.coach, nextChore(scene, state, view, started));
+  setText(ui.coach, nextChore(scene, state, view, inspectedFirstPaddock));
   setMarkup(ui.warnings, renderWarnings(state, view));
   ui.art.dataset.view = scene;
   const selectedPlace = ui.scenes.find(button => button.dataset.scene === scene);
@@ -187,7 +205,7 @@ function render() {
   }
   setMarkup(ui.scene, renderScene(scene, state, view), selectedPlace);
 
-  const details = panel && renderPanel(panel, state, view);
+  const details = panel && renderPanel(panel, state, view, { weekResult, scene, stories, storyWeek });
   ui.panel.hidden = !details;
   ui.summary.hidden = Boolean(details);
   if (details) {
@@ -205,6 +223,14 @@ function focusPanel() {
 }
 
 function closePanel() {
+  if (panel === 'week-result') { continueWeek(); return; }
+  if (panel === 'story' && storyFromHelp) {
+    storyFromHelp = false;
+    panel = 'help';
+    render();
+    (ui.panelBody.querySelector(`[data-story-week="${storyWeek}"]`) ?? ui.panelTitle).focus({ preventScroll: true });
+    return;
+  }
   const previous = panelTrigger;
   panel = null;
   panelTrigger = null;
@@ -216,8 +242,17 @@ function closePanel() {
   (opener?.getClientRects().length && !opener.disabled ? opener : selectedPlace)?.focus({ preventScroll: true });
 }
 
+function continueWeek() {
+  panel = state.result ? 'recap' : null;
+  weekResult = null;
+  panelTrigger = null;
+  render();
+  if (panel) focusPanel();
+  else ui.endWeek.focus({ preventScroll: true });
+}
+
 function toggleClock() {
-  if (state.result || document.hidden) return;
+  if (state.result || document.hidden || panel) return;
   if (clock.running) {
     clock.pause();
     feedback = { message: 'Season paused. You can still make farm decisions.', kind: 'info' };
@@ -232,6 +267,11 @@ function toggleClock() {
 function restart() {
   clock.reset();
   readStoryWeek = 0;
+  stories = {};
+  storyWeek = null;
+  storyFromHelp = false;
+  weekResult = null;
+  inspectedFirstPaddock = false;
   state = farm.createFarm();
   scene = 'pasture';
   panel = null;
@@ -240,26 +280,35 @@ function restart() {
   latestEvents = [];
   started = false;
   render();
-  ui.time.focus({ preventScroll: true });
+  ui.endWeek.focus({ preventScroll: true });
 }
 
 function renderIntro() {
   const page = prologue[prologuePage];
-  const portrait = `game/art/${page.portrait}-portrait.webp`;
-  if (ui.introPortrait.getAttribute('src') !== portrait) ui.introPortrait.setAttribute('src', portrait);
-  ui.introPortrait.alt = `Illustrated portrait of ${page.speaker}`;
+  const portrait = `game/art/${page.art}.webp`;
+  ui.intro.dataset.frame = page.art;
+  if (ui.introPortrait.getAttribute('src') !== portrait) {
+    const frame = ui.introPortrait.parentElement;
+    delete frame.dataset.missing;
+    frame.dataset.loading = '';
+    ui.introPortrait.hidden = false;
+    ui.introPortrait.setAttribute('src', portrait);
+  }
+  ui.introPortrait.alt = page.alt;
   setText(ui.introSpeaker, page.speaker);
   setText(ui.introStep, `${prologuePage + 1} of ${prologue.length}`);
   setText(ui.introTitle, page.title);
-  setText(ui.introText, page.text);
-  setText(ui.introNext, prologuePage === prologue.length - 1 ? 'Go to the pasture' : 'Continue');
+  setText(ui.introText, `“${page.text}”`);
+  ui.introText.scrollTop = 0;
+  setText(ui.introNext, prologuePage === prologue.length - 1 ? 'Go to Pasture' : 'Continue');
 }
 
 function beginPlay() {
   ui.intro.hidden = true;
   ui.interface.hidden = false;
   ui.talk.hidden = false;
-  ui.time.focus({ preventScroll: true });
+  ui.help.hidden = false;
+  ui.endWeek.focus({ preventScroll: true });
 }
 
 root.addEventListener('click', event => {
@@ -268,14 +317,18 @@ root.addEventListener('click', event => {
     ? root.querySelector(`[data-panel="${CSS.escape(object.dataset.sceneObject)}"]`)
     : null);
   if (!button || button.disabled) return;
+  if (panel === 'week-result' && button !== ui.exit && !button.hasAttribute('data-panel-close') && button.dataset.action !== 'continue-week') return;
   ui.notice.removeAttribute('data-feedback');
-  const { speed, scene: place, panel: panelId, action, target } = button.dataset;
+  const { scene: place, panel: panelId, action, target, storyWeek: selectedStory } = button.dataset;
   if (button === ui.launcher) {
     launcherTop = ui.launcher.getBoundingClientRect().top;
     ui.player.showModal();
-    if (!ui.intro.hidden) ui.introTitle.focus({ preventScroll: true });
+    if (!ui.intro.hidden) {
+      ui.introPortrait.loading = 'eager';
+      ui.introTitle.focus({ preventScroll: true });
+    }
     else if (!ui.panel.hidden) focusPanel();
-    else (ui.time.disabled ? ui.exit : ui.time).focus({ preventScroll: true });
+    else (ui.endWeek.disabled ? ui.exit : ui.endWeek).focus({ preventScroll: true });
   } else if (button === ui.introSkip) {
     beginPlay();
   } else if (button === ui.introNext) {
@@ -289,9 +342,14 @@ root.addEventListener('click', event => {
     exitGame();
   } else if (button === ui.time) {
     toggleClock();
-  } else if (speed) {
-    clock.setSpeed(Number(speed));
-    renderClock();
+  } else if (button === ui.endWeek) {
+    settleWeek();
+  } else if (selectedStory) {
+    storyWeek = Number(selectedStory);
+    storyFromHelp = true;
+    panel = 'story';
+    render();
+    focusPanel();
   } else if (place) {
     scene = place;
     panel = null;
@@ -300,12 +358,16 @@ root.addEventListener('click', event => {
     render();
   } else if (panelId) {
     panel = panelId;
+    if (panelId === 'paddock-A' && state.completedWeeks === 0) inspectedFirstPaddock = true;
+    if (clock.running) {
+      clock.pause();
+      feedback = { message: 'The clock is paused. Select Resume when you’re ready.', kind: 'info' };
+    }
     if (panelId === 'story') {
-      readStoryWeek = farm.farmView(state).week;
-      if (clock.running) {
-        clock.pause();
-        feedback = { message: 'The clock is paused while you talk. Select Resume when you’re ready.', kind: 'info' };
-      }
+      storyFromHelp = false;
+      storyWeek = farm.farmView(state).week;
+      readStoryWeek = storyWeek;
+      stories[storyWeek] = chapterFor(storyWeek, state);
     }
     if (!ui.panel.contains(button)) {
       const region = ui.hotspots.contains(button) ? ui.hotspots : ui.scene;
@@ -316,6 +378,8 @@ root.addEventListener('click', event => {
     if (!ui.panel.hidden) focusPanel();
   } else if (button.hasAttribute('data-panel-close')) {
     closePanel();
+  } else if (action === 'continue-week') {
+    continueWeek();
   } else if (action === 'restart') {
     restart();
   } else if (action) {
@@ -360,7 +424,21 @@ document.addEventListener('visibilitychange', () => {
   renderNotice();
 });
 
+ui.speed.addEventListener('input', () => {
+  clock.setSpeed(Number(ui.speed.value));
+  renderClock();
+});
+function showIntroFallback() {
+  const frame = ui.introPortrait.parentElement;
+  delete frame.dataset.loading;
+  frame.dataset.missing = '';
+  ui.introPortrait.hidden = true;
+}
+
+ui.introPortrait.addEventListener('load', () => { delete ui.introPortrait.parentElement.dataset.loading; });
+ui.introPortrait.addEventListener('error', showIntroFallback);
 motion.addEventListener('change', render);
 renderIntro();
+if (ui.introPortrait.complete && !ui.introPortrait.naturalWidth) showIntroFallback();
 render();
 ui.launcher.hidden = false;
