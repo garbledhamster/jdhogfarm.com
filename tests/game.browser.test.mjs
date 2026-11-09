@@ -31,7 +31,7 @@ after(async () => {
 });
 
 async function openGame(t, options = {}) {
-  const { fixtures = false, launch = !fixtures, keyboard = false, ...contextOptions } = options;
+  const { fixtures = false, launch = !fixtures, keyboard = false, keepIntro = false, ...contextOptions } = options;
   const context = await browser.newContext({ ignoreHTTPSErrors: true, ...contextOptions });
   t.after(() => context.close());
   const page = await context.newPage();
@@ -50,6 +50,10 @@ async function openGame(t, options = {}) {
   const button = name => game.getByRole('button', { name, exact: true });
   const value = async key => (await game.locator(`[data-stat="${key}"]`).innerText()).trim();
   await game.waitFor();
+  if (launch && !keepIntro) {
+    if (keyboard) await button('Skip intro').press('Enter');
+    else await button('Skip intro').click();
+  }
   return { page, game, button, value };
 }
 
@@ -435,6 +439,8 @@ test('the viewport player fits short phones, landscape and desktop without movin
 
     assert.equal(await player.evaluate(el => el.matches(':modal')), true);
     assert.equal(await page.locator('html').evaluate(el => getComputedStyle(el).overflowY), 'hidden');
+    await fits('Continue');
+    await control('Skip intro').click();
     await fits('Exit game');
     await fits('Start season');
     await fits('Office');
@@ -491,4 +497,68 @@ test('game artwork switches to still assets when reduced motion is enabled', asy
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await game.locator('.farm-pig-art[href$="/pig.svg"]').first().waitFor();
   assert.match(await backdrop.evaluate(el => getComputedStyle(el).backgroundImage), /pasture\.svg/);
+});
+
+test('Joe’s opening stays paused and points to a first action on a short phone', async t => {
+  const { page, game, button, value } = await openGame(t, {
+    viewport: { width: 320, height: 568 }, hasTouch: true, isMobile: true, keepIntro: true
+  });
+  const story = game.getByRole('region', { name: 'First morning at J&D' });
+  await story.waitFor();
+  assert.match(await story.innerText(), /Joe Rice/);
+  const portrait = story.getByRole('img', { name: 'Illustrated portrait of Joe Rice' });
+  assert.equal(await portrait.evaluate(async el => {
+    await el.decode();
+    return el.naturalWidth > 0;
+  }), true);
+  assert.equal(await button('Start season').isVisible(), false);
+  await page.clock.fastForward(60000);
+  await button('Continue').tap();
+  assert.match(await story.innerText(), /two orders/i);
+  await button('Continue').tap();
+  assert.match(await story.innerText(), /the clock/i);
+  await button('Go to the pasture').tap();
+  assert.match(await value('week'), /Week 1/);
+  assert.match(await value('cash'), /\$1,000/);
+  assert.match(await game.locator('.farm-coach').innerText(), /Start season/);
+  const timer = game.getByRole('timer', { name: 'Time until the next week' });
+  assert.match(await timer.innerText(), /0:20/);
+  await button('Start season').tap();
+  await page.clock.fastForward(5000);
+  assert.match(await timer.innerText(), /0:15/);
+  await page.clock.fastForward(15000);
+  assert.match(await value('week'), /Week 2/);
+  await button('Barn').tap();
+  assert.match(await game.locator('.farm-coach').innerText(), /herd|feed bin/i);
+  await button('Talk to Joe').tap();
+  const chapter = game.getByRole('dialog', { name: 'Joe’s story', exact: true });
+  assert.match(await chapter.innerText(), /One week at a time/);
+  await button('Resume').waitFor();
+  await button('Close').tap();
+  await button('Exit game').tap();
+  await page.getByRole('button', { name: 'Open game', exact: true }).tap();
+  assert.equal(await story.isVisible(), false);
+  await button('Resume').waitFor();
+});
+
+test('Joe and Debbie’s scene avatars open their story and ledger', async t => {
+  const { game, button } = await openGame(t, { viewport: { width: 1280, height: 720 } });
+  async function clickCharacter(expected) {
+    const character = game.locator('.farm-character-art');
+    assert.equal(await character.evaluate(async el => {
+      const image = new Image();
+      image.src = el.getAttribute('href');
+      await image.decode();
+      return image.naturalWidth > 0;
+    }), true);
+    await character.click();
+    await game.getByRole('dialog', { name: expected, exact: true }).waitFor();
+  }
+
+  await clickCharacter('Joe’s story');
+  await button('Close').click();
+  await button('Office').click();
+  await clickCharacter('Farm ledger');
+  const ledger = game.getByRole('dialog', { name: 'Farm ledger', exact: true });
+  assert.match(await ledger.innerText(), /Debbie[\s\S]*Cash activity/);
 });

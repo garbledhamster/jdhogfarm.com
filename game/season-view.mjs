@@ -2,6 +2,7 @@ import {
   applyFarmAction, eligibleForOrder, farmActionError, farmView, FEED_BUNDLE, formatCash, OVERHEAD, PADDOCK_COST,
   PADDOCK_FORAGE, PIG_PAIR, PRODUCTIVE_WEEKS, RECOVERY_WEEKS, SEASON_WEEKS
 } from './farm.mjs';
+import { chapterFor, seasonLines } from './story.mjs';
 
 const pigStill = new URL('./art/pig.svg', import.meta.url).href;
 const pigMotion = new URL('./art/pig-motion.svg', import.meta.url).href;
@@ -79,12 +80,27 @@ function herdArt(state, position, animate) {
   </svg>`;
 }
 
+function personArt(name, action, x, y, width, height) {
+  return `<svg class="farm-herd-art" viewBox="0 0 1200 530" aria-hidden="true">
+    <image class="farm-character-art" data-scene-object="${action}" href="game/art/${name}-avatar.webp"
+      x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMax meet"></image>
+  </svg>`;
+}
+
+function speakerLine(name, copy) {
+  const person = name.toLowerCase();
+  return `<div class="farm-speaker-line">
+    <img src="game/art/${person}-portrait.webp" alt="" width="600" height="600">
+    <p><strong>${name}</strong> ${copy}</p>
+  </div>`;
+}
+
 export function renderHotspots(scene, state, view, animate) {
   switch (scene) {
     case 'pasture': {
       const active = state.paddocks.find(plot => plot.status === 'active');
       const pigs = herdArt(state, active?.id.toLowerCase(), animate);
-      return pigs + state.paddocks.map(plot => objectButton(
+      return pigs + personArt('joe', 'story', 35, 310, 165, 206) + state.paddocks.map(plot => objectButton(
         `Paddock ${plot.id}`, `paddock-${plot.id}`, plot.id.toLowerCase(),
         labels[plot.status], plot.status
       )).join('');
@@ -99,7 +115,8 @@ export function renderHotspots(scene, state, view, animate) {
         orderStatus(order, state, view), order.status
       )).join('');
     case 'office':
-      return objectButton('Ledger', 'ledger', 'ledger', `${formatCash(state.cash)} balance`);
+      return personArt('debbie', 'ledger', 595, 155, 210, 190)
+        + objectButton('Ledger', 'ledger', 'ledger', `${formatCash(state.cash)} balance`);
     default:
       return '';
   }
@@ -129,28 +146,28 @@ export function renderScene(scene, state, view) {
   let markup = '';
   switch (scene) {
     case 'pasture':
-      markup = `<div class="farm-scene-columns">${state.paddocks.map(plot => `
+      markup = `<dl class="farm-scene-columns farm-field-facts">${state.paddocks.map(plot => `
         <div class="farm-scene-column">
-          <h3>Paddock ${plot.id} <span class="farm-condition" data-condition="${plot.status}">${labels[plot.status]}</span></h3>
-          <p>${plotDetail(plot)}. ${plot.status === 'active' && !state.result ? `${PADDOCK_FORAGE} forage this week.` : ''}</p>
-        </div>`).join('')}</div>`;
+          <dt>Paddock ${plot.id}</dt><dd>${plotDetail(plot)}</dd>
+        </div>`).join('')}</dl>`;
       break;
     case 'barn':
-      markup = `<h3>This week’s feed outlook</h3>
-        <p>${state.result ? 'The season has ended.' : forecastText(view)}</p>
-        ${renderCohorts(state)}`;
+      markup = state.result ? '' : `<dl class="farm-ledger-summary farm-field-facts">
+        <dt>Feed needed</dt><dd>${view.forecast.demand}</dd>
+        <dt>From pasture</dt><dd>${view.forecast.forage}</dd>
+        <dt>In storage</dt><dd>${state.feed}</dd>
+      </dl>`;
       break;
     case 'orders':
-      markup = `<h3>Fictional orders</h3>
-        <div class="farm-scene-columns">${state.orders.map(order => `
+      markup = `<dl class="farm-scene-columns farm-field-facts">${state.orders.map(order => `
         <div class="farm-scene-column">
-          <h3>${order.label}</h3>
-          ${orderFacts(order, state, view)}
-        </div>`).join('')}</div>`;
+          <dt>${order.label}</dt><dd>${orderStatus(order, state, view)} · Week ${order.deadline}</dd>
+        </div>`).join('')}</dl>`;
       break;
     case 'office':
-      markup = `<h3>Farm office</h3>
-        ${officePlan(state, view)}`;
+      markup = state.result ? '' : `<dl class="farm-ledger-summary farm-field-facts">
+        <dt>Next bill</dt><dd>${formatCash(OVERHEAD)}</dd>
+      </dl>`;
       break;
   }
   return markup + seasonRecapButton(state);
@@ -260,7 +277,7 @@ function ledgerPanel(state, view) {
   const entries = [...state.ledger].reverse();
   return {
     title: 'Farm ledger',
-    body: `${officePlan(state, view)}
+    body: `${speakerLine('Debbie', 'Here’s what’s come in and what’s gone out. Leave enough for the next bill before you buy anything.')}${officePlan(state, view)}
       <h4>Cash activity</h4>
       <ol class="farm-cash-list">${entries.map(entry => `
         <li><span><strong>Week ${entry.week}</strong> · ${entry.label}</span>
@@ -283,7 +300,7 @@ function recapPanel(state) {
   const warnings = state.events.filter(event => event.kind === 'warning').slice(-5).reverse();
   return {
     title: 'Season recap',
-    body: `<p class="farm-outcome" data-outcome="${state.result}"><strong>${outcome}</strong></p>
+    body: `${speakerLine('Joe', seasonLines[state.result])}<p class="farm-outcome" data-outcome="${state.result}"><strong>${outcome}</strong></p>
       <dl class="farm-ledger-summary">
         <dt>Closing cash</dt><dd><strong>${formatCash(state.cash)}</strong></dd>
         ${state.orders.map(order => `<dt>${order.label}</dt><dd>${order.status === 'open' ? 'Open when the season ended' : labels[order.status]}</dd>`).join('')}
@@ -336,6 +353,13 @@ export function renderPanel(panel, state, view) {
           They will need ${unitCount(PIG_PAIR.pigs)} more feed each week.</p>
           ${purchaseProjection(state, 'buy-pigs')}${controls.reason}`,
         actions: controls.actions
+      };
+    }
+    case 'story': {
+      const chapter = chapterFor(view.week);
+      return {
+        title: 'Joe’s story',
+        body: `<h4>${chapter.title}</h4>${speakerLine('Joe', chapter.text)}`
       };
     }
     case 'ledger':

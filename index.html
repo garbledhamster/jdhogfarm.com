@@ -42,6 +42,7 @@
   <link rel="stylesheet" href="game/game.css">
   <link rel="stylesheet" href="game/season.css">
   <link rel="stylesheet" href="game/motion.css">
+  <link rel="stylesheet" href="game/story.css">
   <script type="module" src="game/game.mjs"></script>
 
   <!-- reCAPTCHA v3 Enterprise - No challenges, background verification only -->
@@ -625,7 +626,7 @@
     <section id="farm-game" aria-labelledby="farm-game-title">
       <div class="farm-heading">
         <h2 id="farm-game-title">Hog Farm Game</h2>
-        <p>Run the farm for six weeks. Keep your pigs fed, fill both orders on time, and finish with cash left. Look around while paused, then start the season.</p>
+        <p>Lend Joe and Debbie a hand for six weeks on the farm.</p>
       </div>
       <div class="farm-launch">
         <button class="farm-small-button" type="button" aria-haspopup="dialog" hidden>Open game</button>
@@ -634,14 +635,38 @@
       <dialog class="farm-player" aria-labelledby="farm-player-title">
         <div class="farm-player-bar">
           <h2 id="farm-player-title">Hog Farm Game</h2>
-          <button class="farm-small-button farm-exit" type="button">Exit game</button>
+          <div class="farm-player-actions">
+            <button class="farm-small-button farm-talk" type="button" data-panel="story" hidden>Talk to Joe</button>
+            <button class="farm-small-button farm-exit" type="button">Exit game</button>
+          </div>
         </div>
-        <div class="farm-interface">
+        <section class="farm-prologue" aria-label="First morning at J&amp;D">
+          <div class="farm-prologue-portrait">
+            <img src="game/art/joe-portrait.webp" alt="Illustrated portrait of Joe Rice" width="600" height="600">
+          </div>
+          <div class="farm-prologue-script">
+            <div class="farm-prologue-identity">
+              <span class="farm-prologue-speaker">Joe Rice</span>
+              <span class="farm-prologue-step">1 of 3</span>
+            </div>
+            <h3 class="farm-prologue-title" tabindex="-1">We could use a hand</h3>
+            <p class="farm-prologue-text"></p>
+            <div class="farm-prologue-actions">
+              <button class="farm-small-button farm-primary-action farm-prologue-next" type="button">Continue</button>
+              <button class="farm-small-button farm-prologue-skip" type="button">Skip intro</button>
+            </div>
+          </div>
+        </section>
+        <div class="farm-interface" hidden>
           <div class="farm-dashboard">
             <div class="farm-clock-row">
               <div class="farm-clock-reading">
                 <p data-stat="week">Week 1 of 6</p>
                 <p class="farm-clock-state">Paused</p>
+              </div>
+              <div class="farm-countdown" role="timer" aria-label="Time until the next week">
+                <strong>0:20</strong>
+                <span>Next week</span>
               </div>
               <div class="farm-time-controls" role="group" aria-label="Game clock">
                 <button class="farm-clock-toggle" type="button">Start season</button>
@@ -662,22 +687,22 @@
             <button type="button" data-scene="pasture" aria-pressed="true">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M8 21c0-6-2-9-5-12m9 12c0-9-1-14-4-18m7 18c1-7 2-11 6-15m-3 15c1-3 2-4 4-5"></path></svg>
               <span>Pasture</span>
-              <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+              <span class="farm-place-badge" aria-hidden="true">!</span>
             </button>
             <button type="button" data-scene="barn" aria-pressed="false">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12H3Zm5 0v-8h8v8m-8-8 8 8m0-8-8 8m3-12h2"></path></svg>
               <span>Barn</span>
-              <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+              <span class="farm-place-badge" aria-hidden="true">!</span>
             </button>
             <button type="button" data-scene="orders" aria-pressed="false">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5H5v16h14V5h-3M8 3h8v4H8zM8 12l2 2 5-5m-7 8h8"></path></svg>
               <span>Orders</span>
-              <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+              <span class="farm-place-badge" aria-hidden="true">!</span>
             </button>
             <button type="button" data-scene="office" aria-pressed="false">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v5H3zm2 5v6m14-6v6M7 4h10v6H7zm3 8h4"></path></svg>
               <span>Office</span>
-              <span class="farm-place-badge" aria-hidden="true" hidden>Check</span>
+              <span class="farm-place-badge" aria-hidden="true">!</span>
             </button>
           </div>
           <div class="farm-stage">
@@ -689,6 +714,7 @@
             <div class="farm-information">
               <p id="farm-notice" class="farm-notice" role="status" aria-atomic="true"></p>
               <section class="farm-summary" aria-label="Scene details" tabindex="0">
+                <p class="farm-coach"><strong>Joe</strong> <span></span></p>
                 <div class="farm-warnings"></div>
                 <div class="farm-scene"></div>
               </section>
@@ -705,7 +731,7 @@
           </div>
         </div>
       </dialog>
-      <p class="farm-fiction">The farm, prices and orders in this game are fictional.</p>
+      <p class="farm-fiction">The season, prices and orders are fictional.</p>
     </section>
 
     <!-- About Section -->

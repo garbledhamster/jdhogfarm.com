@@ -1,5 +1,6 @@
 import * as farm from './farm.mjs';
 import { createClock } from './clock.mjs';
+import { nextChore, prologue } from './story.mjs';
 import { renderHotspots, renderPanel, renderScene, renderWarnings } from './season-view.mjs';
 
 const markupByRegion = new WeakMap();
@@ -10,6 +11,18 @@ const ui = {
   player: select('.farm-player'),
   launcher: select('.farm-launch button'),
   exit: select('.farm-exit'),
+  talk: select('.farm-talk'),
+  interface: select('.farm-interface'),
+  intro: select('.farm-prologue'),
+  introPortrait: select('.farm-prologue-portrait img'),
+  introSpeaker: select('.farm-prologue-speaker'),
+  introStep: select('.farm-prologue-step'),
+  introTitle: select('.farm-prologue-title'),
+  introText: select('.farm-prologue-text'),
+  introNext: select('.farm-prologue-next'),
+  introSkip: select('.farm-prologue-skip'),
+  coach: select('.farm-coach span'),
+  coachSpeaker: select('.farm-coach strong'),
   summary: select('.farm-summary'),
   art: select('.farm-art'),
   hotspots: select('.farm-hotspots'),
@@ -24,6 +37,8 @@ const ui = {
   time: select('.farm-clock-toggle'),
   clockState: select('.farm-clock-state'),
   progress: select('.farm-progress'),
+  countdown: select('.farm-countdown'),
+  countdownValue: select('.farm-countdown strong'),
   scenes: [...root.querySelectorAll('[data-scene]')],
   speeds: [...root.querySelectorAll('[data-speed]')],
   stats: Object.fromEntries([...root.querySelectorAll('[data-stat]')].map(element => [element.dataset.stat, element]))
@@ -38,6 +53,7 @@ let latestEvents = [];
 let started = false;
 let frame = 0;
 let launcherTop;
+let prologuePage = 0;
 
 const clock = createClock(() => {
   const gameHadFocus = root.contains(document.activeElement);
@@ -83,6 +99,8 @@ function setMarkup(element, markup, fallback) {
 function drawProgress() {
   const progress = state.result ? 100 : Math.floor(clock.progress() * 100);
   if (ui.progress.value !== progress) ui.progress.value = progress;
+  const seconds = Math.ceil((1 - clock.progress()) * farm.WEEK_MS / clock.speed / 1000);
+  setText(ui.countdownValue, `0:${String(seconds).padStart(2, '0')}`);
   if (clock.running && !frame) {
     frame = requestAnimationFrame(() => {
       frame = 0;
@@ -98,6 +116,7 @@ function renderClock() {
   setText(ui.time, clock.running ? 'Pause' : started ? 'Resume' : 'Start season');
   setText(ui.clockState, state.result ? 'Season ended' : clock.running ? 'Running' : 'Paused');
   ui.time.disabled = Boolean(state.result);
+  ui.countdown.hidden = Boolean(state.result);
   for (const button of ui.speeds) {
     button.setAttribute('aria-pressed', String(Number(button.dataset.speed) === clock.speed));
     button.disabled = Boolean(state.result);
@@ -117,7 +136,7 @@ function renderPlaces(view) {
   for (const button of ui.scenes) {
     const place = button.dataset.scene;
     button.setAttribute('aria-pressed', String(place === scene));
-    button.querySelector('.farm-place-badge').hidden = !alerts[place];
+    button.querySelector('.farm-place-badge').classList.toggle('is-visible', Boolean(alerts[place]));
     if (alerts[place]) {
       button.setAttribute('aria-description', alerts[place]);
     } else {
@@ -131,7 +150,9 @@ function renderNotice() {
   const events = warnings.length ? warnings : latestEvents;
   const messages = events.map(event => `Week ${event.week} · ${event.message}`).join(' ');
   ui.notice.dataset.tone = feedback?.kind ?? (warnings.length ? 'warning' : 'info');
-  setText(ui.notice, feedback?.message ?? (messages || 'Explore the farm while the clock is paused.'));
+  const notice = feedback?.message ?? messages;
+  setText(ui.notice, notice);
+  ui.notice.hidden = !notice;
   setText(ui.panelFeedback, feedback?.kind === 'warning' && panel ? feedback.message : '');
   ui.panelFeedback.hidden = !ui.panelFeedback.textContent;
 }
@@ -150,6 +171,8 @@ function render() {
   for (const [key, value] of Object.entries(values)) setText(ui.stats[key], value);
   renderClock();
   renderPlaces(view);
+  setText(ui.coachSpeaker, scene === 'office' ? 'Debbie' : 'Joe');
+  setText(ui.coach, nextChore(scene, state, view));
   setMarkup(ui.warnings, renderWarnings(state, view));
   ui.art.dataset.view = scene;
   const selectedPlace = ui.scenes.find(button => button.dataset.scene === scene);
@@ -215,10 +238,29 @@ function restart() {
   ui.time.focus({ preventScroll: true });
 }
 
+function renderIntro() {
+  const page = prologue[prologuePage];
+  const portrait = `game/art/${page.portrait}-portrait.webp`;
+  if (ui.introPortrait.getAttribute('src') !== portrait) ui.introPortrait.setAttribute('src', portrait);
+  ui.introPortrait.alt = `Illustrated portrait of ${page.speaker}`;
+  setText(ui.introSpeaker, page.speaker);
+  setText(ui.introStep, `${prologuePage + 1} of ${prologue.length}`);
+  setText(ui.introTitle, page.title);
+  setText(ui.introText, page.text);
+  setText(ui.introNext, prologuePage === prologue.length - 1 ? 'Go to the pasture' : 'Continue');
+}
+
+function beginPlay() {
+  ui.intro.hidden = true;
+  ui.interface.hidden = false;
+  ui.talk.hidden = false;
+  ui.time.focus({ preventScroll: true });
+}
+
 root.addEventListener('click', event => {
-  const animal = event.target.closest('[data-scene-object]');
-  const button = event.target.closest('button') ?? (animal
-    ? ui.hotspots.querySelector(`[data-panel="${CSS.escape(animal.dataset.sceneObject)}"]`)
+  const object = event.target.closest('[data-scene-object]');
+  const button = event.target.closest('button') ?? (object
+    ? root.querySelector(`[data-panel="${CSS.escape(object.dataset.sceneObject)}"]`)
     : null);
   if (!button || button.disabled) return;
   ui.notice.removeAttribute('data-feedback');
@@ -226,8 +268,18 @@ root.addEventListener('click', event => {
   if (button === ui.launcher) {
     launcherTop = ui.launcher.getBoundingClientRect().top;
     ui.player.showModal();
-    if (!ui.panel.hidden) focusPanel();
+    if (!ui.intro.hidden) ui.introTitle.focus({ preventScroll: true });
+    else if (!ui.panel.hidden) focusPanel();
     else (ui.time.disabled ? ui.exit : ui.time).focus({ preventScroll: true });
+  } else if (button === ui.introSkip) {
+    beginPlay();
+  } else if (button === ui.introNext) {
+    if (prologuePage === prologue.length - 1) beginPlay();
+    else {
+      prologuePage += 1;
+      renderIntro();
+      ui.introTitle.focus({ preventScroll: true });
+    }
   } else if (button === ui.exit) {
     exitGame();
   } else if (button === ui.time) {
@@ -243,6 +295,10 @@ root.addEventListener('click', event => {
     render();
   } else if (panelId) {
     panel = panelId;
+    if (panelId === 'story' && clock.running) {
+      clock.pause();
+      feedback = { message: 'The clock is paused while you talk. Select Resume when you’re ready.', kind: 'info' };
+    }
     if (!ui.panel.contains(button)) {
       const region = ui.hotspots.contains(button) ? ui.hotspots : ui.scene;
       panelTrigger = { element: button, key: controlKey(button), region };
@@ -297,5 +353,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 motion.addEventListener('change', render);
+renderIntro();
 render();
 ui.launcher.hidden = false;

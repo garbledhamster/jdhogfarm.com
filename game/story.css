@@ -1,0 +1,285 @@
+@font-face {
+  font-family: Alegreya;
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('fonts/alegreya-latin.woff2') format('woff2');
+}
+
+#farm-game {
+  --farm-story-type: alegreya, 'Noto Serif', georgia, serif;
+}
+
+#farm-game :is(h2, h3, h4) {
+  font-family: var(--farm-story-type) !important;
+}
+
+.farm-player-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.4rem;
+}
+
+.farm-player-actions .farm-small-button {
+  padding-inline: 0.55rem;
+  font-size: 0.85rem;
+}
+
+.farm-prologue {
+  display: grid;
+  width: min(100%, 64rem);
+  min-height: 0;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  align-self: stretch;
+  justify-self: center;
+  overflow: hidden;
+  border: 1px solid var(--farm-brass);
+  background: var(--farm-paper);
+  color: var(--farm-ink);
+}
+
+.farm-prologue-portrait {
+  display: grid;
+  min-height: 0;
+  place-items: end center;
+  overflow: hidden;
+  border-inline-end: 1px solid var(--farm-rule);
+  background: radial-gradient(ellipse at 50% 38%, #edcd8b, #ad713b);
+}
+
+.farm-prologue-portrait img {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.farm-prologue-script {
+  display: grid;
+  min-height: 0;
+  align-content: center;
+  gap: 0.7rem;
+  padding: clamp(1rem, 3.6vw, 3rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.farm-prologue-identity,
+.farm-prologue-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.farm-prologue-actions {
+  justify-content: start;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.farm-prologue-speaker {
+  color: var(--farm-oxblood);
+  font-weight: 700;
+}
+
+.farm-prologue-step {
+  color: var(--farm-brown);
+  font-size: 0.83rem;
+  font-variant-numeric: tabular-nums;
+}
+
+#farm-game .farm-prologue-title {
+  color: var(--farm-shadow);
+  font-size: clamp(1.8rem, 4.1vw, 3rem);
+  line-height: 1.02;
+}
+
+.farm-prologue-text {
+  max-width: 38ch;
+  font-family: var(--farm-story-type);
+  font-size: clamp(1.14rem, 2.6vw, 1.6rem);
+  line-height: 1.28;
+}
+
+.farm-clock-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.farm-clock-reading {
+  display: grid;
+  gap: 0.02rem;
+}
+
+.farm-clock-reading [data-stat='week'] {
+  color: var(--farm-shadow);
+  font-size: clamp(0.9rem, 2.1vw, 1.15rem);
+}
+
+.farm-time-controls {
+  justify-self: end;
+}
+
+.farm-countdown {
+  display: flex;
+  min-width: 4.6rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--farm-oxblood);
+  line-height: 1.05;
+}
+
+.farm-countdown strong {
+  font-size: clamp(1.65rem, 3.4vw, 2.45rem);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+}
+
+.farm-countdown span {
+  color: var(--farm-brown);
+  font-size: 0.74rem;
+}
+
+.farm-information > :is(.farm-summary, .farm-panel) {
+  grid-row: 2;
+}
+
+#farm-game .farm-coach {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--farm-rule);
+  background: #fff9e9;
+  font-family: var(--farm-story-type);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.22;
+}
+
+.farm-coach strong,
+.farm-speaker-line strong {
+  color: var(--farm-oxblood);
+  font-family: var(--farm-body);
+  font-size: 0.86rem;
+}
+
+.farm-speaker-line {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-block: 0.2rem;
+  font-family: var(--farm-story-type);
+  font-size: 1.15rem;
+  line-height: 1.28;
+}
+
+.farm-speaker-line strong {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.farm-speaker-line img {
+  width: clamp(3rem, 21%, 5.25rem);
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.farm-character-art {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+@media (orientation: portrait) and (width <= 38rem) {
+  .farm-prologue {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  }
+
+  .farm-prologue-portrait {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--farm-rule);
+  }
+
+  .farm-prologue-script {
+    gap: 0.55rem;
+    padding: 0.8rem 0.95rem;
+  }
+
+  .farm-clock-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.3rem 0.55rem;
+  }
+
+  .farm-time-controls {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem;
+    justify-self: stretch;
+  }
+
+  .farm-countdown {
+    align-items: end;
+    padding-inline-end: 0.25rem;
+  }
+}
+
+@media (orientation: landscape) and (height <= 31rem) {
+  .farm-clock-row {
+    grid-template-columns: minmax(3.5rem, 1fr) auto auto;
+    gap: 0.3rem;
+  }
+
+  .farm-countdown {
+    min-width: 3.1rem;
+  }
+
+  .farm-countdown strong {
+    font-size: 1.55rem;
+  }
+
+  .farm-time-controls {
+    gap: 0.25rem;
+  }
+
+  .farm-time-controls .farm-clock-toggle {
+    min-width: 5.25rem;
+    padding-inline: 0.35rem;
+  }
+
+  .farm-prologue-script {
+    gap: 0.55rem;
+    padding: 0.85rem 1rem;
+  }
+}
+
+.farm-place-badge {
+  position: absolute;
+  inset-block-start: 0.22rem;
+  inset-inline-end: 0.3rem;
+  display: none;
+  width: 0.95rem;
+  height: 0.95rem;
+  padding: 0;
+  border-radius: 50%;
+  line-height: 0.95rem;
+  text-align: center;
+}
+
+.farm-place-badge.is-visible {
+  display: block;
+}
+
+.farm-field-facts {
+  font-size: 0.91rem;
+  line-height: 1.24;
+}
+
+.farm-field-facts dt {
+  font-weight: 700;
+}
+
+.farm-field-facts dd {
+  color: var(--farm-brown);
+}
