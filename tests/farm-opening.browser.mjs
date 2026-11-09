@@ -13,6 +13,7 @@ before(async () => {
   if (!url) {
     const cwd = fileURLToPath(new URL('../', import.meta.url));
     server = spawn('python3', ['-u', '-m', 'http.server', '0', '--bind', '127.0.0.1'], { cwd });
+    server.stderr.resume();
     url = await new Promise((resolve, reject) => {
       server.once('error', reject);
       server.once('exit', code => reject(new Error(`Static server exited with code ${code}`)));

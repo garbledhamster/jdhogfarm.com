@@ -16,6 +16,8 @@ before(async () => {
   if (!url) {
     const root = fileURLToPath(new URL('../', import.meta.url));
     server = spawn('python3', ['-u', '-m', 'http.server', '0', '--bind', '127.0.0.1'], { cwd: root });
+    // Drain request logs so repeated navigations cannot fill the server's stderr pipe.
+    server.stderr.resume();
     url = await new Promise((resolve, reject) => {
       server.once('error', reject);
       server.once('exit', code => reject(new Error(`Static server exited with code ${code}`)));
