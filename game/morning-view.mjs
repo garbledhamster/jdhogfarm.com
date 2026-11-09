@@ -62,7 +62,7 @@ function pastureCue(state, forecast) {
     if (ready) {
       const rotated = applyFarmAction(state, { type: 'rotate', id: ready.id }).state;
       if (feedForecast(rotated).shortfall < forecast.shortfall) {
-        return { text: 'Rotate pasture', attributes: ' data-open="pasture-gate"' };
+        return { text: 'Rotate pasture' };
       }
     }
   }
