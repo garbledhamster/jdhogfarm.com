@@ -8,6 +8,8 @@
 
 #farm-game {
   --farm-story-type: alegreya, 'Noto Serif', georgia, serif;
+  --farm-frame-wood: #6a341d;
+  --farm-portrait-mat: radial-gradient(ellipse at 50% 38%, #edcd8b, #ad713b);
 }
 
 #farm-game :is(h2, h3, h4) {
@@ -54,12 +56,22 @@
 }
 
 .farm-prologue-portrait {
+  position: relative;
   display: grid;
   min-height: 0;
   place-items: end center;
   overflow: hidden;
   border-inline-end: 1px solid var(--farm-rule);
-  background: radial-gradient(ellipse at 50% 38%, #edcd8b, #ad713b);
+  background: var(--farm-portrait-mat);
+}
+
+.farm-prologue-portrait::after {
+  position: absolute;
+  inset: 0;
+  border: clamp(3px, 0.7vw, 7px) solid var(--farm-frame-wood);
+  box-shadow: inset 0 0 0 1px var(--farm-brass);
+  pointer-events: none;
+  content: '';
 }
 
 .farm-prologue-portrait img {
@@ -182,7 +194,7 @@
 
 .farm-speaker-line {
   display: flex;
-  align-items: center;
+  align-items: start;
   gap: 0.65rem;
   padding-block: 0.2rem;
   font-family: var(--farm-story-type);
@@ -203,6 +215,14 @@
   width: clamp(3rem, 21%, 5.25rem);
   height: auto;
   flex: 0 0 auto;
+  border: 3px solid var(--farm-frame-wood);
+  outline: 1px solid var(--farm-brass);
+  outline-offset: -4px;
+  background: var(--farm-portrait-mat);
+}
+
+.farm-panel:has(.farm-speaker-line) {
+  box-shadow: inset 0 0 0 2px var(--farm-frame-wood), inset 0 0 0 3px var(--farm-brass);
 }
 
 .farm-character-art {

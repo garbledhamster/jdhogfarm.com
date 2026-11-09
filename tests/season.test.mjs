@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { applyFarmAction, createFarm, farmView, tickFarm } from '../game/farm.mjs';
+import { chapterFor } from '../game/story.mjs';
 const paddock = (state, id) => state.paddocks.find(plot => plot.id === id);
 
 function advance(state, weeks) {
@@ -17,6 +18,15 @@ function apply(state, type, id) {
   assert.equal(result.error, null);
   return result.state;
 }
+
+test('weekly dialogue acknowledges a completed order and stops giving chores after the season', () => {
+  const pickupWeek = advance(createFarm(), 2);
+  assert.match(chapterFor(3, pickupWeek).reply, /confirm/i);
+  const pickupDone = apply(pickupWeek, 'fulfill', 'A');
+  assert.match(chapterFor(3, pickupDone).reply, /pickup.*already in the books/i);
+  const ended = advance(pickupDone, 4);
+  assert.match(chapterFor(6, ended).reply, /recap/i);
+});
 
 test('switching paddocks charges $50 and starts the former active plot resting', () => {
   const state = apply(createFarm(), 'activate', 'B');

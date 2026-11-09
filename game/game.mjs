@@ -177,7 +177,7 @@ function render() {
   renderClock();
   renderPlaces(view);
   setText(ui.coachSpeaker, scene === 'office' ? 'Debbie' : 'Joe');
-  setText(ui.coach, nextChore(scene, state, view));
+  setText(ui.coach, nextChore(scene, state, view, started));
   setMarkup(ui.warnings, renderWarnings(state, view));
   ui.art.dataset.view = scene;
   const selectedPlace = ui.scenes.find(button => button.dataset.scene === scene);
@@ -226,8 +226,7 @@ function toggleClock() {
     clock.play();
     feedback = { message: 'Season running.', kind: 'info' };
   }
-  renderClock();
-  renderNotice();
+  render();
 }
 
 function restart() {

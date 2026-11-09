@@ -356,7 +356,7 @@ export function renderPanel(panel, state, view) {
       };
     }
     case 'story': {
-      const chapter = chapterFor(view.week);
+      const chapter = chapterFor(view.week, state);
       return {
         title: 'Joe’s story',
         body: `<h4>Week ${view.week} · ${chapter.title}</h4>
