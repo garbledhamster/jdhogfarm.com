@@ -9,7 +9,6 @@ const root = document.getElementById('farm-game');
 const select = selector => root.querySelector(selector);
 const motion = window.matchMedia('(prefers-reduced-motion: no-preference)');
 const markupByRegion = new WeakMap();
-const seasonSave = openSeasonSave();
 const saveMessages = {
   unreadable: 'Your saved season couldn’t be opened. You can start a new one.',
   unavailable: 'This browser couldn’t read a saved season. You can start a new one.',
@@ -50,8 +49,9 @@ const ui = {
   stats: Object.fromEntries([...root.querySelectorAll('[data-stat]')].map(node => [node.dataset.stat, node]))
 };
 
-let savedSeason = seasonSave.season;
-let hasSavedSeason = Boolean(savedSeason);
+let seasonSave;
+let savedSeason;
+let hasSavedSeason = false;
 let state = createFarm();
 let place = 'pasture';
 let previousPlace = place;
@@ -99,6 +99,14 @@ function showSaveStatus(status) {
   for (const node of ui.saveStatus) {
     setText(node, saveMessages[status] ?? '');
   }
+}
+
+function readSeasonSave() {
+  seasonSave = openSeasonSave();
+  savedSeason = seasonSave.season;
+  hasSavedSeason = Boolean(savedSeason);
+  setText(ui.launcher, hasSavedSeason ? 'Continue season' : 'Open game');
+  showSaveStatus(seasonSave.status);
 }
 
 function saveProgress() {
@@ -396,6 +404,7 @@ root.addEventListener('click', event => {
   if (!button?.isConnected || button.disabled) return;
   const { place: destination, open, selectPlot, action, localAction, target } = button.dataset;
   if (button === ui.launcher) {
+    if (!ui.intro.hidden) readSeasonSave();
     launcherTop = ui.launcher.getBoundingClientRect().top;
     ui.introPortrait.loading = 'eager';
     ui.player.showModal();
@@ -468,6 +477,5 @@ motion.addEventListener('change', render);
 renderIntro();
 if (ui.introPortrait.complete && !ui.introPortrait.naturalWidth) showIntroFallback();
 render();
-showSaveStatus(seasonSave.status);
-if (hasSavedSeason) setText(ui.launcher, 'Continue season');
+readSeasonSave();
 ui.launcher.hidden = false;

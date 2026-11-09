@@ -118,6 +118,8 @@ export function registerSaveBrowserTests(farmDriver) {
     assert.equal(await farm.value('cash'), '$620');
     assert.equal(await farm.value('herd'), '5');
     assert.equal(await farm.value('grain'), '1');
+    const saved = await farm.page.evaluate(key => JSON.parse(localStorage.getItem(key)), saveKey);
+    assert.equal(saved.state.ledger.filter(entry => entry.week === 1 && entry.type === 'overhead').length, 1);
     await farm.click('Help journal');
     await farm.game.getByRole('button', { name: 'Week 1 · The first morning' }).waitFor();
     assert.match(await farm.game.locator('#farm-panel').innerText(), /Week 2 · Unread/);
@@ -199,6 +201,23 @@ export function registerSaveBrowserTests(farmDriver) {
     await heading(farm, 'Barn').waitFor();
     assert.equal(await farm.value('cash'), '$800');
     assert.equal(await farm.value('grain'), '0');
+  });
+
+  test('saved season opens the latest progress from a waiting homepage tab', async t => {
+    const farm = await openFarm(t, 'pointer');
+    const secondTab = await farm.page.context().newPage();
+    const origin = new URL(farm.page.url()).origin;
+    await secondTab.route('**/*', route =>
+      new URL(route.request().url()).origin === origin ? route.continue() : route.abort());
+    await secondTab.goto(farm.page.url(), { waitUntil: 'domcontentloaded' });
+    const continueButton = secondTab.getByRole('button', { name: 'Continue season', exact: true });
+    await continueButton.waitFor();
+    await startHerd(farm);
+
+    await continueButton.click();
+    const resumedFarm = secondTab.getByRole('dialog', { name: 'Hog Farm Game', exact: true });
+    assert.equal(await resumedFarm.locator('[data-stat="cash"]').innerText(), '$800');
+    assert.equal(await resumedFarm.locator('[data-stat="herd"]').innerText(), '5');
   });
 
   test('saved season warns before a stale tab can replace newer progress', async t => {
