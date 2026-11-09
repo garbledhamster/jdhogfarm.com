@@ -1,0 +1,114 @@
+.farm-commerce-quantity {
+  color: #613324;
+  font-weight: 700;
+}
+
+.farm-panel-body input[type='number'] {
+  width: 6rem;
+  min-height: 44px;
+  padding: 0.4rem 0.45rem;
+  border: 2px solid #9d6d41;
+  border-radius: 0.3rem;
+  background: #fff9ea;
+  color: #41281a;
+  font: inherit;
+}
+
+.farm-field-pig--boar {
+  filter: saturate(0.65) brightness(0.65);
+}
+
+.farm-field-pig--sow {
+  filter: saturate(0.72) brightness(1.12);
+}
+
+.farm-expansion-figures {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(0, 1.25fr);
+  gap: 0.35rem 0.55rem;
+  padding-block: 0.5rem;
+  border-block: 1px solid #bd925e;
+}
+
+.farm-expansion-figures dt {
+  color: #613324;
+  font-weight: 700;
+}
+
+.farm-expansion-warning {
+  color: #7a0000;
+}
+
+.farm-pickup-hogs {
+  transform: translate(150px, -10px);
+  animation: farm-hogs-at-gate 950ms ease-out both;
+}
+
+@keyframes farm-hogs-at-gate {
+  from { transform: translate(0, 0); }
+  to { transform: translate(150px, -10px); }
+}
+
+.farm-plot-selectors {
+  position: absolute;
+  inset: 0.55rem auto auto 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.farm-plot-selectors [aria-pressed='true'] {
+  background: var(--farm-gold);
+}
+
+[data-plot-art='grazing'] .cleared-earth,
+[data-plot-art='available'] .cleared-earth {
+  display: none;
+}
+
+.farm-map-pin[data-map-cue] {
+  border-color: #664122;
+  background: #ffdf89;
+}
+
+.farm-map-pin small {
+  display: block;
+  margin-top: 0.15rem;
+  color: #5f331e;
+  font-size: 0.73em;
+}
+
+[data-growers-arriving] {
+  animation: farm-growers-arrive 880ms ease-out both;
+}
+
+@keyframes farm-growers-arrive {
+  from { transform: translate(95px, 26px); }
+  to { transform: translate(0, 0); }
+}
+
+.farm-stage .farm-map-pins {
+  display: grid;
+  grid-template-areas:
+    'office barn pasture'
+    'supply orders piglets'
+    '. route return';
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(44px, 1fr));
+  place-items: center;
+  gap: 0.35rem;
+}
+
+.farm-map-pins > :is(.farm-map-pin, .farm-map-return) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.farm-map-pin--barn { grid-area: barn; }
+.farm-map-pin--pasture { grid-area: pasture; }
+.farm-map-pin--piglets { grid-area: piglets; }
+.farm-map-pin--supply { grid-area: supply; }
+.farm-map-pin--orders { grid-area: orders; }
+.farm-map-pin--office { grid-area: office; }
+.farm-map-pin--route { grid-area: route; }
+.farm-map-return { grid-area: return; }

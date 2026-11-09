@@ -16,8 +16,8 @@
     "lint:fix": "npm run css:fix && npm run js:fix",
     "prepare": "husky",
     "test": "npm run lint:all && npm run test:game",
-    "test:game": "node --test tests/farm*.test.mjs tests/season.test.mjs",
-    "test:browser": "node --test tests/game.browser.test.mjs"
+    "test:game": "node --test tests/farm*.test.mjs",
+    "test:browser": "node --test tests/game.browser.test.mjs tests/farm-opening.browser.mjs"
   },
   "keywords": [],
   "author": "",

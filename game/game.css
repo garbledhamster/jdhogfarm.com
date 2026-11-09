@@ -1,3 +1,7 @@
+@import url('commerce.css');
+@import url('chores.css');
+@import url('office.css');
+
 #farm-game {
   --farm-ink: #471f13;
   --farm-oxblood: #7a0000;
@@ -152,6 +156,10 @@ html:has(.farm-player[open]) {
   background: #41281a;
   color: var(--farm-paper);
   font: 400 0.8125rem/1.45 var(--farm-body);
+}
+
+#farm-game .farm-player :is(h2, h3, h4) {
+  font-family: var(--farm-body) !important;
 }
 
 .farm-player::backdrop {
@@ -357,50 +365,9 @@ html:has(.farm-player[open]) {
 }
 
 .farm-map-pin {
-  position: absolute;
-  top: var(--pin-y);
-  left: var(--pin-x);
   min-width: min(6rem, 27vw);
-  max-width: 33%;
-  transform: translate(-50%, -50%);
   box-shadow: 0 3px 0 #64412a;
   text-align: center;
-}
-
-.farm-map-pin--barn {
-  --pin-x: 24%;
-  --pin-y: 30%;
-}
-
-.farm-map-pin--pasture {
-  --pin-x: 76%;
-  --pin-y: 30%;
-}
-
-.farm-map-pin--piglets {
-  --pin-x: 76%;
-  --pin-y: 62%;
-}
-
-.farm-map-pin--supply {
-  --pin-x: 24%;
-  --pin-y: 62%;
-}
-
-.farm-map-pin--orders {
-  --pin-x: 50%;
-  --pin-y: 46%;
-}
-
-.farm-map-pin--office {
-  --pin-x: 50%;
-  --pin-y: 14%;
-}
-
-.farm-map-return {
-  position: absolute;
-  right: 0.25rem;
-  bottom: 0.25rem;
 }
 
 .farm-information {
@@ -463,6 +430,11 @@ html:has(.farm-player[open]) {
   align-content: start;
   gap: 0.5rem;
   overflow: auto;
+}
+
+.farm-panel-feedback {
+  margin-bottom: 0.4rem;
+  color: var(--farm-oxblood);
 }
 
 .farm-decision-actions {
@@ -592,6 +564,17 @@ html:has(.farm-player[open]) {
 
   .farm-prologue-script {
     align-content: start;
+  }
+}
+
+@media (orientation: landscape) and (height <= 27rem) {
+  .farm-prologue {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+
+  .farm-prologue-script {
+    gap: 0.5rem;
+    padding: 0.75rem;
   }
 }
 

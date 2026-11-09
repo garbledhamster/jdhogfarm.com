@@ -331,15 +331,18 @@ function grassError(state, plot) {
 
 export function expansionPreview(state, id, quantity = 0, { grass = false } = {}) {
   const spare = state.plots.find(plot => plot.id === id);
-  // Reach tomorrow using today's land and herd before changing the hypothetical plot.
-  const tomorrow = projectNextMorning(state);
-  const before = allocateFeed(tomorrow);
+  const before = feedForecast(state, { next: true });
   const error = grass ? grassError(state, spare) : kitError(state, spare, quantity);
-  const newPlot = grass
+  const land = grass
     ? { ...plot(id, 'grazing'), forage: pasture('active') }
-    : { ...plot(id, 'fenced'), pigs: validStarterQuantity(quantity) ? quantity : 0, fedWeeks: 1 };
+    : plot(id, 'wooded');
 
-  const after = allocateFeed(replacePlot(tomorrow, newPlot));
+  // Changed land can affect today's unfinished feeding. Planned starters arrive tomorrow.
+  const tomorrow = projectNextMorning(replacePlot(state, land));
+  const withStarters = !grass && validStarterQuantity(quantity)
+    ? replacePlot(tomorrow, { ...plot(id, 'fenced'), pigs: quantity, fedWeeks: 1 })
+    : tomorrow;
+  const after = allocateFeed(withStarters);
   const kitCost = grass ? 0 : KIT_COST;
   const hogCost = !grass && validStarterQuantity(quantity) ? quantity * STARTER_COST : 0;
 

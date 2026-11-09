@@ -127,6 +127,7 @@ const plot = `
         <g transform="translate(507 398)"><g class="plot-tree"><use href="#jd-oak-art" transform="scale(1.02)"/></g></g>
         <g transform="translate(609 332)"><g class="plot-tree"><use href="#jd-oak-art" transform="scale(.73)"/></g></g>
 
+        <!-- growers -->
         <g class="plot-fence">
           <g class="fence-run">
             <path d="M326 322l200-91 151 87m-351 15 200-91 151 87" fill="none" stroke="#653f28" stroke-width="7" stroke-linejoin="round"/>
@@ -151,6 +152,7 @@ const plot = `
             <use href="#jd-post" x="677" y="335"/>
           </g>
         </g>
+        <!-- breeders -->
         </g>
 `;
 
@@ -173,13 +175,57 @@ const map = `
           <path class="map-fenced" d="M551 214l59-35 59 30-61 38z" fill="none" stroke="#7d4f31" stroke-width="5" stroke-linejoin="round"/>
           <path d="M470 371l61-31 70 35-60 34z" fill="#c4945f" stroke="#6d462d" stroke-width="5"/>
           <path d="M470 360l61-31 70 35-60 34z" fill="none" stroke="#c38751" stroke-width="4" stroke-linejoin="round"/>
+          <!-- map activity -->
           <use href="#jd-oak-art" transform="translate(425 462) scale(.66)"/>
           <use href="#jd-oak-art" transform="translate(629 446) scale(.62)"/>
         </g>
 `;
 
-export function openingArt(place, stage) {
-  const scene = place === 'map' ? map : plot;
+const penSpots = [[454, 344], [529, 322], [509, 381], [579, 353]];
+
+function pig(x, y, width, role, flipped = false) {
+  const height = width * 105 / 164;
+  const flip = flipped ? ` transform="translate(${x * 2} 0) scale(-1 1)"` : '';
+  return `<image class="farm-field-pig farm-field-pig--${role}" href="game/art/pig.svg" x="${x - width / 2}" y="${y - height}"
+    width="${width}" height="${height}"${flip}/>`;
+}
+
+function growerArt(pigs, weeks, arriving) {
+  const width = weeks >= 6 ? 91 : 45 + weeks * 7;
+  return `<g class="farm-growers" data-fed-weeks="${weeks}"${arriving ? ' data-growers-arriving' : ''}>
+    ${penSpots.slice(0, pigs).sort(([, a], [, b]) => a - b)
+      .map(([x, y], index) => pig(x, y, width, 'grower', index % 2 === 0)).join('')}
+  </g>`;
+}
+
+function breedingArt() {
+  return `<g class="farm-breeding-art" aria-hidden="true">
+    ${pig(356, 454, 82, 'boar')}${pig(425, 478, 65, 'sow', true)}
+  </g>`;
+}
+
+function mapActivity(plots, deliveryStage) {
+  const grass = plots.some(plot => plot.status === 'grazing');
+  const extra = plots.slice(1).filter(plot => plot.status !== 'locked').map(plot => {
+    const fill = plot.status === 'grazing' ? '#8aa64f' : plot.status === 'available' ? '#a1ac58' : '#c28f57';
+    const fence = plot.status === 'fenced' ? '#704426' : '#d8bb76';
+    return `<path data-map-plot="${plot.id}" data-stage="${plot.status}" transform="translate(${plot.id === '2' ? '575 265' : '655 300'})"
+      d="M0 23l54-23 42 25-57 30z" fill="${fill}" stroke="${fence}" stroke-width="5"/>`;
+  }).join('');
+  const truck = deliveryStage ? `<g class="farm-map-truck" data-map-truck="${deliveryStage}"
+    transform="translate(${deliveryStage === 'unloading' ? '374 264' : '402 270'}) scale(-1 1)">
+    <path d="M-31-19h35v24h-35zm35 6h19l10 13v5H4z" fill="#d79753" stroke="#603a2b" stroke-width="3"/>
+    <path d="M10-9h11l6 8H10z" fill="#cde2d3"/>
+    <path d="M-25-14h23" fill="none" stroke="#f5cf85" stroke-width="3"/>
+    <circle cx="-19" cy="6" r="6" fill="#412e23"/><circle cx="23" cy="6" r="6" fill="#412e23"/>
+  </g>` : '';
+  return `<g${grass ? ' data-map-spare-grass="true"' : ''}>${extra}${truck}</g>`;
+}
+
+export function openingArt(place, stage, { pigs = 0, fedWeeks = 0, breeders, plots = [], deliveryStage, arriving = false } = {}) {
+  const scene = place === 'map' ? map.replace('<!-- map activity -->', mapActivity(plots, deliveryStage)) : plot
+    .replace('<!-- growers -->', pigs ? growerArt(pigs, fedWeeks, arriving) : '')
+    .replace('<!-- breeders -->', breeders ? breedingArt() : '');
   return `<svg viewBox="0 0 960 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true" data-plot-art="${stage}">
     ${definitions}${scene}
   </svg>`;

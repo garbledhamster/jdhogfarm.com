@@ -1,0 +1,167 @@
+.farm-chore-controls {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0.5rem;
+  inset-block-end: clamp(0.4rem, 4%, 1rem);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: none;
+}
+
+.farm-chore-controls button,
+.farm-pasture-gate button {
+  min-block-size: 44px;
+  pointer-events: auto;
+}
+
+.farm-chore-controls--barn {
+  inset-inline-start: 18%;
+}
+
+.farm-chore-controls--route {
+  display: grid;
+  justify-items: center;
+}
+
+.farm-route-lanes,
+.farm-route-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.farm-route-options:empty {
+  display: none;
+}
+
+.farm-route-lanes button[aria-pressed="true"] {
+  background: #ffce67;
+  color: #362319;
+  box-shadow: inset 0 -0.16rem #ac7638;
+}
+
+.farm-chore-controls progress {
+  inline-size: min(9rem, 65vw);
+  block-size: 0.5rem;
+  accent-color: #ffce67;
+}
+
+.farm-pasture-gate {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  inset-block-end: 0.5rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.farm-feeding-groups {
+  margin: 0;
+  padding-inline-start: 1.15rem;
+}
+
+.farm-grain-truck {
+  opacity: 0;
+  transform: translate(604px, 348px);
+}
+
+.farm-grain-bed {
+  transform-origin: -42px 3px;
+}
+
+.farm-bin-grain,
+.farm-grain-fall,
+.farm-trough-grain,
+.farm-trough-fall {
+  opacity: 0;
+}
+
+[data-delivery-stage="arriving"] .farm-grain-truck {
+  opacity: 1;
+  animation: farm-grain-truck-in 400ms ease-out both;
+}
+
+[data-delivery-stage="unloading"] .farm-grain-truck {
+  opacity: 1;
+}
+
+[data-delivery-stage="unloading"] .farm-grain-bed {
+  transform: rotate(-29deg);
+  animation: farm-grain-tip 780ms ease-in-out both;
+}
+
+[data-delivery-stage="unloading"] .farm-grain-fall {
+  opacity: 1;
+  animation: farm-grain-fall 780ms ease-out both;
+}
+
+[data-bin-stocked="true"] .farm-bin-grain,
+[data-trough-stocked="true"] .farm-trough-grain {
+  opacity: 1;
+}
+
+[data-trough-stocked="true"] .farm-trough-carrier {
+  transform-origin: 0 0;
+  animation: farm-bucket-tip 460ms ease-in-out both;
+}
+
+[data-trough-stocked="true"] .farm-trough-fall {
+  animation: farm-grain-fall 480ms ease-out both;
+}
+
+[data-trough-stocked="true"] [data-piglet-sprite] {
+  transform: translate(var(--feed-x), var(--feed-y));
+  animation: farm-piglets-at-trough 560ms ease-out both;
+}
+
+@keyframes farm-grain-truck-in {
+  from { transform: translate(1030px, 436px); }
+  to { transform: translate(604px, 348px); }
+}
+
+@keyframes farm-grain-tip {
+  0%, 100% { transform: none; }
+  27%, 73% { transform: rotate(-29deg); }
+}
+
+@keyframes farm-grain-fall {
+  0% { opacity: 0; }
+  24%, 75% { opacity: 1; }
+
+  100% {
+    opacity: 0;
+    transform: translate(-12px, 19px);
+  }
+}
+
+@keyframes farm-bucket-tip {
+  50% { transform: rotate(-12deg); }
+}
+
+@keyframes farm-piglets-at-trough {
+  0% { transform: none; }
+  55% { transform: translate(var(--feed-x), calc(var(--feed-y) - 7px)); }
+  100% { transform: translate(var(--feed-x), var(--feed-y)); }
+}
+
+@media (orientation: landscape) and (height <= 550px) {
+  .farm-chore-controls--route,
+  .farm-chore-controls--piglets {
+    inset-inline-start: auto;
+    justify-items: end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .farm-grain-truck,
+  .farm-grain-bed,
+  .farm-grain-fall,
+  .farm-trough-fall,
+  .farm-trough-carrier,
+  [data-piglet-sprite] {
+    animation: none !important;
+  }
+}

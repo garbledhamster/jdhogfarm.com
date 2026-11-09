@@ -40,9 +40,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@500&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="game/game.css">
-  <link rel="stylesheet" href="game/season.css">
-  <link rel="stylesheet" href="game/motion.css">
-  <link rel="stylesheet" href="game/story.css">
   <script type="module" src="game/game.mjs"></script>
 
   <!-- reCAPTCHA v3 Enterprise - No challenges, background verification only -->
@@ -636,8 +633,8 @@
         <div class="farm-player-bar">
           <h2 id="farm-player-title">Hog Farm Game</h2>
           <div class="farm-player-actions">
-            <button class="farm-small-button farm-help" type="button" data-panel="help" aria-label="Help journal" hidden>? Help</button>
-            <button class="farm-small-button farm-talk" type="button" data-panel="story" hidden>Talk to Joe</button>
+            <button class="farm-small-button farm-help" type="button" data-open="help" aria-label="Help journal" hidden>? Help</button>
+            <button class="farm-small-button farm-talk" type="button" data-open="story" hidden>Talk to Joe</button>
             <button class="farm-small-button farm-exit" type="button">Exit game</button>
           </div>
         </div>
@@ -689,7 +686,10 @@
                   <button class="farm-small-button farm-panel-close" type="button" data-panel-close>Close</button>
                 </div>
                 <div class="farm-panel-body"></div>
-                <div class="farm-decision-actions"></div>
+                <div>
+                  <p class="farm-panel-feedback" role="status" hidden></p>
+                  <div class="farm-decision-actions"></div>
+                </div>
               </div>
               <p id="farm-notice" class="farm-notice" role="status" aria-atomic="true"></p>
             </div>

@@ -93,3 +93,40 @@ test('skip opens the same plot with touch, frame in portrait and full viewport i
   await button('Build first pen').tap();
   await dialog.locator('[data-plot="1"][data-stage="fenced"]').waitFor();
 });
+
+test('Farm Supply waits for a pen and starts two distinct groups with one purchase', async t => {
+  const { launcher, dialog, button } = await play(t, { reducedMotion: 'reduce' });
+  await launcher.click();
+  await button('Skip intro').click();
+  await button('Farm map').click();
+  await button('Farm Supply').click();
+  await dialog.getByText('Build the first pen before buying starters.').waitFor();
+  assert.equal(await dialog.locator('[data-open="starters"]').count(), 0);
+  await button('Farm map').click();
+  await button('Pasture').click();
+  await button('Wooded plot').click();
+  await button('Clear trees').click();
+  await button('Build first pen').click();
+  await button('Go to Farm Supply').click();
+  await dialog.locator('[data-open="starters"][data-target="1"]').click();
+  const quantity = dialog.getByRole('spinbutton', { name: 'Number of starter pigs' });
+  await quantity.fill('5');
+  await dialog.locator('[data-action="buy-starters"]').click();
+  assert.equal(await dialog.locator('[data-stat="cash"]').innerText(), '$1,000');
+  await button('Close').click();
+  assert.equal(await dialog.locator('[data-stat="cash"]').innerText(), '$1,000');
+  await dialog.locator('[data-open="starters"][data-target="1"]').click();
+  await quantity.fill('2');
+  await dialog.locator('[data-action="buy-starters"]').evaluate(confirm => {
+    confirm.click();
+    confirm.click();
+  });
+  assert.equal(await dialog.locator('[data-stat="cash"]').innerText(), '$800');
+  assert.equal(await dialog.locator('[data-stat="herd"]').innerText(), '5');
+  assert.equal(await dialog.locator('[data-open="starters"][data-target="1"]').count(), 0);
+  await button('Farm map').click();
+  await button('Pasture').click();
+  await dialog.getByText('2 starter pigs · 1 fed week').waitFor();
+  await dialog.getByText('3 piglets in their own pen').waitFor();
+  await dialog.getByText('Boar and sow stay on the farm').waitFor();
+});

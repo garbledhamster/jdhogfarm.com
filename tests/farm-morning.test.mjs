@@ -247,6 +247,28 @@ test('keeps the spare pasture or previews and converts it permanently to a pen',
   assert.equal(state.feeding, feeding);
 });
 
+test('land previews project grain left after changing the current unsettled morning', () => {
+  let state = start(4);
+  state = sell(feed(orderGrain(state)), 'feeder', '1', 1);
+  state = stock(act(state, 'buy-kit', { id: '3' }), '3', 3);
+  state = orderGrain(close(state));
+  assert.equal(state.feeding, null);
+  assert.equal(state.grain, 5);
+
+  const keepPreview = farm.expansionPreview(state, '2', 0, { grass: true });
+  const withGrass = act(state, 'keep-grass', { id: '2' });
+  const kept = farm.feedForecast(withGrass, { next: true });
+  assert.equal(kept.shortfall, 1);
+  assert.equal(keepPreview.shortfall, kept.shortfall);
+
+  const canAffordKit = sell(withGrass, 'feeder', '1', 1);
+  const convertPreview = farm.expansionPreview(canAffordKit, '2');
+  const withoutGrass = act(canAffordKit, 'buy-kit', { id: '2' });
+  const converted = farm.feedForecast(withoutGrass, { next: true });
+  assert.equal(converted.shortfall, 3);
+  assert.equal(convertPreview.shortfall, converted.shortfall);
+});
+
 test('rests the spare grass for two closed weeks after its third productive morning', () => {
   let state = start(4);
   state = sell(feed(orderGrain(state)), 'feeder', '1', 1);

@@ -97,7 +97,7 @@ Configuration is in `.lintstagedrc.json`.
 
 ## Homepage game
 
-The homepage loads the game from `game/`. The farm rules and clock are separate from the browser controls and scene rendering. Each page load starts a fresh fictional season.
+The homepage loads the game from `game/`. The farm rules are separate from the browser controls and scene rendering. The player closes each week in the Office. Each page load starts a fresh fictional season.
 
 To test the game in Chromium, install the Playwright browser once and run the browser checks. The checks start a local static server with Python 3. They intercept inquiry writes.
 

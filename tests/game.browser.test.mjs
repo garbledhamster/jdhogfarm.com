@@ -3,6 +3,8 @@ import { spawn } from 'node:child_process';
 import { after, before, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { registerChoreBrowserTests } from './farm-chores.browser.mjs';
+import { registerOfficeBrowserTests } from './farm-office.browser.mjs';
 
 let server;
 let browser;
@@ -43,7 +45,7 @@ async function openGame(t, options = {}) {
     await page.route('**/*', route => {
       const request = route.request();
       return !['GET', 'HEAD'].includes(request.method()) || /formspree|firestore\.googleapis/i.test(request.url())
-        ? route.abort() : route.continue();
+        ? route.abort() : route.fallback();
     });
     await page.route('https://www.google.com/recaptcha/**', route => route.abort());
   }
@@ -67,6 +69,8 @@ async function openGame(t, options = {}) {
   }
   return { page, game, button, value };
 }
+
+registerChoreBrowserTests(openGame);
 
 async function inquiryFixtures(page) {
   await page.route('https://www.google.com/recaptcha/**', route => route.fulfill({
@@ -113,416 +117,6 @@ test('homepage inquiry link and existing inquiry flow still work with writes int
   assert.equal(await form.getByLabel('Your Name:').inputValue(), '');
 });
 
-async function endWeek(game, input = 'click') {
-  const end = game.locator('.farm-end-week');
-  if (input === 'keyboard') await end.press('Enter');
-  else await end[input]();
-  const result = game.locator('#farm-panel');
-  await result.locator('[data-action="continue-week"]').waitFor();
-  const next = result.locator('[data-action="continue-week"]');
-  if (input === 'keyboard') await next.press('Enter');
-  else await next[input]();
-}
-
-async function advance(game, count, input = 'click') {
-  for (let i = 0; i < count; i += 1) await endWeek(game, input);
-}
-
-async function timerStart(game) {
-  await game.locator('.farm-clock-toggle').click();
-}
-
-async function timedWeek(page, game, ms = 60000) {
-  await page.clock.fastForward(ms);
-  const next = game.locator('#farm-panel [data-action="continue-week"]');
-  await next.waitFor();
-  await next.click();
-}
-
-test('manual play waits for End Week and explains the first feeding and overhead', async t => {
-  const { page, game, button, value } = await openGame(t);
-  await page.clock.fastForward(120000);
-  assert.match(await value('week'), /1/);
-  await button('Paddock A').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /4|four/i);
-  await button('Close').click();
-  await button('Barn').click();
-  await button('Feed bin').click();
-  await button('Cancel').click();
-  assert.match(await value('cash'), /\$1,000/);
-  await game.locator('.farm-end-week').click();
-  const result = game.locator('#farm-panel');
-  assert.match(await result.innerText(), /feed|forage/i);
-  assert.match(await result.innerText(), /\$80|overhead/i);
-  assert.match(await result.innerText(), /growth|fed week/i);
-  await result.locator('[data-action="continue-week"]').click();
-  assert.match(await value('week'), /2/);
-  assert.match(await value('cash'), /\$920/);
-});
-
-test('intro scenes and skip lead to the same farm, even when opening art fails', async t => {
-  const first = await openGame(t, { keepIntro: true, viewport: { width: 320, height: 568 }, hasTouch: true });
-  const story = first.game.getByRole('region', { name: 'First morning at J&D' });
-  for (const [index, speaker] of ['Joe', 'Debbie', 'Joe'].entries()) {
-    assert.match(await story.innerText(), new RegExp(speaker, 'i'));
-    const img = story.locator('.farm-prologue-portrait img');
-    assert.match(await img.getAttribute('src'), new RegExp(`opening-${['hogs', 'ledger', 'tractor'][index]}\\.webp`));
-    await first.button(index === 2 ? 'Go to Pasture' : 'Continue').tap();
-  }
-  assert.match(await first.value('week'), /1/);
-  assert.match(await first.value('cash'), /\$1,000/);
-  const skipped = await openGame(t);
-  assert.equal(await skipped.value('week'), await first.value('week'));
-  assert.equal(await skipped.value('cash'), await first.value('cash'));
-  assert.equal(await skipped.value('herd'), await first.value('herd'));
-
-  const context = await browser.newContext();
-  t.after(() => context.close());
-  const page = await context.newPage();
-  await page.route('**/game/art/opening-*.webp', route => route.abort());
-  await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.getByRole('button', { name: 'Open game', exact: true }).click();
-  const game = page.getByRole('dialog', { name: 'Hog Farm Game' });
-  for (let i = 0; i < 2; i += 1) await game.getByRole('button', { name: 'Continue', exact: true }).click();
-  await game.getByRole('button', { name: 'Go to Pasture', exact: true }).click();
-  assert.match(await game.locator('[data-stat="week"]').innerText(), /1/);
-});
-
-for (const input of ['keyboard', 'touch']) {
-  test(`reference winning season ends at $1,320 using ${input} without sending game requests`, async t => {
-    const { page, game, value } = await openGame(t, input === 'touch'
-      ? { viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce', networkIsolation: true }
-      : { viewport: { width: 1280, height: 850 }, keyboard: true, networkIsolation: true });
-    const activate = async name => {
-      const control = game.getByRole('button', { name, exact: true });
-      if (input === 'touch') await control.tap();
-      else await control.press('Enter');
-    };
-    const method = input === 'touch' ? 'tap' : 'keyboard';
-    const requests = [];
-    page.on('request', request => {
-      if (!['GET', 'HEAD'].includes(request.method()) || /formspree|firestore\.googleapis/i.test(request.url())) requests.push(request.url());
-    });
-    await advance(game, 2, method);
-    await activate('Orders');
-    await activate('Feeder pickup');
-    await activate('Confirm pickup');
-    assert.match(await value('cash'), /\$1,240/);
-    await activate('Pasture');
-    await advance(game, 1, method);
-    await activate('Paddock A');
-    await activate('Rest paddock');
-    await activate('Paddock B');
-    await activate('Activate paddock');
-    await advance(game, 1, method);
-    await activate('Orders');
-    await activate('Whole-hog delivery');
-    await activate('Confirm delivery');
-    await advance(game, 2, method);
-    assert.match(await game.innerText(), /\$1,320/);
-    assert.match(await game.innerText(), /Feeder pickup[\s\S]*Fulfilled[\s\S]*Whole.hog delivery[\s\S]*Fulfilled/i);
-    assert.match(await value('feed'), /\b1\b/);
-    assert.deepEqual(requests, []);
-  });
-}
-
-test('no-action season misses both orders and replay resets farm and pacing', async t => {
-  const { page, game, button, value } = await openGame(t);
-  await advance(game, 4);
-  assert.match(await value('cash'), /\$680/);
-  assert.match(await game.innerText(), /short/i);
-  await advance(game, 2);
-  assert.match(await game.innerText(), /\$520/);
-  assert.match(await game.innerText(), /Feeder pickup[\s\S]*Missed[\s\S]*Whole.hog delivery[\s\S]*Missed/i);
-  await page.clock.fastForward(120000);
-  assert.match(await value('cash'), /\$520/);
-  await button('Restart season').click();
-  assert.match(await value('week'), /1/);
-  assert.match(await value('cash'), /\$1,000/);
-  assert.match(await value('herd'), /\b4\b/);
-  assert.match(await value('feed'), /\b1\b/);
-  assert.equal(await game.locator('.farm-speed').inputValue(), '1');
-  assert.doesNotMatch(await game.innerText(), /Missed/i);
-  await page.clock.fastForward(120000);
-  assert.match(await value('week'), /1/);
-});
-
-test('bankruptcy occurs at overhead and blocks further settlement until replay', async t => {
-  const { page, game, button, value } = await openGame(t);
-  await button('Barn').click();
-  for (let i = 0; i < 5; i += 1) {
-    await button('Herd').click();
-    await button('Buy pigs').click();
-    await button('Buy pigs').click();
-  }
-  assert.match(await value('cash'), /\$0/);
-  await game.locator('.farm-end-week').click();
-  await game.locator('#farm-panel [data-action="continue-week"]').click();
-  assert.match(await game.innerText(), /bankrupt/i);
-  assert.match(await game.innerText(), /overhead/i);
-  assert.match(await value('cash'), /[-−]\$80/);
-  await page.clock.fastForward(120000);
-  assert.match(await value('cash'), /[-−]\$80/);
-  await button('Restart season').click();
-  assert.match(await value('cash'), /\$1,000/);
-});
-
-test('timed play preserves partial progress across speed, Help, decisions and inactivity', async t => {
-  const { page, game, button, value } = await openGame(t);
-  const speed = game.locator('.farm-speed');
-  assert.equal(await speed.inputValue(), '1');
-  await timerStart(game);
-  await page.clock.fastForward(15000);
-  await speed.fill('2');
-  await game.locator('.farm-help').click();
-  await page.clock.fastForward(90000);
-  assert.match(await value('week'), /1/);
-  await button('Close').click();
-  await page.clock.fastForward(90000);
-  assert.match(await value('week'), /1/);
-  await timerStart(game);
-  await page.clock.fastForward(5000);
-  await button('Paddock A').click();
-  await page.clock.fastForward(90000);
-  assert.match(await value('week'), /1/);
-  await button('Close').click();
-  await timerStart(game);
-  await page.clock.fastForward(5000);
-  await page.evaluate(() => {
-    Object.defineProperty(document, 'hidden', { configurable: true, value: true });
-    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  await page.clock.fastForward(90000);
-  await page.evaluate(() => {
-    Reflect.deleteProperty(document, 'hidden');
-    Reflect.deleteProperty(document, 'visibilityState');
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  assert.match(await value('week'), /1/);
-  await timerStart(game);
-  await page.clock.fastForward(12499);
-  assert.match(await value('week'), /1/);
-  await page.clock.runFor(1);
-  assert.match(await value('week'), /2/);
-});
-
-test('a manual commit at the timer boundary cannot settle twice', async t => {
-  const { page, game, value } = await openGame(t);
-  await timerStart(game);
-  await page.clock.fastForward(59999);
-  await game.locator('.farm-end-week').evaluate(el => { el.click(); el.click(); });
-  await page.clock.fastForward(1000);
-  assert.match(await value('week'), /2/);
-  assert.match(await value('cash'), /\$920/);
-  await game.locator('#farm-panel [data-action="continue-week"]').click();
-  await page.clock.fastForward(60000);
-  assert.match(await value('week'), /2/);
-});
-
-test('manual and timed weeks produce equal farm results for equivalent choices', async t => {
-  const manual = await openGame(t);
-  await advance(manual.game, 2);
-  const timed = await openGame(t);
-  await timerStart(timed.game);
-  await timedWeek(timed.page, timed.game);
-  await timerStart(timed.game);
-  await timedWeek(timed.page, timed.game);
-  for (const stat of ['week', 'cash', 'herd', 'feed', 'feeders', 'whole']) {
-    assert.equal(await timed.value(stat), await manual.value(stat), stat);
-  }
-});
-
-test('Help returns focus and reopens previously seen conversations through all six weeks', async t => {
-  const { game, button } = await openGame(t);
-  const seen = new Set();
-  for (let week = 1; week <= 6; week += 1) {
-    await button('Talk to Joe').click();
-    const panel = game.locator('#farm-panel');
-    assert.match(await panel.innerText(), new RegExp(`Week ${week}`));
-    const lines = await panel.locator('.farm-speaker-line').allTextContents();
-    assert.equal(lines.length, 2);
-    assert.match(lines[0], /Joe/i);
-    assert.match(lines[1], /Debbie/i);
-    seen.add(lines.join(' '));
-    await button('Close').click();
-    const help = game.locator('.farm-help');
-    await help.focus();
-    await help.press('Enter');
-    assert.equal(await panel.locator(`[data-story-week="${week}"]`).isVisible(), true);
-    await panel.locator(`[data-story-week="${week}"]`).click();
-    assert.match(await panel.innerText(), new RegExp(`Week ${week}`));
-    await button('Close').click();
-    assert.match(await panel.innerText(), /Help journal/i);
-    assert.equal(await panel.locator(`[data-story-week="${week}"]`).evaluate(el => el === document.activeElement), true);
-    await button('Close').click();
-    if (week < 6) await advance(game, 1);
-  }
-  assert.equal(seen.size, 6);
-  const help = game.locator('.farm-help');
-  await help.focus();
-  await help.press('Enter');
-  await button('Close').click();
-  assert.equal(await help.evaluate(el => el === document.activeElement), true);
-});
-
-for (const [width, height] of [[320, 568], [667, 375], [1280, 720]]) {
-  test(`game controls remain reachable at ${width} × ${height}`, async t => {
-    const { page, game, button } = await openGame(t, { viewport: { width, height }, hasTouch: width < 800, isMobile: width < 800 });
-    async function fits(locator, name) {
-      assert.equal(await locator.evaluate(el => {
-        const box = el.getBoundingClientRect();
-        return box.left >= 0 && box.right <= innerWidth && box.top >= 0 && box.bottom <= innerHeight
-          && el.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
-      }), true, `${name} must be visible and actionable`);
-    }
-    await page.evaluate(async () => { await document.fonts.ready; });
-    if (width === 667 && height === 375) {
-      const stats = await game.locator('.farm-stats > div').evaluateAll(columns => columns.map(column => {
-        const outer = column.getBoundingClientRect();
-        return [...column.querySelectorAll('dt, dd')].map(text => {
-          const range = document.createRange();
-          range.selectNodeContents(text);
-          return [...range.getClientRects()].every(rect => rect.left >= outer.left - 1 && rect.right <= outer.right + 1);
-        });
-      }));
-      assert.deepEqual(stats, Array.from({ length: 5 }, () => [true, true]), 'Stats labels and values stay inside their columns');
-    }
-    await fits(button('Exit game'), 'Exit game');
-    await fits(game.locator('.farm-end-week'), 'End Week');
-    await fits(game.locator('.farm-help'), 'Help');
-    await fits(button('Paddock A'), 'Paddock A');
-    await fits(button('Paddock B'), 'Paddock B');
-    for (const place of ['Pasture', 'Barn', 'Orders', 'Office']) {
-      const control = button(place);
-      assert.match(await control.locator('img').getAttribute('src'), new RegExp(`${place.toLowerCase()}\\.svg`));
-      await fits(control, place);
-    }
-    await button('Barn').click();
-    await button('Feed bin').click();
-    await fits(button('Buy feed'), 'Buy feed');
-    await fits(button('Cancel'), 'Cancel');
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-  });
-}
-
-test('navigation communicates selected place without color and keyboard focus is visible at zoom', async t => {
-  const { page, game, button } = await openGame(t, { viewport: { width: 1280, height: 850 }, keyboard: true });
-  await page.evaluate(() => { document.body.style.zoom = '2'; });
-  const barn = button('Barn');
-  await barn.focus();
-  assert.equal(await barn.evaluate(el => el.matches(':focus-visible')), true);
-  assert.notEqual(await barn.evaluate(el => getComputedStyle(el).outlineStyle), 'none');
-  await barn.press('Enter');
-  assert.equal(await barn.getAttribute('aria-pressed'), 'true');
-  assert.equal(await button('Pasture').getAttribute('aria-pressed'), 'false');
-  assert.equal(await game.locator('.farm-end-week').isVisible(), true);
-});
-
-test('reduced motion uses still artwork and characters open their actions', async t => {
-  const { game, button } = await openGame(t, { reducedMotion: 'reduce' });
-  const backdrop = game.locator('.farm-art');
-  assert.match(await backdrop.evaluate(el => getComputedStyle(el).backgroundImage), /pasture\.svg/);
-  assert.match(await game.locator('.farm-pig-art').first().getAttribute('href'), /pig\.svg$/);
-  await game.locator('.farm-character-art').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /Joe/i);
-  await button('Close').click();
-  await button('Office').click();
-  await game.locator('.farm-character-art').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /ledger|cash activity/i);
-});
-
-test('character poses and portraits agree after a pickup and during a shortage', async t => {
-  const { game, button } = await openGame(t, { reducedMotion: 'reduce' });
-  await advance(game, 2);
-  await button('Orders').click();
-  await button('Feeder pickup').click();
-  await button('Confirm pickup').click();
-  await button('Office').click();
-  const character = game.locator('.farm-character-art');
-  const panel = game.locator('#farm-panel');
-  assert.match(await character.getAttribute('href'), /debbie-settled-avatar\.webp$/);
-  await character.click();
-  assert.match(await panel.locator('img').getAttribute('src'), /debbie-settled-portrait\.webp$/);
-  await button('Close').click();
-  await advance(game, 1);
-  await button('Pasture').click();
-  assert.match(await character.getAttribute('href'), /joe-concerned-avatar\.webp$/);
-  await character.click();
-  assert.match(await panel.locator('img').first().getAttribute('src'), /joe-concerned-portrait\.webp$/);
-  assert.match(await panel.innerText(), /short by 1 feed unit/i);
-});
-
-test('speed slider accepts keyboard steps and touch-accessible values from one through four', async t => {
-  const { game } = await openGame(t, { viewport: { width: 320, height: 568 }, hasTouch: true, isMobile: true });
-  const speed = game.getByRole('slider', { name: /speed/i });
-  await speed.focus();
-  for (let next = 2; next <= 4; next += 1) {
-    await speed.press('ArrowRight');
-    assert.equal(await speed.inputValue(), String(next));
-    assert.match(await game.locator('.farm-speed-value').innerText(), new RegExp(`${next}×`));
-  }
-  await speed.fill('1');
-  assert.equal(await speed.inputValue(), '1');
-});
-
-test('rotation restores forage and the former paddock recovers after two boundaries', async t => {
-  const { game, button, value } = await openGame(t);
-  await advance(game, 2);
-  await button('Paddock B').click();
-  await button('Activate paddock').click();
-  assert.match(await value('cash'), /\$790/);
-  await button('Paddock A').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /Resting/i);
-  await button('Close').click();
-  await advance(game, 2);
-  await button('Paddock A').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /Ready/i);
-  assert.match(await value('whole'), /\b4\b/);
-  assert.match(await value('feed'), /\b1\b/);
-});
-
-test('canceling a purchase changes nothing; buying pigs and feed changes the forecast', async t => {
-  const { game, button, value } = await openGame(t);
-  await button('Barn').click();
-  await button('Feed bin').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /After purchase[\s\S]*\$900[\s\S]*5 units/i);
-  await button('Cancel').click();
-  assert.match(await value('cash'), /\$1,000/);
-  await button('Herd').click();
-  await button('Buy pigs').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /After purchase[\s\S]*\$800[\s\S]*6 pigs/i);
-  await button('Buy pigs').click();
-  assert.match(await value('herd'), /\b6\b/);
-  await button('Feed bin').click();
-  assert.match(await game.locator('#farm-panel').innerText(), /After purchase[\s\S]*\$700[\s\S]*5 units/i);
-  await button('Buy feed').click();
-  await advance(game, 1);
-  assert.match(await value('feed'), /\b3\b/);
-  assert.match(await value('herd'), /\b6\b/);
-});
-
-test('leaving the game pauses its clock and restores launcher focus and position', async t => {
-  const { page, game, button, value } = await openGame(t);
-  await timerStart(game);
-  await page.clock.fastForward(15000);
-  await button('Exit game').click();
-  const launcher = page.getByRole('button', { name: 'Open game', exact: true });
-  assert.equal(await launcher.evaluate(el => el === document.activeElement), true);
-  const position = await launcher.evaluate(el => el.getBoundingClientRect().top);
-  await page.clock.fastForward(120000);
-  await launcher.click();
-  assert.match(await value('week'), /1/);
-  await timerStart(game);
-  await page.clock.fastForward(44999);
-  assert.match(await value('week'), /1/);
-  await page.clock.runFor(1);
-  assert.match(await value('week'), /2/);
-  await game.locator('#farm-panel [data-action="continue-week"]').click();
-  await button('Exit game').click();
-  assert.ok(Math.abs((await launcher.evaluate(el => el.getBoundingClientRect().top)) - position) <= 2);
-});
-
 for (const [width, height] of [[320, 568], [667, 375]]) {
   test(`all opening quotes fit without scrolling at ${width} × ${height}`, async t => {
     const { page, game, button } = await openGame(t, {
@@ -548,3 +142,364 @@ for (const [width, height] of [[320, 568], [667, 375]]) {
     }
   });
 }
+
+async function farmDriver(t, input, options = {}) {
+  const touch = input === 'touch';
+  const opened = await openGame(t, {
+    viewport: touch ? { width: 390, height: 844 } : { width: 1280, height: 800 },
+    hasTouch: touch, isMobile: touch, keyboard: input === 'keyboard', networkIsolation: true,
+    ...options
+  });
+  const { page, game, button, value } = opened;
+  const writes = [];
+  const externalGameRequests = [];
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => {
+    const destination = new URL(request.url());
+    if (!['GET', 'HEAD'].includes(request.method()) || /formspree|firestore\.googleapis/i.test(request.url())) writes.push(request.url());
+    if (destination.origin !== new URL(url).origin && (destination.pathname.includes('/game/') || request.resourceType() === 'font')) {
+      externalGameRequests.push(request.url());
+    }
+  });
+  t.after(() => {
+    assert.deepEqual(errors, [], 'No uncaught page errors during play');
+    assert.deepEqual(writes, [], 'Game never writes to network services');
+    assert.deepEqual(externalGameRequests, [], 'Game art and type are local');
+  });
+
+  async function activate(locator) {
+    if (touch) await locator.tap();
+    else if (input === 'keyboard') await locator.press('Enter');
+    else await locator.click();
+  }
+
+  function control(data, key, target) {
+    const selector = `[data-${data}="${key}"]${target === undefined ? '' : `[data-target="${target}"]`}`;
+    return game.locator(`button${selector}:visible`);
+  }
+
+  const action = (type, target) => activate(control('action', type, target));
+  const local = (type, target) => activate(control('local-action', type, target));
+  const pick = (panel, target) => activate(control('open', panel, target));
+  const click = name => activate(button(name));
+
+  async function go(place) {
+    await activate(control('place', 'map'));
+    await activate(control('place', place));
+  }
+
+  async function confirm(type, quantity) {
+    if (quantity !== undefined) {
+      await game.locator('input[type="number"]:visible').fill(String(quantity));
+    }
+    await action(type);
+  }
+
+  async function build(plot = '1') {
+    await activate(control('select-plot', plot));
+    await action('clear-plot', plot);
+    await action('build-pen', plot);
+  }
+
+  async function buyGrain() {
+    await pick('grain-order');
+    await confirm('order-grain');
+    await page.clock.runFor(1400);
+  }
+
+  async function feed({ rotate = false, order = true } = {}) {
+    if (rotate) {
+      await go('pasture');
+      await pick('pasture-gate');
+      await action('rotate', 'B');
+    }
+    await go('barn');
+    if (order) await buyGrain();
+    await local('start-route');
+    await local('assist-route');
+    await page.clock.runFor(2500);
+    await action('settle-feed');
+  }
+
+  async function stock(plot, quantity) {
+    await pick('starters', plot);
+    await confirm('buy-starters', quantity);
+  }
+
+  async function sell(kind, group, quantity) {
+    await go('orders');
+    await pick(kind, group);
+    await confirm(`sell-${kind}`, quantity);
+  }
+
+  async function closeWeek() {
+    await go('office');
+    await action('end-week');
+  }
+
+  return { page, game, value, action, local, pick, go, confirm, click, build, buyGrain, feed, stock, sell, closeWeek };
+}
+
+registerOfficeBrowserTests(farmDriver);
+
+for (const [name, input, expansions, marketSale, finalCash] of [
+  ['one pen', 'keyboard', false, true, '$470'],
+  ['two expansions', 'touch', true, true, '$680'],
+  ['a missed market sale', 'pointer', false, false, '$20']
+]) {
+  test(`six-week reference season with ${name} via ${input}`, async t => {
+    const farm = await farmDriver(t, input, { reducedMotion: input === 'touch' ? 'reduce' : 'no-preference' });
+    assert.match(await farm.value('week'), /Week 1/);
+    assert.equal(await farm.value('cash'), '$1,000');
+    await farm.build();
+    await farm.go('supply');
+    await farm.stock('1', expansions ? 4 : 2);
+    assert.equal(await farm.value('cash'), expansions ? '$600' : '$800');
+
+    await farm.feed();
+    await farm.sell('feeder', '1', expansions ? 4 : 1);
+    if (expansions) {
+      for (const plot of ['2', '3']) {
+        await farm.go('supply');
+        await farm.pick('kit', plot);
+        await farm.confirm('buy-kit');
+        await farm.go('pasture');
+        await farm.build(plot);
+        await farm.go('supply');
+        await farm.stock(plot, 1);
+      }
+    }
+    await farm.closeWeek();
+
+    for (let week = 2; week <= 6; week += 1) {
+      assert.match(await farm.value('week'), new RegExp(`Week ${week}`));
+      await farm.feed({ rotate: week === 4, order: week !== 4 });
+      if (week === 6 && marketSale) {
+        assert.match(await farm.game.innerText(), /market.ready|ready for market/i);
+        await farm.sell('market', 'litter', expansions ? 2 : 1);
+        if (expansions) {
+          await farm.go('supply');
+          await farm.stock('1', 2);
+        }
+      }
+      await farm.closeWeek();
+    }
+
+    assert.equal(await farm.value('cash'), finalCash);
+    assert.match(await farm.game.innerText(), marketSale
+      ? /season won|you did it|successful season|both sales/i
+      : /no market|missed market|market.+needed/i);
+    await farm.action('replay');
+    assert.equal(await farm.value('cash'), '$1,000');
+    assert.match(await farm.value('week'), /Week 1/);
+    assert.match(await farm.game.innerText(), /wooded|trees/i);
+  });
+}
+
+test('blocked opening art leaves a playable intro and a working homepage launcher', async t => {
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  t.after(() => context.close());
+  const page = await context.newPage();
+  await page.route('**/*', route => {
+    const request = route.request();
+    return new URL(request.url()).origin === new URL(url).origin && ['GET', 'HEAD'].includes(request.method())
+      && !request.url().includes('/game/art/opening-') ? route.continue() : route.abort();
+  });
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  const launch = page.getByRole('button', { name: 'Open game', exact: true });
+  await launch.click();
+  const game = page.getByRole('dialog', { name: 'Hog Farm Game', exact: true });
+  await game.locator('.farm-prologue-portrait[data-missing]').waitFor();
+  await game.getByRole('button', { name: 'Skip intro', exact: true }).press('Enter');
+  assert.match(await game.locator('[data-stat="week"]').innerText(), /Week 1/);
+  await game.getByRole('button', { name: 'Exit game', exact: true }).press('Enter');
+  assert.equal(await launch.evaluate(element => element === document.activeElement), true);
+});
+
+test('a grain shortage holds the litter while the pasture-fed starters grow', async t => {
+  const farm = await farmDriver(t, 'pointer', { reducedMotion: 'reduce' });
+  await farm.build();
+  await farm.go('supply');
+  await farm.stock('1', 2);
+  await farm.go('barn');
+  assert.match(await farm.game.innerText(), /short by 3 units/i);
+  await farm.local('start-route');
+  await farm.local('assist-route');
+  await farm.page.clock.runFor(2500);
+  await farm.pick('feed-shortfall-bucket');
+  assert.match(await farm.game.locator('#farm-panel').innerText(), /Piglets.+short by 3 units/i);
+  await farm.click('Feed what you can');
+  assert.equal(await farm.value('grain'), '0');
+  assert.match(await farm.game.innerText(), /Piglets.+held at 0 fed weeks/i);
+  assert.match(await farm.game.innerText(), /Grower pen 1.+grew to 2 fed weeks/i);
+  await farm.sell('feeder', '1', 1);
+  assert.equal(await farm.value('cash'), '$1,000');
+  assert.equal(await farm.value('herd'), '4');
+});
+
+test('replaying a paused bucket run clears the farm and leaves no route callback', async t => {
+  const farm = await farmDriver(t, 'pointer');
+  await farm.build();
+  await farm.go('supply');
+  await farm.stock('1', 1);
+  await farm.go('barn');
+  await farm.buyGrain();
+  await farm.local('start-route');
+  await farm.page.clock.runFor(1000);
+  await farm.click('Farm map');
+  await farm.click('Help journal');
+  await farm.pick('replay');
+  await farm.action('replay');
+  await farm.page.clock.runFor(9000);
+  assert.match(await farm.value('week'), /Week 1/);
+  assert.equal(await farm.value('cash'), '$1,000');
+  assert.equal(await farm.value('grain'), '0');
+  assert.equal(await farm.value('herd'), '0');
+  await farm.game.getByRole('heading', { name: 'Pasture', exact: true }).waitFor();
+  await farm.game.getByRole('button', { name: 'Wooded plot', exact: true }).waitFor();
+});
+
+test('the spare grass covers two growers and conversion changes only the next forecast', async t => {
+  const farm = await farmDriver(t, 'touch', { viewport: { width: 740, height: 350 }, reducedMotion: 'reduce' });
+  await farm.build();
+  await farm.go('supply');
+  await farm.stock('1', 4);
+  await farm.feed();
+  await farm.sell('feeder', '1', 2);
+
+  await farm.go('supply');
+  await farm.pick('kit', '3');
+  await farm.confirm('buy-kit', 4);
+  await farm.go('pasture');
+  await farm.build('3');
+  await farm.go('supply');
+  await farm.stock('3', 4);
+
+  await farm.go('supply');
+  await farm.pick('grass', '2');
+  await farm.action('keep-grass');
+  const balance = await farm.value('cash');
+  assert.equal(balance, '$380');
+  await farm.go('barn');
+  assert.match(await farm.game.innerText(), /next morning.+9 to feed.+6 from grass/is);
+
+  await farm.go('supply');
+  await farm.pick('kit', '2');
+  const preview = farm.game.locator('[data-expansion-preview]');
+  assert.match(await preview.innerText(), /up to 2 units from the spare grass will be lost/i);
+  assert.match(await preview.innerText(), /4 pigs/i);
+  assert.equal(await farm.value('cash'), balance);
+  await farm.click('Cancel');
+  await farm.go('barn');
+  assert.match(await farm.game.innerText(), /next morning.+9 to feed.+6 from grass/is);
+  assert.match(await farm.game.innerText(), /grew to 2 fed weeks/i);
+
+  await farm.go('supply');
+  await farm.pick('kit', '2');
+  await farm.confirm('buy-kit', 1);
+  assert.equal(await farm.value('cash'), '$260');
+  await farm.go('pasture');
+  await farm.build('2');
+  await farm.go('barn');
+  assert.match(await farm.game.innerText(), /next morning.+9 to feed.+4 from grass/is);
+  assert.match(await farm.game.innerText(), /grew to 2 fed weeks/i);
+});
+
+test('the illustrated map follows a delivery, route and eligible feeder sale', async t => {
+  const farm = await farmDriver(t, 'touch', { reducedMotion: 'reduce' });
+  const cue = place => farm.game.locator(`[data-map-cue="${place}"]`);
+  await farm.build();
+  await farm.go('supply');
+  await farm.stock('1', 2);
+  await farm.click('Farm map');
+  assert.match(await cue('barn').innerText(), /feed short by 3/i);
+  await cue('barn').tap();
+
+  await farm.pick('grain-order');
+  await farm.action('order-grain');
+  await farm.click('Farm map');
+  assert.match(await cue('barn').innerText(), /truck on the road/i);
+  await farm.page.clock.runFor(1400);
+  assert.match(await cue('barn').innerText(), /grain ready/i);
+  assert.equal(await farm.value('grain'), '4');
+  await cue('barn').tap();
+
+  await farm.local('start-route');
+  await farm.click('Farm map');
+  assert.match(await cue('route').innerText(), /resume feed run/i);
+  await cue('route').tap();
+  await farm.local('assist-route');
+  await farm.page.clock.runFor(2500);
+  await farm.action('settle-feed');
+  await farm.click('Farm map');
+  assert.equal(await cue('route').count(), 0);
+  assert.match(await cue('orders').innerText(), /feeders ready/i);
+  await cue('orders').tap();
+  await farm.pick('feeder', '1');
+  await farm.confirm('sell-feeder', 2);
+  await farm.click('Farm map');
+  assert.equal(await cue('orders').count(), 0);
+  assert.equal(await farm.value('herd'), '3');
+});
+
+test('Debbie links back to unfinished chores, records one bill and reopens a seen conversation', async t => {
+  const farm = await farmDriver(t, 'keyboard');
+  await farm.build();
+  await farm.go('supply');
+  await farm.stock('1', 2);
+  await farm.go('barn');
+  await farm.pick('grain-order');
+  await farm.action('order-grain');
+  await farm.go('office');
+  assert.match(await farm.game.innerText(), /wait for the grain truck/i);
+  assert.equal(await farm.game.locator('[data-action="end-week"]').count(), 0);
+  await farm.page.clock.runFor(1400);
+  assert.match(await farm.game.innerText(), /settle the morning feeding/i);
+  await farm.feed({ order: false });
+
+  await farm.go('office');
+  await farm.click('Talk to Debbie');
+  const decision = farm.game.locator('#farm-panel');
+  assert.match(await decision.innerText(), /Week 1.+The first morning/i);
+  await farm.click('Close');
+  await farm.click('Help journal');
+  const weekOne = decision.locator('[data-story-week="1"]');
+  await weekOne.press('Enter');
+  assert.match(await decision.innerText(), /Week 1.+The first morning/i);
+  await farm.click('Close');
+  assert.equal(await weekOne.evaluate(element => element === document.activeElement), true);
+  await farm.click('Close');
+
+  await farm.game.locator('[data-action="end-week"]').evaluate(confirm => {
+    confirm.click();
+    confirm.click();
+  });
+  assert.match(await farm.value('week'), /Week 2/);
+  assert.equal(await farm.value('cash'), '$620');
+});
+
+test('a delivery refreshes an open pen preview without losing the selected number of starters', async t => {
+  const farm = await farmDriver(t, 'pointer');
+  await farm.build();
+  await farm.go('supply');
+  await farm.stock('1', 2);
+  await farm.feed();
+  await farm.sell('feeder', '1', 2);
+  await farm.go('barn');
+  await farm.pick('grain-order');
+  await farm.action('order-grain');
+
+  await farm.go('supply');
+  await farm.pick('kit', '2');
+  const quantity = farm.game.getByRole('spinbutton', { name: 'Number of starters to plan for' });
+  await quantity.fill('4');
+  const preview = farm.game.locator('[data-expansion-preview]');
+  assert.match(await preview.innerText(), /short by 2/i);
+  await farm.game.getByRole('button', { name: 'Confirm kit purchase' }).focus();
+  await farm.page.clock.runFor(1400);
+  assert.equal(await farm.value('grain'), '5');
+  assert.equal(await quantity.inputValue(), '4');
+  assert.match(await preview.innerText(), /\$400/);
+  assert.doesNotMatch(await preview.innerText(), /short by/i);
+});

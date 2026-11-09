@@ -1,0 +1,118 @@
+.farm-stage[data-view='office'] .farm-playfield {
+  background-position: right center;
+}
+
+.farm-office-controls {
+  position: absolute;
+  right: 10%;
+  bottom: 9%;
+}
+
+.farm-office-content {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.farm-office-actions,
+.farm-office-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+
+.farm-office-facts > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.35rem;
+}
+
+.farm-office-facts dd {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.farm-office-ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.farm-office-ledger caption {
+  font-weight: 700;
+  text-align: left;
+}
+
+.farm-office-ledger :is(th, td) {
+  padding: 0.25rem 0.35rem;
+  border-bottom: 1px solid var(--farm-rule);
+  text-align: left;
+}
+
+.farm-office-ledger td,
+.farm-office-ledger th[scope='col']:not(:first-child) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.farm-story-line {
+  display: grid;
+  grid-template-columns: clamp(3.5rem, 18vw, 7.5rem) minmax(0, 1fr);
+  align-items: start;
+  gap: 0.6rem;
+}
+
+.farm-story-line img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 2px solid #96643e;
+  background: #c79d5f;
+}
+
+.farm-story-line strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.farm-journal,
+.farm-recap-results,
+.farm-recap-weeks {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.farm-journal {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.farm-journal :is(button, span) {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.farm-journal span {
+  padding: 0.45rem;
+  color: #734931;
+}
+
+.farm-recap-weeks li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--farm-rule);
+}
+
+@media (orientation: portrait) {
+  .farm-office-controls {
+    right: 0.65rem;
+    left: 0.65rem;
+    display: flex;
+    justify-content: center;
+  }
+}
