@@ -292,9 +292,12 @@ html:has(.farm-player[open]) {
   background: #638248 url('art/pasture.svg') center / cover;
 }
 
-.farm-stage[data-view='barn'] .farm-playfield,
-.farm-stage[data-view='supply'] .farm-playfield {
+.farm-stage[data-view='barn'] .farm-playfield {
   background-image: url('art/barn.svg');
+}
+
+.farm-stage[data-view='supply'] .farm-playfield {
+  background: #83a24f;
 }
 
 .farm-stage[data-view='orders'] .farm-playfield {

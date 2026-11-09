@@ -157,3 +157,46 @@ test('Farm Supply waits for a pen and starts two distinct groups with one purcha
   await dialog.getByText('3 piglets in their own pen').waitFor();
   await dialog.getByText('Boar and sow stay on the farm').waitFor();
 });
+
+test('Farm Supply keeps the pen, quantity, and price visible for a phone purchase', async t => {
+  const { page, launcher, dialog, button } = await play(t, {
+    isMobile: true, hasTouch: true, viewport: { width: 320, height: 568 }, reducedMotion: 'reduce'
+  });
+  await launcher.tap();
+  await button('Skip intro').tap();
+  await button('Wooded plot').tap();
+  await button('Clear trees').tap();
+  await button('Build first pen').tap();
+  await button('Go to Farm Supply').tap();
+  await dialog.locator('.farm-artwork [data-supply-shop]').waitFor();
+  await button('Buy starters for Pen 1').tap();
+  await dialog.getByRole('heading', { name: 'Starters for Pen 1', exact: true }).waitFor();
+  const quantity = dialog.getByRole('spinbutton', { name: 'Number of starter pigs' });
+  const total = dialog.locator('[data-starter-total]');
+  assert.match(await dialog.locator('[data-starter-price]').innerText(), /\$100 each/u);
+  assert.equal(await quantity.inputValue(), '2');
+  assert.match(await total.innerText(), /\$200/u);
+  await quantity.fill('3');
+  assert.match(await total.innerText(), /\$300/u);
+
+  for (const [width, height] of [[320, 568], [667, 375], [740, 350]]) {
+    await page.setViewportSize({ width, height });
+    const purchaseFits = await total.evaluate(node => {
+      const panel = node.closest('.farm-panel');
+      const body = panel.querySelector('.farm-panel-body').getBoundingClientRect();
+      const confirm = panel.querySelector('[data-action="buy-starters"]').getBoundingClientRect();
+      const rows = [node, panel.querySelector('input'), panel.querySelector('[data-starter-price]')];
+      return rows.every(row => {
+        const bounds = row.getBoundingClientRect();
+        return bounds.top >= body.top - 1 && bounds.bottom <= body.bottom + 1 &&
+          bounds.left >= body.left - 1 && bounds.right <= body.right + 1;
+      }) && confirm.bottom <= innerHeight && confirm.height >= 44;
+    });
+    assert.equal(purchaseFits, true, `Purchase details fit at ${width} × ${height}`);
+  }
+
+  await button('Confirm starter purchase').press('Enter');
+  await dialog.getByRole('heading', { name: 'Pasture', exact: true }).waitFor();
+  await dialog.getByText('3 starter pigs · 1 fed week').waitFor();
+  assert.equal(await dialog.locator('[data-stat="cash"]').innerText(), '$700');
+});

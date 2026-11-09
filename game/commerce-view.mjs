@@ -2,28 +2,7 @@ import {
   expansionPreview, feedForecast, formatCash, KIT_COST, PEN_CAPACITY, saleGroups, SALE_AGE, SALE_PRICES, SEASON_GOAL, SPARE_FORAGE, STARTER_COST
 } from './morning.mjs';
 
-const supplyArt = `<svg viewBox="0 0 960 620" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-  <defs>
-    <pattern id="farm-supply-planks" width="88" height="120" patternUnits="userSpaceOnUse">
-      <path d="M0 0h88v120H0z" fill="#a5734b"/>
-      <path d="M1 0v120m80-120v120" fill="none" stroke="#805339" stroke-width="3"/>
-      <path d="M20 14v28m34 23v43m-17-40v18" fill="none" stroke="#be8a58" stroke-width="2"/>
-    </pattern>
-  </defs>
-  <path fill="#835335" d="M0 0h960v620H0z"/>
-  <path fill="url(#farm-supply-planks)" d="M0 0h960v415H0z"/>
-  <path d="M0 410h960v210H0z" fill="#6d4930"/>
-  <path d="M0 444h960M0 497h960M0 562h960M186 620l167-209m224 209-43-209m255 209L643 411" stroke="#8a613e" stroke-width="5" fill="none"/>
-  <path d="M240 165h480v254H240z" fill="#583724" stroke="#bc8a55" stroke-width="14"/>
-  <path d="M236 270h488m-487 90h486" stroke="#d0a064" stroke-width="13"/>
-  <path d="M264 222h84v40h-84zm98-16h111v56H362zm129 20h66v36h-66zm89-19h109v55H580z" fill="#bd985a" stroke="#82552e" stroke-width="4"/>
-  <path d="M267 304h111v48H267zm128 7h100v41H395zm135-6h84v47h-84zm97 8h61v39h-61z" fill="#aa8050" stroke="#795030" stroke-width="4"/>
-  <path d="M185 402h588v86H185z" fill="#805433" stroke="#613a26" stroke-width="7"/>
-  <path d="M173 391h612v25H173z" fill="#d3a468" stroke="#73472b" stroke-width="5"/>
-  <path d="M584 371h82v19h-82zm16-16h47v16h-47z" fill="#596557" stroke="#394b41" stroke-width="4"/>
-  <rect x="345" y="80" width="270" height="54" rx="3" fill="#4e3927" stroke="#d5a46b" stroke-width="4"/>
-  <path d="M384 107h192" stroke="#f0cd85" stroke-width="3" stroke-dasharray="28 8 10 8"/>
-</svg>`;
+import { renderSupplyArt } from './supply-art.mjs';
 
 const saleLabels = { feeder: 'Feeder pickup', market: 'Market hog sale' };
 const pigLabel = quantity => `${quantity} ${quantity === 1 ? 'pig' : 'pigs'}`;
@@ -66,7 +45,7 @@ function supplyView(state) {
         : state.sales.feeder ? `Pen kits cost ${formatCash(KIT_COST)}. Preview the kit and feed before spending.`
           : 'The fenced pens already have their hogs.';
   return {
-    art: supplyArt,
+    art: renderSupplyArt(),
     controls: `<div class="farm-stage-controls farm-commerce-controls">${options.join('')}</div>`,
     details: `<p>${message}</p>`
   };
@@ -77,11 +56,15 @@ function starterDecision(state, id) {
   if (pen?.status !== 'fenced' || pen.pigs) return null;
   const quantity = 'farm-starter-quantity';
   const firstPurchase = !state.litterBorn ? `<p><strong>Season goals.</strong> ${SEASON_GOAL}</p>` : '';
+  const initialQuantity = 2;
   return {
     title: `Starters for Pen ${pen.id}`,
-    body: `${firstPurchase}<p>Weaned starters cost ${formatCash(STARTER_COST)} each. Choose up to ${PEN_CAPACITY}.</p>
-      <p>Cash on hand ${formatCash(state.cash)}.</p>
-      ${numericChoice(quantity, 'Number of starter pigs', PEN_CAPACITY, 2)}`,
+    body: `${firstPurchase}<p data-starter-price>Weaned starters cost ${formatCash(STARTER_COST)} each. Choose up to ${PEN_CAPACITY}.</p>
+      <p data-starter-cash>Cash on hand ${formatCash(state.cash)}.</p>
+      <div class="farm-starter-choice">
+        ${numericChoice(quantity, 'Number of starter pigs', PEN_CAPACITY, initialQuantity, 'data-commerce-quantity="starters"')}
+        <p data-starter-total role="status">Purchase total ${formatCash(initialQuantity * STARTER_COST)}.</p>
+      </div>`,
     actions: control('Confirm starter purchase', `data-action="buy-starters" data-target="${pen.id}" data-quantity-from="${quantity}"`, true)
       + control('Cancel', 'data-panel-close')
   };
@@ -182,8 +165,11 @@ export function updateCommercePreview(root, state) {
       expansionFigures(expansionPreview(state, input.dataset.target, quantity), false);
   } else {
     const valid = Number.isInteger(quantity) && quantity >= 1 && quantity <= Number(input.max);
-    root.querySelector('[data-sale-total]').textContent = valid
-      ? `Pickup total ${formatCash(quantity * SALE_PRICES[kind])}.`
+    const [total, label, unitPrice] = kind === 'starters'
+      ? ['[data-starter-total]', 'Purchase total', STARTER_COST]
+      : ['[data-sale-total]', 'Pickup total', SALE_PRICES[kind]];
+    root.querySelector(total).textContent = valid
+      ? `${label} ${formatCash(quantity * unitPrice)}.`
       : `Choose a quantity between 1 and ${input.max}.`;
   }
 }
