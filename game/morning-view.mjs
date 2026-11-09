@@ -21,14 +21,14 @@ export const prologue = [
     art: 'opening-hogs',
     alt: 'Joe beside a hog at the fence',
     title: 'A new piece of ground',
-    text: 'Morning. We’ve got a wooded plot and six weeks to raise a herd. Could use a hand getting started.'
+    text: `Morning. We’ve got six weeks to raise a herd. ${SEASON_GOAL}`
   },
   {
     speaker: 'Debbie Rice',
     art: 'opening-ledger',
     alt: 'Debbie at her ledger in the office',
     title: 'I’ll keep the books',
-    text: `We start with $1,000. ${SEASON_GOAL}`
+    text: 'We start with $1,000. Come see me in the Office to look over the morning and pay the bill.'
   },
   {
     speaker: 'Joe Rice',

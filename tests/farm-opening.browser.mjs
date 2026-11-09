@@ -101,7 +101,6 @@ for (const [width, height] of [[320, 568], [667, 375]]) {
     });
     const goals = /feeder sale.+market hog sale.+cash left after the last bill/i;
     await launcher.press('Enter');
-    await button('Continue').tap();
     assert.match(await dialog.locator('.farm-prologue-text').innerText(), goals);
     await button('Skip intro').tap();
     await button('Wooded plot').tap();
