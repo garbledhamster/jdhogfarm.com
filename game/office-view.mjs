@@ -1,5 +1,5 @@
 import { renderFeedForecast, renderFeedingGroups } from './chores-view.mjs';
-import { endWeekBlocker, feedForecast, formatCash, OVERHEAD, saleGroups, SEASON_GOAL, SEASON_WEEKS } from './morning.mjs';
+import { canContinueFarm, chapterEndWeek, endWeekBlocker, feedForecast, formatCash, OVERHEAD, saleGroups, SEASON_GOAL, SEASON_WEEKS } from './morning.mjs';
 
 const chapters = [
   {
@@ -60,16 +60,17 @@ function nextOfficeAction(state, { route }) {
     };
   }
 
-  const marketReady = !state.sales.market && saleGroups(state, 'market').length;
-  const feederReady = !state.sales.feeder && saleGroups(state, 'feeder').length;
+  const finalWeek = state.week === chapterEndWeek(state);
+  const marketReady = (state.chapter === 'growth' || !state.sales.market) && saleGroups(state, 'market').length;
+  const feederReady = (state.chapter === 'growth' || !state.sales.feeder) && saleGroups(state, 'feeder').length;
   const checkOrders = marketReady || feederReady
-    ? button('Check Orders', 'data-place="orders"', state.week === SEASON_WEEKS)
+    ? button('Check Orders', 'data-place="orders"', finalWeek)
     : '';
   return {
     note: marketReady ? 'A market hog is ready. You can sell it before you close the books.'
       : feederReady ? 'A feeder is ready. You can arrange a pickup before you close the books.'
         : 'The morning’s work is in the books.',
-    actions: checkOrders + button('End Week', `data-action="end-week" data-week="${state.week}"`, !checkOrders || state.week !== SEASON_WEEKS)
+    actions: checkOrders + button('End Week', `data-action="end-week" data-week="${state.week}"`, !checkOrders || !finalWeek)
   };
 }
 
@@ -83,7 +84,7 @@ function officeArt(state) {
 }
 
 function officeFacts(state) {
-  const finalWeek = state.week === SEASON_WEEKS;
+  const finalWeek = state.week === chapterEndWeek(state);
   return `<dl class="farm-office-facts">
     <div><dt>Cash now</dt><dd>${formatCash(state.cash)}</dd></div>
     <div><dt>${finalWeek ? 'Last bill' : 'Next bill'}</dt><dd>${formatCash(OVERHEAD)}</dd></div>
@@ -92,7 +93,7 @@ function officeFacts(state) {
 }
 
 function nextMorningForecast(state) {
-  return state.feeding && state.week < SEASON_WEEKS
+  return state.feeding && state.week < chapterEndWeek(state)
     ? renderFeedForecast(state, feedForecast(state, { next: true }), { focusable: true })
     : '';
 }
@@ -103,8 +104,8 @@ export function renderOfficePlace(place, state, context) {
   if (state.result) {
     return {
       art,
-      controls: `<div class="farm-office-controls">${button('Season recap', 'data-open="recap"', true)}</div>`,
-      details: `<p>The season is closed. Cash after the last bill is ${formatCash(state.cash)}.</p>`
+      controls: `<div class="farm-office-controls">${button(recapTitle(state), 'data-open="recap"', true)}</div>`,
+      details: `<p>${state.chapter === 'growth' ? 'The growth chapter is closed.' : 'The season is closed.'} Cash after the last bill is ${formatCash(state.cash)}.</p>`
     };
   }
   const next = nextOfficeAction(state, context);
@@ -161,11 +162,14 @@ function helpJournal(state, seenStories) {
       : `<span>Week ${week} · Unread</span>`}</li>`;
   }).join('');
 
+  const growing = state.chapter === 'growth';
+  const goal = growing ? `Keep money in the account after the Week ${chapterEndWeek(state)} bill.` : SEASON_GOAL;
+  const talk = growing ? '' : `<p>Talk to Joe or Debbie in Week ${state.week} to add that conversation to the journal.</p>`;
   return {
     title: 'Help journal',
-    body: `<h4>Season goals</h4><p>${SEASON_GOAL}</p>
+    body: `<h4>${growing ? 'Growth chapter' : 'Season goals'}</h4><p>${goal}</p>
       <p>Use the map to visit a place. Check the Barn forecast, choose when to sell in Orders, and select End Week in the Office.</p>
-      <p>Talk to Joe or Debbie in Week ${state.week} to add that conversation to the journal.</p>
+      ${talk}
       <h4>Conversations</h4><ol class="farm-journal">${weeks}</ol>`,
     actions: button('Replay season…', 'data-open="replay"')
   };
@@ -179,6 +183,7 @@ function portraitLine(name, image, line) {
 function renderStory(state, storyWeek) {
   const week = chapters[storyWeek - 1] ? storyWeek : state.week;
   const chapter = chapters[week - 1];
+  if (!chapter) return null;
   return {
     title: `Week ${week} · ${chapter.title}`,
     body: `<div class="farm-office-content">${portraitLine('Joe', 'joe', chapter.joe)}
@@ -208,7 +213,7 @@ function endingExchange(state) {
       : !state.sales.market ? 'a market hog sale' : '';
   const joe = missedSale ? `We closed without ${missedSale}.` : 'We made both sales.';
   const cashLeft = `There’s ${formatCash(state.cash)} left after the last bill.`;
-  const debbie = state.result === 'won' ? `${cashLeft} Time to shut the gate for the season.`
+  const debbie = state.result === 'won' ? `${cashLeft} We can stop here or keep farming.`
     : state.cash > 0 ? cashLeft
       : state.cash === 0 ? 'The last bill used the rest of our cash. We needed money left to finish the season.'
         : `We’re short by ${formatCash(-state.cash)} after the last bill. We needed money left to finish the season.`;
@@ -218,7 +223,49 @@ function endingExchange(state) {
   </section>`;
 }
 
+function recapWeeks(history) {
+  const weeks = history.map(({ week, feeding, cash }) => {
+    const feed = feeding.shortfall ? `Feed short by ${feeding.shortfall}`
+      : feeding.demand ? 'All groups fed' : 'No hogs to feed';
+    return `<li><span>Week ${week}</span><span>${feed}</span><strong>${formatCash(cash)}</strong></li>`;
+  }).join('');
+  return `<h4>Each week after the bill</h4><ol class="farm-recap-weeks">${weeks}</ol>`;
+}
+
+function recapTitle(state) {
+  return state.chapter === 'growth' ? 'Growth chapter recap' : 'Season recap';
+}
+
+function growthRecap(state) {
+  const { ledgerLength, sales } = state.firstMilestone;
+  const openingCash = state.ledger[ledgerLength - 1].balance;
+  const totals = { sales: 0, purchases: 0, bills: 0 };
+  for (const entry of state.ledger.slice(ledgerLength)) {
+    if (entry.type === 'overhead') totals.bills -= entry.amount;
+    else if (entry.amount < 0) totals.purchases -= entry.amount;
+    else totals.sales += entry.amount;
+  }
+  const feeders = counts(state.sales.feeder - sales.feeder, 'feeder hog');
+  const market = counts(state.sales.market - sales.market, 'market hog');
+  return {
+    title: recapTitle(state),
+    body: `<section class="farm-office-content" aria-label="Growth chapter result">
+      <h4>${state.result === 'won' ? 'You finished Week 12 with cash left' : 'Week 12 closed without cash left'}</h4>
+      <p>You started Week 7 with ${formatCash(openingCash)}. After the last bill, you had ${formatCash(state.cash)}.</p>
+      <div class="farm-office-actions">${button('Closing ledger', 'data-open="ledger"', true)}</div>
+      <ul class="farm-recap-results">
+        <li>Sales: ${formatCash(totals.sales)} · ${feeders} and ${market} sold.</li>
+        <li>Purchases: ${formatCash(totals.purchases)}.</li>
+        <li>Weekly bills: ${formatCash(totals.bills)}.</li>
+      </ul>
+      </section>
+      ${recapWeeks(state.history.slice(SEASON_WEEKS))}`,
+    actions: button('Replay season', 'data-action="replay"')
+  };
+}
+
 function seasonRecap(state) {
+  if (state.chapter === 'growth') return growthRecap(state);
   const won = state.result === 'won';
   const lastBill = state.ledger.findLast(entry => entry.type === 'overhead');
   const results = [
@@ -226,11 +273,6 @@ function seasonRecap(state) {
     state.sales.market ? `${counts(state.sales.market, 'market hog')} sold.` : 'No market hog sale.',
     `${formatCash(lastBill?.balance ?? state.cash)} after the last bill.`
   ];
-  const history = state.history.map(({ week, feeding, cash }) => {
-    const feed = feeding.shortfall ? `Feed short by ${feeding.shortfall}`
-      : feeding.demand ? 'All groups fed' : 'No hogs to feed';
-    return `<li><span>Week ${week}</span><span>${feed}</span><strong>${formatCash(cash)}</strong></li>`;
-  }).join('');
   return {
     title: 'Season recap',
     body: `<section class="farm-office-content" aria-label="Season result">
@@ -239,9 +281,10 @@ function seasonRecap(state) {
       <div class="farm-office-actions">${button('Closing ledger', 'data-open="ledger"', true)}</div>
       <ul class="farm-recap-results">${results.map(result => `<li>${result}</li>`).join('')}</ul>
       </section>
-      <h4>Each week after the bill</h4><ol class="farm-recap-weeks">${history}</ol>
+      ${recapWeeks(state.history)}
       <h4>On your next run</h4><p>${recapAdvice(state)}</p>`,
-    actions: button('Replay season', 'data-action="replay"')
+    actions: (canContinueFarm(state) ? button('Continue farm', 'data-action="continue-farm"', true) : '') +
+      button('Replay season', 'data-action="replay"')
   };
 }
 

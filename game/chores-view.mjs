@@ -1,4 +1,4 @@
-import { feedForecast, formatCash, GRAIN_BUNDLE, PADDOCK_FORAGE, RECOVERY_WEEKS, saleGroups } from './morning.mjs';
+import { chapterEndWeek, feedForecast, formatCash, GRAIN_BUNDLE, PADDOCK_FORAGE, RECOVERY_WEEKS, saleGroups } from './morning.mjs';
 import { renderBarnArt, renderPigletArt, renderRouteArt } from './chores-art.mjs';
 
 const groupName = group => group.id === 'litter' ? 'Piglets' : `Grower pen ${group.id}`;
@@ -24,8 +24,10 @@ export function renderFeedingGroups(feeding) {
 }
 
 function showForecast(state) {
-  if (state.feeding) return renderFeedingGroups(state.feeding) + renderFeedForecast(state, feedForecast(state, { next: true }));
-  return renderFeedForecast(state);
+  if (!state.feeding) return renderFeedForecast(state);
+  const feeding = renderFeedingGroups(state.feeding);
+  if (state.chapter === 'growth' && state.week === chapterEndWeek(state)) return feeding;
+  return feeding + renderFeedForecast(state, feedForecast(state, { next: true }));
 }
 
 function nextAfterFeed(state) {

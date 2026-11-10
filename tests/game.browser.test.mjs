@@ -6,6 +6,7 @@ import { chromium } from 'playwright';
 import { registerFarmBookBrowserTests } from './farm-book.browser.mjs';
 import { registerChoreBrowserTests } from './farm-chores.browser.mjs';
 import { registerOfficeBrowserTests } from './farm-office.browser.mjs';
+import { registerGrowthBrowserTests } from './farm-growth.browser.mjs';
 import { registerSaveBrowserTests } from './farm-save.browser.mjs';
 
 let server;
@@ -248,6 +249,7 @@ async function farmDriver(t, input, options = {}) {
 registerFarmBookBrowserTests(farmDriver);
 registerOfficeBrowserTests(farmDriver);
 registerSaveBrowserTests(farmDriver);
+registerGrowthBrowserTests(farmDriver);
 
 test('Orders explains how morning feeding changes sale readiness', async t => {
   const farm = await farmDriver(t, 'pointer', { reducedMotion: 'reduce' });

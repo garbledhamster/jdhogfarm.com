@@ -1,4 +1,5 @@
 export const SEASON_WEEKS = 6;
+export const GROWTH_END_WEEK = 12;
 export const OVERHEAD = 80;
 export const STARTER_COST = 100;
 export const PEN_CAPACITY = 4;
@@ -29,6 +30,8 @@ function plot(id, status) {
 export function createFarm() {
   return {
     week: 1,
+    chapter: 'first',
+    firstMilestone: null,
     cash: OPENING_CASH,
     grain: 0,
     plots: [plot('1', 'wooded'), plot('2', 'locked'), plot('3', 'locked')],
@@ -46,6 +49,14 @@ export function createFarm() {
     sales: { feeder: 0, market: 0 },
     result: null
   };
+}
+
+export function chapterEndWeek(state) {
+  return state.chapter === 'growth' ? GROWTH_END_WEEK : SEASON_WEEKS;
+}
+
+export function canContinueFarm(state) {
+  return state.chapter === 'first' && state.week === SEASON_WEEKS && state.result === 'won';
 }
 
 export function formatCash(cash) {
@@ -286,11 +297,25 @@ function endWeek(state, week) {
     cash: billed.cash
   }];
   const next = nextMorning(billed);
-  if (state.week === SEASON_WEEKS) {
-    const won = state.sales.feeder > 0 && state.sales.market > 0 && billed.cash > 0;
+  if (state.week === chapterEndWeek(state)) {
+    const won = billed.cash > 0 && (state.chapter === 'growth' || (state.sales.feeder > 0 && state.sales.market > 0));
     return accept({ ...next, week: state.week, history, result: won ? 'won' : 'lost' });
   }
   return accept({ ...next, history, feeding: null, bucket: null });
+}
+
+function continueFarm(state) {
+  if (!canContinueFarm(state)) return reject(state, 'Finish the first season with a win to continue.');
+  // The Week 6 close already posted the bill and rolled the pasture into the next morning.
+  return accept({
+    ...state,
+    chapter: 'growth',
+    firstMilestone: { result: state.result, ledgerLength: state.ledger.length, sales: state.sales },
+    week: SEASON_WEEKS + 1,
+    result: null,
+    feeding: null,
+    bucket: null
+  });
 }
 
 function sell(state, kind, { id, quantity, week, expectedPigs }) {
@@ -359,6 +384,7 @@ export function expansionPreview(state, id, quantity = 0, { grass = false } = {}
 }
 
 export function applyFarmAction(state, action) {
+  if (action.type === 'continue-farm') return continueFarm(state);
   if (state.result) return reject(state, 'The season is over. Replay to start again.');
 
   const { type, id, quantity } = action;

@@ -2,7 +2,7 @@ import { createChores } from './chores.mjs';
 import { paintChoreRoute } from './chores-art.mjs';
 import { updateCommercePreview } from './commerce-view.mjs';
 import { renderFarmBook } from './farm-book-view.mjs';
-import { applyFarmAction, createFarm, formatCash, SEASON_WEEKS } from './morning.mjs';
+import { applyFarmAction, chapterEndWeek, createFarm, formatCash, SEASON_WEEKS } from './morning.mjs';
 import { placeNames, prologue, renderDecision, renderPlace } from './morning-view.mjs';
 import { openSeasonSave } from './season-save.mjs';
 
@@ -175,13 +175,15 @@ function render() {
   const view = renderPlace(place, state, context);
   const showingBook = panel === 'farm-book';
   const decision = showingBook ? renderFarmBook(state, context) : panel && renderDecision(panel, state, context);
-  setText(ui.stats.week, `Week ${state.week} of ${SEASON_WEEKS}`);
+  setText(ui.stats.week, `Week ${state.week} of ${chapterEndWeek(state)}`);
   setText(ui.stats.cash, formatCash(state.cash));
   setText(ui.stats.grain, String(state.grain));
   const pigs = state.plots.reduce((total, plot) => total + plot.pigs, state.litter.pigs);
   setText(ui.stats.herd, String(pigs));
   setText(ui.talk, place === 'office' ? 'Talk to Debbie' : 'Talk to Joe');
-  ui.talk.toggleAttribute('data-unread', !seenStories.has(state.week) && !state.result);
+  const hasStory = state.week <= SEASON_WEEKS;
+  ui.talk.hidden = !ui.intro.hidden || !hasStory;
+  ui.talk.toggleAttribute('data-unread', hasStory && !seenStories.has(state.week) && !state.result);
   setText(ui.sceneTitle, placeNames[place]);
   setText(ui.notice, decision ? '' : notice);
   const feedback = showingBook ? bookNotice : notice;
@@ -248,7 +250,7 @@ function showPlayInterface() {
   ui.intro.hidden = true;
   ui.interface.hidden = false;
   ui.help.hidden = false;
-  ui.talk.hidden = false;
+  ui.talk.hidden = state.week > SEASON_WEEKS;
 }
 
 function beginPlay() {
@@ -304,6 +306,9 @@ function goTo(destination, nextNotice = '') {
 }
 
 function openPanel(key, target, opener) {
+  const requestedStory = key === 'story' ? Number(opener.dataset.storyWeek ?? state.week) : null;
+  if (key === 'story' && (!Number.isInteger(requestedStory) || requestedStory < 1 ||
+    requestedStory > Math.min(SEASON_WEEKS, state.week))) return;
   const fromHelp = panel === 'help';
   panel = key;
   panelTarget = target ?? null;
@@ -312,7 +317,7 @@ function openPanel(key, target, opener) {
   else notice = '';
   if (key === 'story') {
     storyFromHelp = fromHelp;
-    storyWeek = Number(opener.dataset.storyWeek ?? state.week);
+    storyWeek = requestedStory;
     seenStories.add(storyWeek);
     saveProgress();
   }
@@ -352,6 +357,7 @@ function applyAction(button) {
     return;
   }
   if (action === 'end-week' && place !== 'office') return;
+  if (action === 'continue-farm' && (place !== 'office' || panel !== 'recap')) return;
   const input = quantityFrom && document.getElementById(quantityFrom);
   const amount = input ? input.valueAsNumber : quantity === undefined ? undefined : Number(quantity);
   const result = applyFarmAction(state, {
@@ -373,6 +379,12 @@ function applyAction(button) {
   if (action === 'buy-starters') {
     selectedPlot = target;
     goTo('pasture');
+    return;
+  }
+  if (action === 'continue-farm') {
+    recentAction = null;
+    previousPlace = 'office';
+    goTo('barn', 'Week 7 is open. Check the Barn to see what needs feeding.');
     return;
   }
   if (action === 'end-week') {
