@@ -197,7 +197,8 @@ function render() {
   ui.map.setAttribute('aria-pressed', String(place === 'map'));
   ui.stage.dataset.view = place;
   setMarkup(ui.art, view.art);
-  syncCarrier(ui.art, place === 'route' ? context.route : null, context.motion, routeActive);
+  // The scheduler retains the route while the map replaces its artwork.
+  syncCarrier(ui.art, context.route, context.motion, routeActive);
   setMarkup(ui.controls, view.controls, ui.sceneTitle);
   setMarkup(ui.details, view.details, ui.sceneTitle);
   ui.field.inert = Boolean(decision);

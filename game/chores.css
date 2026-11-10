@@ -170,10 +170,32 @@
   }
 }
 
+@media (orientation: portrait) and (height <= 540px) {
+  .farm-player:has(.farm-stage[data-view="route"]) .farm-player-bar {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .farm-player:has(.farm-stage[data-view="route"]) .farm-player-actions {
+    justify-content: space-between;
+  }
+
+  .farm-player:has(.farm-stage[data-view="route"]) .farm-player-actions button {
+    padding-inline: 0.45rem;
+    font-size: 0.6875rem;
+  }
+}
+
 @media (orientation: portrait) {
+  .farm-stage[data-view="route"] {
+    grid-template-rows: minmax(min-content, 1fr) minmax(min-content, auto);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .farm-stage[data-view="route"] .farm-playfield {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(6rem, 1fr) auto;
     background: #83a24f;
   }
 

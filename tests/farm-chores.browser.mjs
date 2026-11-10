@@ -80,6 +80,72 @@ export function registerChoreBrowserTests(openGame) {
     });
   }
 
+  test('bucket carrier holds its visible pose across the map and resets on retry', async t => {
+    const fixture = await openGame(t, { reducedMotion: 'no-preference' });
+    const { page, game, button } = fixture;
+    await startHerd(fixture);
+    await visit(fixture, 'barn');
+    await button('Take bucket').click();
+    const carrier = game.locator('[data-chore-hero]');
+    const pose = () => carrier.getAttribute('transform');
+    const entrance = await pose();
+    await button('Start walking').click();
+    await page.keyboard.press('ArrowLeft');
+    await page.clock.runFor(24);
+    const stepping = await pose();
+    assert.notEqual(stepping, entrance);
+    await button('Farm map').click();
+    await page.clock.runFor(1000);
+    await button('Return to Feed run').click();
+    assert.equal(await pose(), stepping, 'Returning from the map keeps the partially completed step');
+    assert.equal(await button('Left lane').getAttribute('aria-pressed'), 'true');
+
+    await page.keyboard.press('ArrowRight');
+    await page.clock.runFor(3000);
+    await game.getByText('You met a rock. Retry or walk with Joe.').waitFor();
+    await button('Retry route').click();
+    assert.equal(await pose(), entrance, 'Retry starts with the carrier at the middle entrance');
+  });
+
+  test('bucket route keeps the artwork and touch controls usable in short portrait', async t => {
+    const fixture = await openGame(t, {
+      keyboard: true, isMobile: true, hasTouch: true, viewport: { width: 320, height: 480 }
+    });
+    const { page, game, button } = fixture;
+    await startHerd(fixture);
+    await visit(fixture, 'barn');
+    await button('Take bucket').tap();
+
+    const carrier = game.locator('[data-chore-hero]');
+    async function assertSceneHasRoom() {
+      const { artHeight, carrierHeight, pageFits } = await carrier.evaluate(node => ({
+        artHeight: node.closest('.farm-artwork').getBoundingClientRect().height,
+        carrierHeight: node.getBoundingClientRect().height,
+        pageFits: document.documentElement.scrollWidth <= innerWidth
+      }));
+      assert.ok(artHeight >= 96 && carrierHeight >= 13, `Scene height ${artHeight}px, carrier height ${carrierHeight}px`);
+      assert.ok(pageFits, 'The game fits the viewport width');
+    }
+
+    await assertSceneHasRoom();
+    await button('Start walking').tap();
+    await assertSceneHasRoom();
+    await button('Left lane').tap();
+    assert.equal(await button('Left lane').getAttribute('aria-pressed'), 'true');
+
+    await page.setViewportSize({ width: 320, height: 420 });
+    await assertSceneHasRoom();
+    const guidanceFits = await game.locator('.farm-stage').evaluate(stage => {
+      stage.scrollTop = stage.scrollHeight;
+      const guidance = stage.querySelector('.farm-summary').getBoundingClientRect();
+      return stage.scrollTop > 0 && guidance.bottom <= stage.getBoundingClientRect().bottom + 1;
+    });
+    assert.ok(guidanceFits, 'The route stage scrolls to reveal its full guidance');
+    await button('Walk with Joe').tap();
+    await page.clock.runFor(2400);
+    await game.getByRole('heading', { name: 'Piglet pen', exact: true }).waitFor();
+  });
+
   test('bucket run collides, retries, and pauses across the map, rotation and a hidden page', async t => {
     const fixture = await openGame(t, {
       isMobile: true, hasTouch: true, viewport: { width: 390, height: 740 }, reducedMotion: 'reduce'
