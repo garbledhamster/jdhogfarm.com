@@ -161,11 +161,65 @@ function visibleProgress(progress, motion) {
   return motion ? progress : Math.floor(progress * 8) / 8;
 }
 
+const LANE_STEP_MS = 120;
+
+export function createRouteCarrier(readProgress) {
+  let sprite;
+  let frame = null;
+  let previousRoute;
+  let previousMotion;
+  let lane = 1;
+  let progress = 0;
+  let step;
+
+  function draw() {
+    sprite?.setAttribute('transform', routeTransform(lane, progress));
+  }
+
+  function animate(time) {
+    if (step) {
+      const fraction = Math.max(0, Math.min(1, (time - step.started) / LANE_STEP_MS));
+      lane = step.from + (previousRoute.lane - step.from) * (1 - (1 - fraction) ** 3);
+      if (fraction === 1) step = null;
+    }
+    // A pause can discard part of a scheduler tick. Hold the last frame until it catches up.
+    progress = Math.max(progress, readProgress());
+    draw();
+    frame = requestAnimationFrame(animate);
+  }
+
+  return function syncCarrier(container, route, motion, active) {
+    sprite = route ? container.querySelector('[data-chore-hero]') : null;
+    const walking = route?.status === 'walking';
+    const animateCarrier = active && walking && motion && sprite;
+    if (!animateCarrier && frame !== null) {
+      cancelAnimationFrame(frame);
+      frame = null;
+      step = null;
+    }
+    const retrying = walking && !route.assisted && previousRoute?.status === 'blocked';
+    if (!motion || !previousMotion || !walking || !previousRoute || retrying) {
+      lane = route?.lane ?? 1;
+      progress = visibleProgress(route?.progress ?? 0, motion);
+      step = null;
+    }
+    if (animateCarrier) {
+      if (!step || previousRoute?.lane !== route.lane) {
+        step = lane === route.lane ? null : { from: lane, started: performance.now() };
+      }
+      if (frame === null) frame = requestAnimationFrame(animate);
+    }
+    previousRoute = route;
+    previousMotion = motion;
+    draw();
+  };
+}
+
 export function paintChoreRoute(container, route, motion) {
-  const hero = container.querySelector('[data-chore-hero]');
-  if (!hero || !route) return;
-  const progress = visibleProgress(route.progress, motion);
-  hero.setAttribute('transform', routeTransform(route.lane, progress));
+  if (!motion) {
+    const hero = container.querySelector('[data-chore-hero]');
+    hero?.setAttribute('transform', routeTransform(route.lane, visibleProgress(route.progress, motion)));
+  }
   for (const obstacle of route.obstacles) {
     const sprite = container.querySelector(`[data-chore-obstacle="${obstacle.id}"]`);
     const position = motion ? obstacle : { ...obstacle, lane: Math.round(obstacle.lane) };

@@ -1,5 +1,5 @@
 import { createChores } from './chores.mjs';
-import { paintChoreRoute } from './chores-art.mjs';
+import { createRouteCarrier, paintChoreRoute } from './chores-art.mjs';
 import { updateCommercePreview } from './commerce-view.mjs';
 import { renderFarmBook } from './farm-book-view.mjs';
 import { applyFarmAction, chapterEndWeek, createFarm, formatCash, SEASON_WEEKS } from './morning.mjs';
@@ -97,6 +97,8 @@ const chores = createChores({
   }
 });
 
+const syncCarrier = createRouteCarrier(() => chores.paintProgress);
+
 function setText(node, text) {
   if (node.textContent !== text) node.textContent = text;
 }
@@ -158,16 +160,18 @@ function focusPlace() {
 }
 
 function syncChores() {
+  const active = ui.player.open && !document.hidden && place === 'route' && !panel;
   chores.sync({
     week: state.week,
     shipment: state.shipment,
     hasBucket: Boolean(state.bucket),
-    active: ui.player.open && !document.hidden && place === 'route' && !panel
+    active
   });
+  return active;
 }
 
 function render() {
-  syncChores();
+  const routeActive = syncChores();
   const context = {
     previousPlace, selectedPlot, panel, panelTarget, storyWeek, storyFromHelp, seenStories, recentAction,
     bookSection, motion: motion.matches, route: chores.route, deliveryStage: chores.deliveryStage
@@ -193,6 +197,7 @@ function render() {
   ui.map.setAttribute('aria-pressed', String(place === 'map'));
   ui.stage.dataset.view = place;
   setMarkup(ui.art, view.art);
+  syncCarrier(ui.art, place === 'route' ? context.route : null, context.motion, routeActive);
   setMarkup(ui.controls, view.controls, ui.sceneTitle);
   setMarkup(ui.details, view.details, ui.sceneTitle);
   ui.field.inert = Boolean(decision);

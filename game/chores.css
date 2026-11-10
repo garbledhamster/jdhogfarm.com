@@ -170,6 +170,38 @@
   }
 }
 
+@media (orientation: portrait) {
+  .farm-stage[data-view="route"] .farm-playfield {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    background: #83a24f;
+  }
+
+  .farm-stage[data-view="route"] :is(.farm-artwork, .farm-hotspots),
+  .farm-chore-controls--route {
+    position: static;
+  }
+
+  .farm-stage[data-view="route"] .farm-artwork {
+    overflow: hidden;
+    container-type: size;
+  }
+
+  .farm-stage[data-view="route"] .farm-artwork > svg {
+    inline-size: min(100%, 174cqh);
+    margin-inline: auto;
+    overflow: visible;
+  }
+
+  .farm-chore-controls--route {
+    min-block-size: 7.625rem;
+    align-content: center;
+    padding: 0.35rem 0.5rem;
+    border-block-start: 2px solid #ba8855;
+    background: #f9e7bd;
+  }
+}
+
 @media (orientation: landscape) and (height <= 550px) {
   .farm-stage[data-view="route"] .farm-playfield {
     background: #83a24f;

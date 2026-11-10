@@ -25,6 +25,61 @@ async function orderGrain({ game, button }) {
 }
 
 export function registerChoreBrowserTests(openGame) {
+  for (const [input, viewport] of [
+    ['keyboard', { width: 1280, height: 800 }],
+    ['touch', { width: 320, height: 568 }]
+  ]) {
+    test(`bucket carrier moves between route ticks and eases toward ${input} steering`, async t => {
+      const touch = input === 'touch';
+      const fixture = await openGame(t, { keyboard: true, isMobile: touch, hasTouch: touch, viewport });
+      const { page, game, button } = fixture;
+      const activate = name => touch ? button(name).tap() : button(name).press('Enter');
+      await startHerd(fixture);
+      await visit(fixture, 'barn');
+      await activate('Take bucket');
+      const carrier = game.locator('[data-chore-hero]');
+      const pose = () => carrier.evaluate(node => {
+        const { e: x, f: y } = node.transform.baseVal.getItem(0).matrix;
+        return { x, y };
+      });
+      const entrance = await pose();
+      await page.clock.runFor(1000);
+      assert.deepEqual(await pose(), entrance);
+      await activate('Start walking');
+      if (touch) await button('Left lane').tap();
+      else await page.keyboard.press('ArrowLeft');
+      assert.equal(await button('Left lane').getAttribute('aria-pressed'), 'true');
+
+      const atInput = await pose();
+      await page.clock.runFor(24);
+      const firstPaint = await pose();
+      assert.ok(firstPaint.y < entrance.y, 'Carrier advances before the 40 ms route tick');
+      assert.equal(atInput.x, entrance.x, 'Steering starts from the visible lane');
+      assert.ok(firstPaint.x < entrance.x && firstPaint.x > entrance.x - 70, 'Carrier starts easing left within 24 ms');
+      if (touch) {
+        const artClearOfControls = await carrier.evaluate(node => {
+          const controls = node.closest('.farm-playfield').querySelector('.farm-chore-controls--route');
+          return node.getBoundingClientRect().bottom <= controls.getBoundingClientRect().top;
+        });
+        assert.ok(artClearOfControls, 'Portrait controls leave the moving carrier visible');
+      }
+
+      // Retargeting before the first step finishes must preserve the current pose.
+      if (touch) await button('Middle lane').tap();
+      else await page.keyboard.press('ArrowRight');
+      assert.equal((await pose()).x, firstPaint.x);
+      if (touch) await button('Left lane').tap();
+      else await page.keyboard.press('ArrowLeft');
+      await page.clock.runFor(136);
+      assert.ok((await pose()).x < entrance.x - 70, 'Carrier completes the step into the left lane');
+
+      await page.clock.runFor(5479);
+      await game.getByRole('heading', { name: 'Feed run', exact: true }).waitFor();
+      await page.clock.runFor(1);
+      await game.getByRole('heading', { name: 'Piglet pen', exact: true }).waitFor();
+    });
+  }
+
   test('bucket run collides, retries, and pauses across the map, rotation and a hidden page', async t => {
     const fixture = await openGame(t, {
       isMobile: true, hasTouch: true, viewport: { width: 390, height: 740 }, reducedMotion: 'reduce'
@@ -57,8 +112,13 @@ export function registerChoreBrowserTests(openGame) {
     assert.equal(await button('Retry route').evaluate(node => document.activeElement === node), true);
     await button('Retry route').tap();
     assert.equal(await button('Middle lane').evaluate(node => document.activeElement === node), true);
+    const middle = await carrier.getAttribute('transform');
     await page.keyboard.press('ArrowLeft');
     assert.equal(await button('Left lane').getAttribute('aria-pressed'), 'true');
+    const left = await carrier.getAttribute('transform');
+    assert.notEqual(left, middle, 'Reduced motion snaps directly to the chosen lane');
+    await page.clock.runFor(24);
+    assert.equal(await carrier.getAttribute('transform'), left);
     await button('Right lane').tap();
     await button('Left lane').tap();
     await page.clock.runFor(1100);
@@ -102,7 +162,9 @@ export function registerChoreBrowserTests(openGame) {
     await game.getByText('Order grain before taking the bucket.', { exact: false }).waitFor();
     await button('Take bucket').click();
     await button('Walk with Joe').click();
-    await page.clock.runFor(2500);
+    await page.clock.runFor(2399);
+    await game.getByRole('heading', { name: 'Feed run', exact: true }).waitFor();
+    await page.clock.runFor(1);
     await button('Pour feed').click();
     await game.getByRole('heading', { name: 'Feed shortfall', exact: true }).waitFor();
     assert.equal(await value('grain'), '0');

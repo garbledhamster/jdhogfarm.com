@@ -62,8 +62,12 @@ export function createChores({
     }, FRAME_MS);
   }
 
+  function progressAfter(elapsed) {
+    return Math.min(1, route.progress + elapsed / (route.assisted ? ASSIST_MS : ROUTE_MS));
+  }
+
   function advanceRoute(elapsed) {
-    const progress = Math.min(1, route.progress + elapsed / (route.assisted ? ASSIST_MS : ROUTE_MS));
+    const progress = progressAfter(elapsed);
     const hit = !route.assisted && obstacleSet().find(obstacle =>
       route.progress < obstacle.at && progress >= obstacle.at && route.lane === Math.round(obstacleLane(obstacle, obstacle.at))
     );
@@ -138,6 +142,15 @@ export function createChores({
 
   return {
     get route() { return routeSnapshot(); },
+    get paintProgress() {
+      // Draw between ticks without moving collision checks or the arrival callback.
+      if (!routeTimer) return route?.progress ?? 0;
+      const projected = progressAfter(Math.min(FRAME_MS, now() - routeTimer.started));
+      if (route.assisted) return projected;
+      // Wait for the scheduler to resolve a crossing before drawing past its obstacle.
+      const nextObstacle = obstacleSet().find(obstacle => obstacle.at > route.progress);
+      return Math.min(projected, nextObstacle?.at ?? 1);
+    },
     get deliveryStage() { return delivery?.stage ?? null; },
     routeAction,
     sync({ week: currentWeek, shipment, active: routeVisible, hasBucket: reserved = true }) {
