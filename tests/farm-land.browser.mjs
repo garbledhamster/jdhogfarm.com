@@ -5,17 +5,55 @@ import { test } from 'node:test';
 const saveKey = 'jdhogfarm.season';
 const [, firstWin] = JSON.parse(readFileSync(new URL('./fixtures/farm-season-v1.json', import.meta.url)));
 
-async function resume(farm, snapshot) {
+async function reloadFarm(farm, snapshot) {
   if (snapshot) {
     await farm.page.evaluate(({ key, snapshot }) => {
       localStorage.setItem(key, JSON.stringify(snapshot));
     }, { key: saveKey, snapshot });
   }
   await farm.page.reload({ waitUntil: 'domcontentloaded' });
+}
+
+async function resume(farm, snapshot) {
+  await reloadFarm(farm, snapshot);
   await farm.page.getByRole('button', { name: 'Continue season', exact: true }).click();
 }
 
 export function registerLandBrowserTests(farmDriver) {
+  test('farther land can be bought before the planned starter is affordable', async t => {
+    const farm = await farmDriver(t, 'pointer');
+    await farm.page.route('https://fonts.googleapis.com/**', route => route.abort());
+    await resume(farm, firstWin);
+    await farm.click('Continue farm');
+    await farm.buyGrain();
+    await farm.buyGrain();
+    assert.equal(await farm.value('cash'), '$270');
+    await farm.go('supply');
+    await farm.pick('kit', '4');
+    const figures = farm.game.getByRole('region', { name: 'Price and feed outlook' });
+    assert.match(await figures.innerText(), /Due now\s+\$220/);
+    assert.match(await figures.innerText(), /After starters\s+-\$50/);
+    assert.match(await figures.innerText(), /Save \$50 more for the planned starters/);
+    await farm.click('Buy land and kit');
+    assert.equal(await farm.value('cash'), '$50');
+  });
+
+  test('farther land in the ledger prevents a truncated current save from resuming', async t => {
+    const farm = await farmDriver(t, 'pointer');
+    await farm.page.route('https://fonts.googleapis.com/**', route => route.abort());
+    await resume(farm, firstWin);
+    await farm.click('Continue farm');
+    await farm.go('supply');
+    await farm.pick('kit', '4');
+    await farm.confirm('buy-kit', 0);
+    const damaged = await farm.page.evaluate(key => JSON.parse(localStorage.getItem(key)), saveKey);
+    assert.equal(damaged.state.ledger.at(-1).id, '4');
+    damaged.state.plots = damaged.state.plots.slice(0, 3);
+    await reloadFarm(farm, damaged);
+    assert.equal(await farm.page.getByRole('button', { name: 'Continue season', exact: true }).count(), 0);
+    await farm.page.getByRole('button', { name: 'Open game', exact: true }).waitFor();
+  });
+
   for (const [width, height] of [[320, 568], [667, 375]]) {
     test(`farther land preview and purchase survive reload at ${width} × ${height}`, async t => {
       const farm = await farmDriver(t, 'touch', { viewport: { width, height }, reducedMotion: 'reduce' });
@@ -35,7 +73,7 @@ export function registerLandBrowserTests(farmDriver) {
         assert.equal(await panel.getByRole('heading').innerText(), `Preview Plot ${id}`);
         const figures = panel.getByRole('region', { name: 'Price and feed outlook' });
         assert.match(await figures.innerText(), /Land now\s+\$100\s+Kit now\s+\$120\s+Starters later\s+\$100/);
-        assert.match(await figures.innerText(), /Cash left\s+\$150/);
+        assert.match(await figures.innerText(), /After starters\s+\$150/);
         assert.match(await figures.innerText(), /Added capacity\s+4 pigs/);
         assert.match(await figures.innerText(), /Grain needed/);
         assert.ok(await panel.locator('.farm-panel-body').evaluate(body => body.scrollWidth <= body.clientWidth));

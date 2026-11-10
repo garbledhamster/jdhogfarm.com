@@ -125,7 +125,10 @@ function expansionFigures(preview, grass) {
     landCost, kitCost, hogCost, capacityGained, forageLost, forageCapacityBefore } = preview;
   const forageNote = forageLost ? ` Up to ${forageLost} units from the spare grass will be lost for the season.`
     : forageCapacityAfter > forageCapacityBefore ? ` Spare grass can add up to ${SPARE_FORAGE} units for older hogs.` : '';
-  const warning = preview.error ? `<p class="farm-expansion-warning">${preview.error}</p>` : '';
+  const starterWarning = landCost && cashLeft < 0
+    ? `You can buy the land and kit now. Save ${formatCash(-cashLeft)} more for the planned starters.` : '';
+  const message = preview.error ?? starterWarning;
+  const warning = message ? `<p class="farm-expansion-warning">${message}</p>` : '';
   const kit = `<dt>Kit now</dt><dd>${formatCash(kitCost)}</dd>`;
   const capacity = `<dt>${landCost ? 'Added capacity' : 'Pen capacity gained'}</dt><dd>${pigLabel(capacityGained)}</dd>`;
   const forecast = `<dt>Next morning demand</dt><dd>${demandBefore} → ${demandAfter} ${landCost ? 'units' : 'feed units'}</dd>
@@ -137,7 +140,7 @@ function expansionFigures(preview, grass) {
         <dt>Land now</dt><dd>${formatCash(landCost)}</dd>${kit}
         <dt>Starters later</dt><dd>${formatCash(hogCost)}</dd>
         <dt>Due now</dt><dd>${formatCash(landCost + kitCost)}</dd>
-        <dt>Cash left</dt><dd>${formatCash(cashLeft)}</dd>
+        <dt>After starters</dt><dd>${formatCash(cashLeft)}</dd>
         ${capacity}
       </dl>
       <dl class="farm-expansion-figures">${forecast}</dl>

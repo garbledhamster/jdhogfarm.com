@@ -144,6 +144,13 @@ function validFarm(state) {
     validLastOutcome(state);
 }
 
+function hasFartherPlotReferences({ state, selectedPlot }) {
+  const includesFarther = records => records.some(({ id }) => FARTHER_PLOT_IDS.includes(id));
+  return FARTHER_PLOT_IDS.includes(selectedPlot) || includesFarther(state.ledger) ||
+    includesFarther(state.feeding?.groups ?? []) ||
+    state.history.some(week => includesFarther(week.transactions) || includesFarther(week.feeding.groups));
+}
+
 function decode(raw) {
   try {
     const stored = JSON.parse(raw);
@@ -154,6 +161,8 @@ function decode(raw) {
       : stored;
     if (saved.state.lastOutcome === undefined) saved.state.lastOutcome = null;
     if (saved.state.chapter === 'growth' && Array.isArray(saved.state.plots) && saved.state.plots.length === plotIds.length) {
+      // A save with a farther purchase or feeding record has lost plot data.
+      if (hasFartherPlotReferences(saved)) return null;
       saved = { ...saved, state: { ...saved.state, plots: [...saved.state.plots, ...fartherPlots()] } };
     }
     if (validFarm(saved.state) &&

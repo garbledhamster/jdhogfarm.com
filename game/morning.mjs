@@ -355,12 +355,13 @@ function landCost(id) {
 }
 
 function kitError(state, id, plot, quantity) {
-  if (FARTHER_PLOT_IDS.includes(id) && state.chapter !== 'growth') return 'Farther plots open in the growth chapter.';
+  const land = landCost(id);
+  if (land && state.chapter !== 'growth') return 'Farther plots open in the growth chapter.';
   if (!plot || plot.id === '1') return 'Choose a spare plot for the kit.';
   if (!state.sales.feeder) return 'Make a feeder sale to unlock the spare plots.';
   if (plot.status !== 'available' && plot.status !== 'grazing') return 'This plot already has its pen kit.';
   if (quantity !== 0 && !validStarterQuantity(quantity)) return 'Choose one to four starter pigs.';
-  const cost = landCost(id) + KIT_COST + quantity * STARTER_COST;
+  const cost = KIT_COST + (land ? land : quantity * STARTER_COST);
   if (state.cash < cost) return insufficientCash(cost);
   return null;
 }
