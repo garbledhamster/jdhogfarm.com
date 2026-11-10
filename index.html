@@ -661,12 +661,20 @@
         </section>
         <div class="farm-interface" hidden>
           <div class="farm-dashboard">
-            <button class="farm-small-button farm-map-toggle" type="button" data-place="map" aria-label="Farm map" aria-pressed="false">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zm6-3v15m6-12v15"></path>
-              </svg>
-              Map
-            </button>
+            <div class="farm-dashboard-tools">
+              <button class="farm-small-button farm-map-toggle" type="button" data-place="map" aria-label="Farm map" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3zm6-3v15m6-12v15"></path>
+                </svg>
+                Map
+              </button>
+              <button class="farm-small-button farm-book-toggle" type="button" data-open="farm-book" aria-label="Farm book" aria-haspopup="dialog" aria-controls="farm-panel" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 6c-2-2-5-2-9-2v14c4 0 7 0 9 2 2-2 5-2 9-2V4c-4 0-7 0-9 2zm0 0v14"></path>
+                </svg>
+                Book
+              </button>
+            </div>
             <p data-stat="week">Week 1 of 6</p>
             <dl class="farm-stats">
               <div><dt>Cash</dt><dd data-stat="cash"></dd></div>

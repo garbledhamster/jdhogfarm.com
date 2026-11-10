@@ -1,6 +1,7 @@
 import { createChores } from './chores.mjs';
 import { paintChoreRoute } from './chores-art.mjs';
 import { updateCommercePreview } from './commerce-view.mjs';
+import { renderFarmBook } from './farm-book-view.mjs';
 import { applyFarmAction, createFarm, formatCash, SEASON_WEEKS } from './morning.mjs';
 import { placeNames, prologue, renderDecision, renderPlace } from './morning-view.mjs';
 import { openSeasonSave } from './season-save.mjs';
@@ -33,6 +34,7 @@ const ui = {
   introSkip: select('.farm-prologue-skip'),
   interface: select('.farm-interface'),
   map: select('.farm-map-toggle'),
+  book: select('.farm-book-toggle'),
   stage: select('.farm-stage'),
   field: select('.farm-playfield'),
   art: select('.farm-artwork'),
@@ -59,6 +61,8 @@ let selectedPlot = null;
 let panel = null;
 let panelTrigger = null;
 let panelTarget = null;
+let bookSection = 'pens';
+let bookNotice = '';
 let storyWeek = null;
 let storyFromHelp = false;
 let seenStories = new Set();
@@ -72,7 +76,9 @@ const chores = createChores({
     const result = applyFarmAction(state, { type: 'deliver-grain', id });
     if (result.error) return;
     state = result.state;
-    notice = 'Grain ready. The truck filled the bin.';
+    const deliveryNotice = 'Grain ready. The truck filled the bin.';
+    if (panel === 'farm-book') bookNotice = deliveryNotice;
+    if (panel !== 'farm-book' || !notice) notice = deliveryNotice;
     saveProgress();
     render();
   },
@@ -164,10 +170,11 @@ function render() {
   syncChores();
   const context = {
     previousPlace, selectedPlot, panel, panelTarget, storyWeek, storyFromHelp, seenStories, recentAction,
-    motion: motion.matches, route: chores.route, deliveryStage: chores.deliveryStage
+    bookSection, motion: motion.matches, route: chores.route, deliveryStage: chores.deliveryStage
   };
   const view = renderPlace(place, state, context);
-  const decision = panel && renderDecision(panel, state, context);
+  const showingBook = panel === 'farm-book';
+  const decision = showingBook ? renderFarmBook(state, context) : panel && renderDecision(panel, state, context);
   setText(ui.stats.week, `Week ${state.week} of ${SEASON_WEEKS}`);
   setText(ui.stats.cash, formatCash(state.cash));
   setText(ui.stats.grain, String(state.grain));
@@ -177,8 +184,10 @@ function render() {
   ui.talk.toggleAttribute('data-unread', !seenStories.has(state.week) && !state.result);
   setText(ui.sceneTitle, placeNames[place]);
   setText(ui.notice, decision ? '' : notice);
-  setText(ui.panelFeedback, decision ? notice : '');
-  ui.panelFeedback.hidden = !decision || !notice;
+  const feedback = showingBook ? bookNotice : notice;
+  setText(ui.panelFeedback, decision ? feedback : '');
+  ui.panelFeedback.hidden = !decision || !feedback;
+  ui.book.setAttribute('aria-expanded', String(showingBook));
   ui.map.setAttribute('aria-pressed', String(place === 'map'));
   ui.stage.dataset.view = place;
   setMarkup(ui.art, view.art);
@@ -201,11 +210,14 @@ function renderDecisionPanel(decision) {
   const key = `${panel}:${panelTarget ?? ''}`;
   const sameDecision = ui.panel.dataset.decisionKey === key;
   const previousInput = sameDecision ? ui.panelBody.querySelector('input[type="number"]') : null;
+  const bookPage = panel === 'farm-book' && ui.panelBody.querySelector(`#farm-book-page-${bookSection}`);
+  const bookScroll = bookPage && bookPage.scrollTop;
   ui.panel.dataset.decisionKey = key;
   setText(ui.panelTitle, decision.title);
   setMarkup(ui.panelBody, decision.body, ui.panelTitle);
   setMarkup(ui.panelActions, decision.actions, ui.panelTitle);
   if (!sameDecision) ui.panelBody.scrollTop = 0;
+  if (bookScroll) ui.panelBody.querySelector(`#${bookPage.id}`).scrollTop = bookScroll;
   if (previousInput) {
     const currentInput = ui.panelBody.querySelector(`#${CSS.escape(previousInput.id)}`);
     if (currentInput) {
@@ -271,6 +283,7 @@ function clearPanel() {
   panel = null;
   panelTarget = null;
   panelTrigger = null;
+  bookNotice = '';
   storyFromHelp = false;
 }
 
@@ -295,7 +308,8 @@ function openPanel(key, target, opener) {
   panel = key;
   panelTarget = target ?? null;
   panelTrigger = opener;
-  notice = '';
+  if (key === 'farm-book') bookNotice = '';
+  else notice = '';
   if (key === 'story') {
     storyFromHelp = fromHelp;
     storyWeek = Number(opener.dataset.storyWeek ?? state.week);
@@ -313,8 +327,8 @@ function closePanel() {
     return;
   }
   const opener = panelTrigger;
+  if (panel !== 'farm-book') notice = '';
   clearPanel();
-  notice = '';
   render();
   focus(opener?.isConnected ? opener : ui.sceneTitle);
 }
@@ -323,6 +337,7 @@ function replay() {
   chores.reset();
   state = createFarm();
   selectedPlot = null;
+  bookSection = 'pens';
   storyWeek = null;
   seenStories = new Set();
   recentAction = null;
@@ -402,7 +417,7 @@ function exitGame() {
 root.addEventListener('click', event => {
   const button = event.target.closest('button');
   if (!button?.isConnected || button.disabled) return;
-  const { place: destination, open, selectPlot, action, localAction, target } = button.dataset;
+  const { place: destination, open, selectPlot, action, localAction, target, bookSection: section } = button.dataset;
   if (button === ui.launcher) {
     if (!ui.intro.hidden) readSeasonSave();
     launcherTop = ui.launcher.getBoundingClientRect().top;
@@ -433,8 +448,13 @@ root.addEventListener('click', event => {
     saveProgress();
     render();
     focus(ui.controls.querySelector('[data-action]'));
+  } else if (button === ui.book && panel === 'farm-book') {
+    closePanel();
   } else if (open) {
     openPanel(open, target, button);
+  } else if (section && panel === 'farm-book') {
+    bookSection = section;
+    render();
   } else if (button.hasAttribute('data-panel-close')) {
     closePanel();
   } else if (localAction) {

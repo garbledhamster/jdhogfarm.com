@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { after, before, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { registerFarmBookBrowserTests } from './farm-book.browser.mjs';
 import { registerChoreBrowserTests } from './farm-chores.browser.mjs';
 import { registerOfficeBrowserTests } from './farm-office.browser.mjs';
 import { registerSaveBrowserTests } from './farm-save.browser.mjs';
@@ -244,6 +245,7 @@ async function farmDriver(t, input, options = {}) {
   return { page, game, value, action, local, pick, go, confirm, click, build, buyGrain, feed, stock, sell, closeWeek };
 }
 
+registerFarmBookBrowserTests(farmDriver);
 registerOfficeBrowserTests(farmDriver);
 registerSaveBrowserTests(farmDriver);
 
