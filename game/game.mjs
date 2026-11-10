@@ -2,6 +2,7 @@ import { createChores } from './chores.mjs';
 import { createRouteCarrier, paintChoreRoute } from './chores-art.mjs';
 import { updateCommercePreview } from './commerce-view.mjs';
 import { renderFarmBook } from './farm-book-view.mjs';
+import { describeFarmReceipt } from './farm-receipt-view.mjs';
 import { applyFarmAction, chapterEndWeek, createFarm, formatCash, SEASON_WEEKS } from './morning.mjs';
 import { placeNames, prologue, renderDecision, renderPlace } from './morning-view.mjs';
 import { openSeasonSave } from './season-save.mjs';
@@ -76,9 +77,8 @@ const chores = createChores({
     const result = applyFarmAction(state, { type: 'deliver-grain', id });
     if (result.error) return;
     state = result.state;
-    const deliveryNotice = 'Grain ready. The truck filled the bin.';
-    if (panel === 'farm-book') bookNotice = deliveryNotice;
-    if (panel !== 'farm-book' || !notice) notice = deliveryNotice;
+    notice = describeFarmReceipt(state);
+    if (panel === 'farm-book') bookNotice = notice;
     saveProgress();
     render();
   },
@@ -274,6 +274,7 @@ function restoreSeason() {
   if (state.result) {
     place = 'office';
     panel = 'recap';
+    notice = describeFarmReceipt(state);
   } else if (state.bucket && !bucketArrived) {
     place = 'route';
   }
@@ -377,14 +378,14 @@ function applyAction(button) {
     render();
     return;
   }
-  const previous = state;
+  const showsReceipt = state.ledger !== result.state.ledger || action === 'settle-feed';
   state = result.state;
   recentAction = { type: action, id: target };
   clearPanel();
-  notice = previous.ledger.length !== state.ledger.length ? state.ledger.at(-1).label : '';
+  notice = showsReceipt ? describeFarmReceipt(state) : '';
   if (action === 'buy-starters') {
     selectedPlot = target;
-    goTo('pasture');
+    goTo('pasture', notice);
     return;
   }
   if (action === 'continue-farm') {
@@ -396,7 +397,7 @@ function applyAction(button) {
   if (action === 'end-week') {
     recentAction = null;
     if (!state.result) {
-      goTo('barn', `Week ${previous.week} closed. Debbie posted the ${formatCash(-state.ledger.at(-1).amount)} bill.`);
+      goTo('barn', notice);
       return;
     }
     panel = 'recap';

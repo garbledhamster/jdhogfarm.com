@@ -401,6 +401,9 @@ html:has(.farm-player[open]) {
 }
 
 .farm-notice {
+  position: sticky;
+  top: 0;
+  background: #fff2d0;
   color: #7a0000;
 }
 

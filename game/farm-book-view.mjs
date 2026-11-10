@@ -1,4 +1,5 @@
 import { renderFeedingGroups } from './chores-view.mjs';
+import { describeFarmReceipt, formatCashChange } from './farm-receipt-view.mjs';
 import { feedForecast, formatCash, GRAIN_BUNDLE, PEN_CAPACITY, saleGroups } from './morning.mjs';
 
 const sections = { pens: 'Pens', feed: 'Feed', land: 'Land', sales: 'Sales' };
@@ -10,6 +11,7 @@ function penFacts(state) {
   const market = new Set(saleGroups(state, 'market').map(group => group.id));
   const readiness = ({ id, pigs, fedWeeks }) => {
     if (!pigs) return 'Empty';
+    if (state.result) return `${count(fedWeeks, 'fed week')} · Season closed`;
     const ready = market.has(id) ? `${pigs} market-ready` : feeders.has(id) ? `${pigs} feeder-ready` : 'Growing';
     return `${count(fedWeeks, 'fed week')} · ${ready}`;
   };
@@ -76,10 +78,12 @@ function salesFacts(state) {
     ${fact('Market hogs sold', state.sales.market)}
     ${fact('Receipts', formatCash(receipts))}
     ${fact('Spending', formatCash(spending))}
+    ${fact('Net cash movement', formatCashChange(receipts - spending))}
   </dl>`;
 }
 
 export function renderFarmBook(state, { bookSection, deliveryStage }) {
+  const latest = describeFarmReceipt(state);
   const pages = { pens: penFacts, feed: feedFacts, land: landFacts, sales: salesFacts };
   const body = `<div class="farm-book-sections" role="group" aria-label="Farm book sections">
     ${Object.entries(sections).map(([key, label]) =>
@@ -87,6 +91,7 @@ export function renderFarmBook(state, { bookSection, deliveryStage }) {
         aria-pressed="${key === bookSection}">${label}</button>`).join('')}
   </div>
   <section class="farm-book-page" id="farm-book-page-${bookSection}" aria-labelledby="farm-book-${bookSection}" tabindex="0">
+    ${latest ? `<p><strong>Latest change</strong> · ${latest}</p>` : ''}
     ${pages[bookSection](state, deliveryStage)}
   </section>`;
   return { title: 'Farm book', body, actions: '' };

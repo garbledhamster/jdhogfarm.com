@@ -44,6 +44,7 @@ export function createFarm() {
     lastDelivery: null,
     bucket: null,
     feeding: null,
+    lastOutcome: null,
     ledger: [{ week: 1, label: 'Opening balance', amount: OPENING_CASH, balance: OPENING_CASH, type: 'opening' }],
     history: [],
     sales: { feeder: 0, market: 0 },
@@ -69,7 +70,7 @@ const reject = (state, error) => ({ state, error });
 function transaction(state, type, label, amount, details = {}) {
   const cash = state.cash + amount;
   const entry = { week: state.week, label, amount, balance: cash, type, ...details };
-  return { ...state, cash, ledger: [...state.ledger, entry] };
+  return { ...state, cash, ledger: [...state.ledger, entry], lastOutcome: 'cash' };
 }
 
 function replacePlot(state, updated) {
@@ -210,7 +211,8 @@ function orderGrain(state) {
 function deliverGrain(state, id) {
   if (!state.shipment || state.shipment.id !== id) return reject(state, 'This delivery is no longer pending.');
   return accept({
-    ...state, shipment: null, grain: state.grain + GRAIN_BUNDLE.units, lastDelivery: { id, week: state.week }
+    ...state, shipment: null, grain: state.grain + GRAIN_BUNDLE.units,
+    lastDelivery: { id, week: state.week }, lastOutcome: 'delivery'
   });
 }
 
@@ -263,7 +265,8 @@ function settleFeed(state, { source, allowShortfall }) {
   const fed = afterFeeding(state, forecast);
   return accept({
     ...fed,
-    litter: grow(fed.litter), plots: fed.plots.map(grow), bucket: null, feeding: { ...forecast, groups }
+    litter: grow(fed.litter), plots: fed.plots.map(grow), bucket: null,
+    feeding: { ...forecast, groups }, lastOutcome: 'feeding'
   });
 }
 

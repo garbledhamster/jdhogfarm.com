@@ -101,6 +101,17 @@ function validMilestone(state) {
     sales[kind] === firstEntries.filter(entry => entry.type === kind).reduce((sum, entry) => sum + entry.quantity, 0));
 }
 
+// A receipt points to a committed outcome already validated by the save.
+function validLastOutcome(state) {
+  switch (state.lastOutcome) {
+    case null: return true;
+    case 'cash': return state.ledger.at(-1).type !== 'opening';
+    case 'delivery': return !state.result && !state.shipment && state.lastDelivery?.week === state.week;
+    case 'feeding': return !state.result && state.feeding !== null;
+    default: return false;
+  }
+}
+
 function validFarm(state) {
   if (!record(state) || !['first', 'growth'].includes(state.chapter)) return false;
   const endWeek = chapterEndWeek(state);
@@ -123,7 +134,8 @@ function validFarm(state) {
     state.ledger.every(entry => validEntry(entry, state.week)) && state.ledger.at(-1).balance === state.cash &&
     record(state.sales) && whole(state.sales.feeder) && whole(state.sales.market) &&
     (state.result === null || (state.week === endWeek && ['won', 'lost'].includes(state.result) &&
-      state.shipment === null && state.bucket === null)) && validHistory(state, endWeek) && validMilestone(state);
+      state.shipment === null && state.bucket === null)) && validHistory(state, endWeek) && validMilestone(state) &&
+    validLastOutcome(state);
 }
 
 function decode(raw) {
@@ -134,6 +146,7 @@ function decode(raw) {
     const saved = stored.version === 1
       ? { ...stored, version, state: { ...stored.state, chapter: 'first', firstMilestone: null } }
       : stored;
+    if (saved.state.lastOutcome === undefined) saved.state.lastOutcome = null;
     if (validFarm(saved.state) &&
       typeof saved.place === 'string' && Object.hasOwn(placeNames, saved.place) &&
       typeof saved.previousPlace === 'string' && Object.hasOwn(placeNames, saved.previousPlace) &&

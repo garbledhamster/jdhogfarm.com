@@ -4,6 +4,7 @@ import { after, before, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { registerFarmBookBrowserTests } from './farm-book.browser.mjs';
+import { registerFarmReceiptBrowserTests } from './farm-receipts.browser.mjs';
 import { registerChoreBrowserTests } from './farm-chores.browser.mjs';
 import { registerOfficeBrowserTests } from './farm-office.browser.mjs';
 import { registerGrowthBrowserTests } from './farm-growth.browser.mjs';
@@ -247,6 +248,7 @@ async function farmDriver(t, input, options = {}) {
 }
 
 registerFarmBookBrowserTests(farmDriver);
+registerFarmReceiptBrowserTests(farmDriver);
 registerOfficeBrowserTests(farmDriver);
 registerSaveBrowserTests(farmDriver);
 registerGrowthBrowserTests(farmDriver);
