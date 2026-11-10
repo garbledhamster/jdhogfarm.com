@@ -163,7 +163,7 @@ function pigletView(state, { route }) {
   } else if (shipment) {
     status = 'The grain truck is still unloading. Check the Barn before you feed.';
   } else if (bucketAtPen && bucketNeedsReplan(state)) {
-    status = 'There’s more grain in the bin now. Refill the bucket at the Barn before you pour.';
+    status = 'The feed allocation changed. Refill the bucket at the Barn before you pour.';
   } else if (bucketAtPen) {
     status = `The bucket reached the pen with ${units(bucket.amount)} of grain.`;
     action = settleButton('Pour feed', 'bucket', forecast);
