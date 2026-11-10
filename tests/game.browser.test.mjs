@@ -8,6 +8,7 @@ import { registerFarmReceiptBrowserTests } from './farm-receipts.browser.mjs';
 import { registerChoreBrowserTests } from './farm-chores.browser.mjs';
 import { registerOfficeBrowserTests } from './farm-office.browser.mjs';
 import { registerGrowthBrowserTests } from './farm-growth.browser.mjs';
+import { registerRouteBrowserTests } from './farm-route.browser.mjs';
 import { registerLandBrowserTests } from './farm-land.browser.mjs';
 import { registerSaveBrowserTests } from './farm-save.browser.mjs';
 
@@ -254,6 +255,7 @@ registerOfficeBrowserTests(farmDriver);
 registerSaveBrowserTests(farmDriver);
 registerGrowthBrowserTests(farmDriver);
 registerLandBrowserTests(farmDriver);
+registerRouteBrowserTests(farmDriver);
 
 test('Orders explains how morning feeding changes sale readiness', async t => {
   const farm = await farmDriver(t, 'pointer', { reducedMotion: 'reduce' });

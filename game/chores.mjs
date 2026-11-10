@@ -1,5 +1,7 @@
 const ROUTE_MS = 5600;
 const ASSIST_MS = 2400;
+const FARTHER_MS = 2000;
+const FARTHER_ASSIST_MS = 1000;
 const FRAME_MS = 40;
 const ARRIVAL_MS = 400;
 const UNLOAD_MS = 780;
@@ -30,13 +32,23 @@ export function createChores({
   let delivery = null;
 
   function obstacleSet() {
+    if (route?.completedStops > 0) return [week >= 9 ? { ...snake, at: 0.6 } : { ...rock, at: 0.6 }];
     return hazards[Math.min(week ?? 1, hazards.length) - 1];
+  }
+
+  function tripProgress() {
+    if (route.status === 'arrived') return 1;
+    const completed = route.completedStops > 0 ? ROUTE_MS + (route.completedStops - 1) * FARTHER_MS : 0;
+    const current = route.completedStops > 0 ? FARTHER_MS : ROUTE_MS;
+    return (completed + current * route.progress) / (ROUTE_MS + (route.plan.length - 1) * FARTHER_MS);
   }
 
   function routeSnapshot() {
     if (!route) return null;
     return {
       ...route,
+      tripProgress: tripProgress(),
+      plan: route.plan.map(stop => ({ ...stop })),
       obstacles: obstacleSet().map(obstacle => ({ ...obstacle, lane: obstacleLane(obstacle, route.progress) }))
     };
   }
@@ -63,7 +75,10 @@ export function createChores({
   }
 
   function progressAfter(elapsed) {
-    return Math.min(1, route.progress + elapsed / (route.assisted ? ASSIST_MS : ROUTE_MS));
+    const duration = route.completedStops > 0
+      ? (route.assisted ? FARTHER_ASSIST_MS : FARTHER_MS)
+      : (route.assisted ? ASSIST_MS : ROUTE_MS);
+    return Math.min(1, route.progress + elapsed / duration);
   }
 
   function advanceRoute(elapsed) {
@@ -76,14 +91,22 @@ export function createChores({
       publishRoute();
       return;
     }
-    route = { ...route, progress, status: progress === 1 ? 'arrived' : 'walking' };
-    if (progress === 1) onArrive();
-    else publishRoute(true);
+    if (progress === 1) {
+      const completedStops = route.completedStops + 1;
+      const arrived = completedStops === route.plan.length;
+      route = { ...route, completedStops, progress: arrived ? 1 : 0, status: arrived ? 'arrived' : 'walking' };
+      if (arrived) onArrive();
+      else publishRoute();
+    } else {
+      route = { ...route, progress };
+      publishRoute(true);
+    }
   }
 
-  function enterRoute(status) {
+  function enterRoute(status, plan = route?.plan ?? [{ id: 'litter', grain: 0 }], completedStops = route?.completedStops ?? 0) {
     stopRoute();
-    route = { status, lane: 1, progress: status === 'arrived' ? 1 : 0, assisted: false, hit: null };
+    route = { status, lane: 1, progress: status === 'arrived' ? 1 : 0, assisted: false, hit: null,
+      plan: plan.map(stop => ({ ...stop })), completedStops: status === 'arrived' ? plan.length : completedStops };
     publishRoute();
     queueRoute();
     return true;
@@ -92,7 +115,9 @@ export function createChores({
   function routeAction(type, target) {
     switch (type) {
       case 'prepare-route':
-        return hasBucket && enterRoute('ready');
+        return hasBucket && enterRoute('ready', target, 0);
+      case 'restore-route':
+        return hasBucket && enterRoute(target.completedStops === target.plan.length ? 'arrived' : 'ready', target.plan, target.completedStops);
       case 'restore-arrived-route':
         return hasBucket && enterRoute('arrived');
       case 'walk-route':
@@ -141,6 +166,7 @@ export function createChores({
   }
 
   return {
+    get milestone() { return route ? { plan: route.plan.map(stop => ({ ...stop })), completedStops: route.completedStops } : null; },
     get route() { return routeSnapshot(); },
     get paintProgress() {
       // Draw between ticks without moving collision checks or the arrival callback.

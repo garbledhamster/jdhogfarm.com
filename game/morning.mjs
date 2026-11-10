@@ -222,14 +222,34 @@ function deliverGrain(state, id) {
   });
 }
 
+// The creek approach is always present; only grain-allocated farther pens extend it.
+export function feedRoutePlan(state) {
+  const forecast = allocateFeed(state);
+  const farther = forecast.groups.filter(group => FARTHER_PLOT_IDS.includes(group.id) && group.grain > 0)
+    .map(({ id, grain }) => ({ id, grain }));
+  if (!state.litter.pigs && !farther.length) return [];
+  return [{ id: state.litter.pigs ? 'litter' : 'gate', grain: forecast.litterGrain }, ...farther];
+}
+
+export function reservedRoutePlan(state) {
+  return state.bucket?.plan ?? (state.bucket ? [{ id: 'litter', grain: state.bucket.amount }] : []);
+}
+
+export function bucketNeedsReplan(state) {
+  const reserved = reservedRoutePlan(state);
+  return Boolean(state.bucket && feedRoutePlan(state).some(stop =>
+    stop.id !== 'gate' && !reserved.some(held => held.id === stop.id && held.grain >= stop.grain)));
+}
+
 function reserveLitter(state, refill) {
   if (state.feeding) return reject(state, 'The morning feeding is already settled.');
-  if (!state.litter.pigs) return reject(state, 'The litter pen is empty.');
-  const amount = allocateFeed(state).litterGrain;
-  if (state.bucket && (!refill || state.bucket.amount >= amount)) {
+  const plan = feedRoutePlan(state);
+  if (!plan.length) return reject(state, 'The litter pen is empty and no farther pens need grain.');
+  if (state.bucket && (!refill || !bucketNeedsReplan(state))) {
     return reject(state, 'The bucket is already on its way.');
   }
-  return accept({ ...state, bucket: { week: state.week, amount } });
+  const amount = plan.reduce((sum, stop) => sum + stop.grain, 0);
+  return accept({ ...state, bucket: { week: state.week, amount, plan } });
 }
 
 function rotate(state, id) {
@@ -244,20 +264,26 @@ function rotate(state, id) {
   });
 }
 
-function settleFeed(state, { source, allowShortfall }) {
+function settleFeed(state, { source, allowShortfall, route }) {
   if (state.feeding) return reject(state, 'The morning feeding is already settled.');
   if (state.shipment) return reject(state, 'Wait for the grain truck to unload at the Barn.');
   if (state.week === 1 && !state.litterBorn) {
     return reject(state, 'Bring starter pigs home before settling the first feeding.');
   }
-  if (state.litter.pigs && (source !== 'bucket' || !state.bucket)) {
-    return reject(state, 'Carry the bucket to the litter pen first.');
+  const plan = feedRoutePlan(state);
+  if (plan.length && (source !== 'bucket' || !state.bucket)) {
+    return reject(state, 'Carry the bucket along the feed route first.');
   }
-  if (!state.litter.pigs && source !== 'barn') return reject(state, 'Settle the older hogs’ feed at the Barn.');
+  if (!plan.length && !state.bucket && source !== 'barn') return reject(state, 'Settle the older hogs’ feed at the Barn.');
 
   const forecast = allocateFeed(state);
-  if (state.bucket && state.bucket.amount < forecast.litterGrain) {
-    return reject(state, 'Return to the Barn to refill the bucket with the grain that arrived.');
+  if (bucketNeedsReplan(state)) {
+    return reject(state, 'Return to the Barn to refill the bucket and replan the feed route.');
+  }
+  const reserved = reservedRoutePlan(state);
+  if (reserved.some(stop => FARTHER_PLOT_IDS.includes(stop.id)) &&
+    (route?.completedStops !== reserved.length || JSON.stringify(route.plan) !== JSON.stringify(reserved))) {
+    return reject(state, 'Finish every stop on the feed route before settling.');
   }
   if (forecast.shortfall && !allowShortfall) {
     return reject(state, 'There is a feed shortfall. Add grain, rotate pasture, or confirm feeding what you have.');
@@ -285,8 +311,8 @@ export function endWeekBlocker(state) {
       : { place: 'pasture', message: 'Build the first pen and bring starter pigs home before closing the first week.' };
   }
   if (!state.feeding && feedGroups(state).length) {
-    if (state.litter.pigs && state.bucket) {
-      return { place: 'route', message: 'Finish feeding the litter before you close the books.' };
+    if (state.bucket) {
+      return { place: 'route', message: 'Finish the feed route before you close the books.' };
     }
     return { place: 'barn', message: 'Settle the morning feeding before you close the books.' };
   }
@@ -340,7 +366,7 @@ function sell(state, kind, { id, quantity, week, expectedPigs }) {
 
   const updated = { ...group, pigs: group.pigs - quantity };
   let next = id === 'litter'
-    ? { ...state, litter: updated, bucket: updated.pigs ? state.bucket : null }
+    ? { ...state, litter: updated, bucket: updated.pigs || reservedRoutePlan(state).some(stop => FARTHER_PLOT_IDS.includes(stop.id)) ? state.bucket : null }
     : replacePlot(state, updated);
   if (kind === 'feeder' && !state.sales.feeder) {
     next = { ...next, plots: next.plots.map(plot => plot.status === 'locked' ? { ...plot, status: 'available' } : plot) };

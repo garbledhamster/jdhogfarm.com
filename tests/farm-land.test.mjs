@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { applyFarmAction, createFarm, expansionPreview, feedForecast, saleGroups } from '../game/morning.mjs';
+import { createChores } from '../game/chores.mjs';
+import { routeClock } from './farm-route-fixture.mjs';
+import { applyFarmAction, createFarm, expansionPreview, feedForecast, feedRoutePlan, saleGroups } from '../game/morning.mjs';
 
 function act(state, type, fields) {
   const result = applyFarmAction(state, { type, week: state.week, ...fields });
@@ -15,8 +17,15 @@ function reject(state, type, fields, error) {
 }
 
 function feed(state) {
-  if (!state.litter.pigs) return act(state, 'settle-feed', { source: 'barn' });
-  return act(act(state, 'reserve-litter'), 'settle-feed', { source: 'bucket' });
+  if (!feedRoutePlan(state).length) return act(state, 'settle-feed', { source: 'barn' });
+  state = act(state, 'reserve-litter');
+  const clock = routeClock();
+  const chores = createChores(clock);
+  chores.sync({ week: state.week, hasBucket: true, active: true });
+  chores.routeAction('prepare-route', state.bucket.plan);
+  chores.routeAction('assist-route');
+  clock.advance(4400);
+  return act(state, 'settle-feed', { source: 'bucket', route: chores.milestone });
 }
 
 function addGrain(state) {

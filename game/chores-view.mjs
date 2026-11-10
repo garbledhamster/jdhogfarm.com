@@ -1,4 +1,4 @@
-import { chapterEndWeek, feedForecast, formatCash, GRAIN_BUNDLE, PADDOCK_FORAGE, RECOVERY_WEEKS, saleGroups } from './morning.mjs';
+import { bucketNeedsReplan, chapterEndWeek, feedForecast, feedRoutePlan, formatCash, GRAIN_BUNDLE, PADDOCK_FORAGE, RECOVERY_WEEKS, saleGroups } from './morning.mjs';
 import { renderBarnArt, renderPigletArt, renderRouteArt } from './chores-art.mjs';
 
 const groupName = group => group.id === 'litter' ? 'Piglets' : `Grower pen ${group.id}`;
@@ -50,11 +50,13 @@ function barnAction(state, route, forecast, orderFirst) {
       ? button('Go to Farm Supply', 'data-place="supply"', true)
       : button('Go to Pasture', 'data-place="pasture"', true);
   }
-  if (state.litter?.pigs) {
-    if (state.bucket && forecast.litterGrain > state.bucket.amount) {
+  if (state.bucket || feedRoutePlan(state).length) {
+    if (bucketNeedsReplan(state)) {
       return button('Refill bucket', 'data-local-action="refill-route"', !orderFirst);
     }
-    if (route?.status === 'arrived') return button('Go to piglet pen', 'data-place="piglets"', !orderFirst);
+    if (route?.status === 'arrived') return route.plan?.length > 1
+      ? button('Finish feed run', 'data-place="route"', !orderFirst)
+      : button('Go to piglet pen', 'data-place="piglets"', !orderFirst);
     if (route) return button('Return to feed run', 'data-place="route"', !orderFirst);
     return button('Take bucket', 'data-local-action="start-route"', !orderFirst);
   }
@@ -90,7 +92,24 @@ function barnView(state, { deliveryStage, route }) {
 const laneNames = ['Left', 'Middle', 'Right'];
 const hazardNames = { rock: 'a rock', snake: 'a snake', 'moving-snake': 'a moving snake' };
 
-function routeView({ route, motion }) {
+const stopName = stop => stop.id === 'litter' ? 'Piglets' : stop.id === 'gate' ? 'Creek gate' : `Pen ${stop.id}`;
+
+function routeView(state, { route, motion }) {
+  const plan = route?.plan ?? [];
+  const expanded = plan.length > 1;
+  const itinerary = expanded ? `<p data-route-stops="">${plan.map((stop, index) =>
+    `${index < route.completedStops ? '✓ ' : ''}${stopName(stop)}`).join(' → ')}</p>` : '';
+  if (expanded && route.status === 'arrived') {
+    const action = state.feeding ? nextAfterFeed(state) : bucketNeedsReplan(state)
+      ? button('Back to Barn to refill', 'data-place="barn"', true)
+      : state.shipment ? button('Check grain truck', 'data-place="barn"', true)
+      : settleButton('Finish feeding', 'bucket', feedForecast(state));
+    const message = state.feeding ? 'You’ve finished feeding for this morning.' : bucketNeedsReplan(state)
+      ? 'The feed allocation changed. Refill at the Barn to plan the new stops.'
+      : 'All stops reached. Finish feeding to give every group its share.';
+    return { art: renderRouteArt(route, motion), controls: controls('route', action),
+      details: itinerary + `<p>${message}</p>` + showForecast(state) };
+  }
   if (!route || route.status === 'arrived') {
     return {
       art: renderRouteArt(route, motion),
@@ -111,13 +130,16 @@ function routeView({ route, motion }) {
   const snakeHint = route.obstacles.length > 1 ? ' Watch for snakes on the right.' : '';
   let prompt = `${ready ? 'Start when you’re ready. ' : ''}A rock blocks the middle.${snakeHint} Tap a lane or use the arrow keys.`;
   if (blocked) prompt = `You met ${hazardNames[route.hit]}. Retry or walk with Joe.`;
-  else if (route.assisted) prompt = 'Joe is walking with you to the piglet pen.';
+  else if (route.assisted) prompt = expanded
+    ? `Joe is walking with you to ${stopName(plan[route.completedStops])}.`
+    : 'Joe is walking with you to the piglet pen.';
+  else if (route.completedStops > 0) prompt = `On to ${stopName(plan[route.completedStops])}. Watch for ${hazardNames[route.obstacles[0].id]}. Tap a lane or use the arrow keys.`;
   return {
     art: renderRouteArt(route, motion),
-    controls: controls('route', `<progress data-chore-progress max="100" value="${Math.floor(route.progress * 100)}" aria-label="Route progress"></progress>
+    controls: controls('route', `<progress data-chore-progress max="100" value="${Math.floor((route.tripProgress ?? route.progress) * 100)}" aria-label="Route progress"></progress>
       ${laneButtons ? `<div class="farm-route-lanes" role="group" aria-label="Choose a lane">${laneButtons}</div>` : ''}
       <div class="farm-route-options">${start}${retry}${assist}</div>`),
-    details: `<p>${prompt}</p>`
+    details: itinerary + `<p>${prompt}</p>`
   };
 }
 
@@ -133,11 +155,14 @@ function pigletView(state, { route }) {
     status = marketReady ? 'The litter is market ready. The butcher can pick up hogs today.'
       : 'You’ve finished feeding for this morning.';
     action = marketReady ? button('Go to Orders', 'data-place="orders"', true) : nextAfterFeed(state);
+  } else if (route?.plan?.length > 1) {
+    status = 'This morning’s bucket has farther stops. Finish the feed run before settling.';
+    action = button('Return to feed run', 'data-place="route"', true);
   } else if (!litter?.pigs) {
     status = 'The piglet pen is empty. You can finish feeding at the Barn.';
   } else if (shipment) {
     status = 'The grain truck is still unloading. Check the Barn before you feed.';
-  } else if (bucketAtPen && bucket.amount < forecast.litterGrain) {
+  } else if (bucketAtPen && bucketNeedsReplan(state)) {
     status = 'There’s more grain in the bin now. Refill the bucket at the Barn before you pour.';
   } else if (bucketAtPen) {
     status = `The bucket reached the pen with ${units(bucket.amount)} of grain.`;
@@ -156,7 +181,7 @@ function pigletView(state, { route }) {
 export function renderChorePlace(place, state, context) {
   switch (place) {
     case 'barn': return barnView(state, context);
-    case 'route': return routeView(context);
+    case 'route': return routeView(state, context);
     case 'piglets': return pigletView(state, context);
     default: return null;
   }

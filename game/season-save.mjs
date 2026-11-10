@@ -1,4 +1,4 @@
-import { chapterEndWeek, fartherPlots, FARTHER_PLOT_IDS, PEN_CAPACITY, PRODUCTIVE_WEEKS, RECOVERY_WEEKS, SEASON_WEEKS } from './morning.mjs';
+import { chapterEndWeek, fartherPlots, FARTHER_PLOT_IDS, PEN_CAPACITY, PRODUCTIVE_WEEKS, RECOVERY_WEEKS, reservedRoutePlan, SEASON_WEEKS } from './morning.mjs';
 import { placeNames } from './morning-view.mjs';
 
 const saveKey = 'jdhogfarm.season';
@@ -117,6 +117,32 @@ function validLastOutcome(state) {
   }
 }
 
+function validBucket(state) {
+  const bucket = state.bucket;
+  if (bucket === null) return true;
+  if (!record(bucket) || bucket.week !== state.week || state.feeding !== null ||
+    !whole(bucket.amount, 0, state.grain)) return false;
+  if (bucket.plan === undefined) return state.litter.pigs > 0 && bucket.amount <= 3;
+  const plan = bucket.plan;
+  return Array.isArray(plan) && plan.length >= 1 && plan.length <= 3 &&
+    plan.every((stop, index) => record(stop) && (index === 0
+      ? ((stop.id === 'litter' && whole(stop.grain, 0, 3)) || (stop.id === 'gate' && stop.grain === 0 && plan.length > 1))
+      : (state.chapter === 'growth' && FARTHER_PLOT_IDS.includes(stop.id) &&
+        state.plots.some(plot => plot.id === stop.id && plot.status === 'fenced') &&
+        whole(stop.grain, 1, PEN_CAPACITY) && (index === 1 || stop.id > plan[index - 1].id)))) &&
+    plan.reduce((sum, stop) => sum + stop.grain, 0) === bucket.amount;
+}
+
+function validRouteProgress(saved) {
+  const progress = saved.routeProgress;
+  if (progress === undefined) return saved.state.bucket?.plan === undefined; // V1 and pre-route V2 snapshots.
+  if (!saved.state.bucket) return progress === null;
+  const plan = reservedRoutePlan(saved.state);
+  return record(progress) && JSON.stringify(progress.plan) === JSON.stringify(plan) &&
+    whole(progress.completedStops, 0, plan.length) &&
+    saved.bucketArrived === (progress.completedStops === plan.length);
+}
+
 function validFarm(state) {
   if (!record(state) || !['first', 'growth'].includes(state.chapter)) return false;
   const endWeek = chapterEndWeek(state);
@@ -133,8 +159,7 @@ function validFarm(state) {
     Array.isArray(state.paddocks) && state.paddocks.length === 2 &&
     ['A', 'B'].every((id, index) => validPasture(state.paddocks[index], endWeek) && state.paddocks[index].id === id) &&
     validShipment(state) &&
-    (state.bucket === null || (record(state.bucket) && state.bucket.week === state.week &&
-      whole(state.bucket.amount, 0, Math.min(3, state.grain)) && state.litter.pigs > 0 && state.feeding === null)) &&
+    validBucket(state) &&
     (state.feeding === null || validFeeding(state.feeding, state.week, endWeek)) &&
     Array.isArray(state.ledger) && state.ledger[0]?.type === 'opening' &&
     state.ledger.every(entry => validEntry(entry, state.week)) && state.ledger.at(-1).balance === state.cash &&
@@ -147,7 +172,7 @@ function validFarm(state) {
 function hasFartherPlotReferences({ state, selectedPlot }) {
   const includesFarther = records => records.some(({ id }) => FARTHER_PLOT_IDS.includes(id));
   return FARTHER_PLOT_IDS.includes(selectedPlot) || includesFarther(state.ledger) ||
-    includesFarther(state.feeding?.groups ?? []) ||
+    includesFarther(state.feeding?.groups ?? []) || includesFarther(state.bucket?.plan ?? []) ||
     state.history.some(week => includesFarther(week.transactions) || includesFarther(week.feeding.groups));
 }
 
@@ -165,7 +190,7 @@ function decode(raw) {
       if (hasFartherPlotReferences(saved)) return null;
       saved = { ...saved, state: { ...saved.state, plots: [...saved.state.plots, ...fartherPlots()] } };
     }
-    if (validFarm(saved.state) &&
+    if (validFarm(saved.state) && validRouteProgress(saved) &&
       typeof saved.place === 'string' && Object.hasOwn(placeNames, saved.place) &&
       typeof saved.previousPlace === 'string' && Object.hasOwn(placeNames, saved.previousPlace) &&
       saved.previousPlace !== 'map' && (saved.selectedPlot === null || saved.state.plots.some(plot => plot.id === saved.selectedPlot)) &&

@@ -126,9 +126,15 @@ function snake(obstacle) {
 export function renderRouteArt(route, motion) {
   const progress = route ? visibleProgress(route.progress, motion) : 0;
   const heroPosition = routeTransform(route?.lane ?? 1, progress);
-  const rockPosition = routeTransform(1, route?.obstacles[0].at ?? 0.5);
-  const snakes = route?.obstacles.slice(1).map(snake).join('') ?? '';
-  return scene(bucketPerson + soil, '', `
+  const obstacles = route?.obstacles ?? [{ id: 'rock', at: 0.5, lane: 1 }];
+  const rock = obstacles.find(obstacle => obstacle.id === 'rock');
+  const rockPosition = routeTransform(rock?.lane ?? 1, rock?.at ?? 0.5);
+  const snakes = obstacles.filter(obstacle => obstacle.id !== 'rock').map(snake).join('');
+  const segment = Math.min(route?.completedStops ?? 0, (route?.plan?.length ?? 1) - 1);
+  const stop = route?.plan?.[segment];
+  const farther = segment > 0;
+  const destination = stop?.id === 'gate' ? 'Creek gate' : farther ? `Pen ${stop.id}` : 'Piglets';
+  return scene(bucketPerson + soil, `data-route-stop="${stop?.id ?? 'litter'}"`, `
           <path fill="#83a24f" d="M-1800 0h4560v620h-4560z"/>
           <path fill="#759347" d="M-1800 80L0 149v103l-1800-82zM960 62l1800 38v105L960 177zM-1800 448 0 437v183h-1800zM960 548l1800-40v112H960z"/>
           <path fill="url(#chore-turf)" d="M-1800 0h4560v620h-4560z"/>
@@ -140,18 +146,21 @@ export function renderRouteArt(route, motion) {
             stroke="#ac9057" stroke-width="2.5" stroke-dasharray="15 21 5 24" stroke-linecap="round" opacity=".52"/>
           <path d="M312 494l19-6m285 3 15 8m-281-87 20-9m219 5 20 8" fill="none"
             stroke="#f1d595" stroke-width="3" stroke-linecap="round" opacity=".65"/>
-          ${pigletPen('translate(481 142)')}
-          <path d="M-1800 298q1460 20 1800-59 196-48 480-4t480-15q259-66 1800-115" fill="none" stroke="#a1a271" stroke-width="72"/>
+          ${farther || stop?.id === 'gate' ? '' : pigletPen('translate(481 142)')}
+          ${farther ? '' : `<path d="M-1800 298q1460 20 1800-59 196-48 480-4t480-15q259-66 1800-115" fill="none" stroke="#a1a271" stroke-width="72"/>
           <path d="M-1800 298q1460 20 1800-59 196-48 480-4t480-15q259-66 1800-115" fill="none" stroke="#599394" stroke-width="58"/>
           <path d="M-1800 299q1460 20 1800-59 199-44 474-6t486-14q259-66 1800-115" fill="none" stroke="#8cbdb1" stroke-width="5" stroke-dasharray="15 14 5 13" stroke-linecap="round"/>
-          ${creekBridge('translate(480 238)')}
+          ${creekBridge('translate(480 238)')}`}
+          ${farther ? `<path d="M282 192h396m-396 20h396" stroke="#d7a16b" stroke-width="8"/>
+          <rect x="421" y="119" width="118" height="35" rx="4" fill="#f5deb0" stroke="#67482f" stroke-width="2"/>
+          <text x="480" y="143" text-anchor="middle" fill="#362319" font-size="24" font-weight="bold">${destination}</text>` : ''}
           ${penGate('translate(480 178)')}
-          <g data-chore-obstacle="rock" transform="${rockPosition}">
+          ${rock ? `<g data-chore-obstacle="rock" transform="${rockPosition}">
             <ellipse cx="7" cy="2" rx="27" ry="9" fill="#594b39" opacity=".4"/>
             <path d="M-26 0l5-21 22-11 21 9 8 20-13 9-31 1z" fill="#77756a" stroke="#554e3e" stroke-width="3"/>
             <path d="M-21-21l22-11 21 9-10 11-22 2z" fill="#aaa38a"/>
             <path d="M12-12l10-11 8 20-13 9z" fill="#625f52"/>
-          </g>
+          </g>` : ''}
           ${snakes}
           <g data-chore-hero="" transform="${heroPosition}"><use href="#chore-bucket-person"/></g>
   `);
@@ -198,7 +207,7 @@ export function createRouteCarrier(readProgress) {
       step = null;
     }
     const retrying = walking && !route.assisted && previousRoute?.status === 'blocked';
-    if (!motion || !previousMotion || !walking || !previousRoute || retrying) {
+    if (!motion || !previousMotion || !walking || !previousRoute || retrying || route.completedStops !== previousRoute.completedStops) {
       lane = route?.lane ?? 1;
       progress = visibleProgress(route?.progress ?? 0, motion);
       step = null;
@@ -226,7 +235,7 @@ export function paintChoreRoute(container, route, motion) {
     sprite?.setAttribute('transform', routeTransform(position.lane, position.at));
   }
   const meter = container.querySelector('[data-chore-progress]');
-  if (meter) meter.value = Math.floor(route.progress * 100);
+  if (meter) meter.value = Math.floor((route.tripProgress ?? route.progress) * 100);
 }
 
 const pigletPositions = [

@@ -74,14 +74,14 @@ function pastureCue(state, forecast) {
 function mapView(state, { previousPlace, route, deliveryStage }) {
   const forecast = feedForecast(state);
   const first = state.plots[0];
-  const routePaused = Boolean(route && route.status !== 'arrived');
+  const routePaused = Boolean(route && (route.status !== 'arrived' || (route.plan?.length > 1 && !state.feeding)));
   const marketReady = saleGroups(state, 'market').length;
   const feederReady = saleGroups(state, 'feeder').length;
   const pasture = state.result ? null : pastureCue(state, forecast);
   const cues = state.result ? {} : {
     barn: barnCue(state, forecast, deliveryStage),
     pasture: pasture?.text,
-    piglets: route?.status === 'arrived' && !state.feeding ? 'Bucket at the pen' : '',
+    piglets: route?.status === 'arrived' && route.plan?.length === 1 && !state.feeding ? 'Bucket at the pen' : '',
     supply: state.plots.some(plot => plot.status === 'fenced' && !plot.pigs) ? 'Buy starters'
       : state.plots.some(plot => plot.status === 'available') ? 'Pen kits available' : '',
     orders: marketReady ? 'Market hogs ready' : feederReady ? 'Feeders ready' : '',

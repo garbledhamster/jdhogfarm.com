@@ -99,6 +99,10 @@ Configuration is in `.lintstagedrc.json`.
 
 The homepage loads the game from `game/`. The farm rules are separate from the browser controls and scene rendering. The player closes each week in the Office. The game saves progress in the current browser. After a reload, choose **Continue season** on the homepage.
 
+In the growth chapter, the morning bucket visits Piglets first, then Pen 4 and Pen 5 when their feed allocation includes grain. Empty pens and pens covered by grass add no stop. Each farther segment adds two seconds of manual walking and one obstacle; the longest uninterrupted trip takes 9.64 seconds manually or 4.4 seconds with Joe. Feed settles once after arrival. The Farm book and map pause the walk. Reload preserves completed stops and restarts the unfinished segment at its entrance. If the allocation needs more grain or another destination, refill at the Barn to plan a new trip.
+
+Replay the expanded route, its save milestones, and the next bill with `node --test tests/farm-route.test.mjs`. Run its homepage checks with `node --test --test-name-pattern='multi-stop|farther route' tests/game.browser.test.mjs`.
+
 Run the named Week 2 grain shortage scenario without opening a browser.
 
 ```bash

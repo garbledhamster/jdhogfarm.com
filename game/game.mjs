@@ -3,7 +3,7 @@ import { createRouteCarrier, paintChoreRoute } from './chores-art.mjs';
 import { updateCommercePreview } from './commerce-view.mjs';
 import { renderFarmBook } from './farm-book-view.mjs';
 import { describeFarmReceipt } from './farm-receipt-view.mjs';
-import { applyFarmAction, chapterEndWeek, createFarm, formatCash, SEASON_WEEKS } from './morning.mjs';
+import { applyFarmAction, chapterEndWeek, createFarm, formatCash, reservedRoutePlan, SEASON_WEEKS } from './morning.mjs';
 import { placeNames, prologue, renderDecision, renderPlace } from './morning-view.mjs';
 import { openSeasonSave } from './season-save.mjs';
 
@@ -87,12 +87,13 @@ const chores = createChores({
     if (progressOnly) paintChoreRoute(ui.stage, route, motion.matches);
     else {
       const collision = place === 'route' && route.status === 'blocked' && ui.controls.contains(document.activeElement);
+      saveProgress();
       render();
       if (collision) focusPlace();
     }
   },
   onArrive() {
-    goTo('piglets');
+    goTo(chores.route.plan.length > 1 ? 'route' : 'piglets');
     focus(ui.controls.querySelector('button:not(:disabled)'));
   }
 });
@@ -119,7 +120,7 @@ function readSeasonSave() {
 
 function saveProgress() {
   const bucketArrived = Boolean(state.bucket && chores.route?.status === 'arrived');
-  const status = seasonSave.write({ state, place, previousPlace, selectedPlot, bucketArrived, seenStories: [...seenStories] });
+  const status = seasonSave.write({ state, place, previousPlace, selectedPlot, bucketArrived, routeProgress: state.bucket ? chores.milestone : null, seenStories: [...seenStories] });
   if (!status) hasSavedSeason = true;
   showSaveStatus(status);
 }
@@ -266,7 +267,7 @@ function beginPlay() {
 }
 
 function restoreSeason() {
-  const { bucketArrived } = savedSeason;
+  const { bucketArrived, routeProgress } = savedSeason;
   ({ state, place, previousPlace, selectedPlot } = savedSeason);
   seenStories = new Set(savedSeason.seenStories);
   savedSeason = null;
@@ -282,7 +283,8 @@ function restoreSeason() {
   showPlayInterface();
   if (state.bucket) {
     syncChores();
-    chores.routeAction(bucketArrived ? 'restore-arrived-route' : 'prepare-route');
+    const plan = reservedRoutePlan(state);
+    chores.routeAction('restore-route', routeProgress ?? { plan, completedStops: bucketArrived ? plan.length : 0 });
   } else {
     render();
   }
@@ -371,6 +373,7 @@ function applyAction(button) {
     type: action, id: target, quantity: amount,
     source, week: week === undefined ? state.week : Number(week),
     expectedPigs: expectedPigs === undefined ? undefined : Number(expectedPigs),
+    route: chores.milestone,
     allowShortfall: button.hasAttribute('data-allow-shortfall')
   });
   if (result.error) {
@@ -383,6 +386,10 @@ function applyAction(button) {
   recentAction = { type: action, id: target };
   clearPanel();
   notice = showsReceipt ? describeFarmReceipt(state) : '';
+  if (action === 'settle-feed' && place === 'route') {
+    goTo('barn', notice);
+    return;
+  }
   if (action === 'buy-starters') {
     selectedPlot = target;
     goTo('pasture', notice);
@@ -418,7 +425,7 @@ function routeAction(type, target) {
     }
     state = reservation.state;
     syncChores();
-    chores.routeAction('prepare-route');
+    chores.routeAction('prepare-route', reservedRoutePlan(state));
     goTo('route');
     return;
   }
