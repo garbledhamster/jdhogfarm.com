@@ -70,9 +70,10 @@ export function registerGrowthBrowserTests(farmDriver) {
     await heading(farm, 'Barn').waitFor();
     const continued = await saved(farm);
     assert.equal(continued.version, 2);
-    for (const key of ['cash', 'grain', 'plots', 'paddocks', 'litter', 'sales', 'ledger', 'history']) {
+    for (const key of ['cash', 'grain', 'paddocks', 'litter', 'sales', 'ledger', 'history']) {
       assert.deepEqual(continued.state[key], firstWin.state[key], key);
     }
+    assert.deepEqual(continued.state.plots.slice(0, 3), firstWin.state.plots);
     assert.equal(continued.state.firstMilestone.result, 'won');
     assert.equal(await button(farm, 'Continue farm').count(), 0);
 

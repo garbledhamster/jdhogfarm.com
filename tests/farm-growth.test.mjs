@@ -56,9 +56,10 @@ test('week-6-continuation carries the same farm through Week 12 on the existing 
   assert.equal(state.result, null);
   assert.equal(state.feeding, null);
   assert.equal(state.bucket, null);
-  for (const key of ['cash', 'plots', 'litter', 'breeders', 'paddocks', 'grain', 'lastDelivery', 'sales', 'ledger', 'history']) {
+  for (const key of ['cash', 'litter', 'breeders', 'paddocks', 'grain', 'lastDelivery', 'sales', 'ledger', 'history']) {
     assert.deepEqual(state[key], first[key], key);
   }
+  assert.deepEqual(state.plots.slice(0, 3), first.plots);
   assert.equal(state.history.length, 6);
   assert.deepEqual(state.firstMilestone, { result: 'won', ledgerLength: first.ledger.length, sales: first.sales });
   rejected(state, 'continue-farm');

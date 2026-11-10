@@ -1,14 +1,17 @@
-import { chapterEndWeek, PEN_CAPACITY, PRODUCTIVE_WEEKS, RECOVERY_WEEKS, SEASON_WEEKS } from './morning.mjs';
+import { chapterEndWeek, fartherPlots, FARTHER_PLOT_IDS, PEN_CAPACITY, PRODUCTIVE_WEEKS, RECOVERY_WEEKS, SEASON_WEEKS } from './morning.mjs';
 import { placeNames } from './morning-view.mjs';
 
 const saveKey = 'jdhogfarm.season';
 const version = 2;
 
 const plotIds = ['1', '2', '3'];
+const growthPlotIds = [...plotIds, ...FARTHER_PLOT_IDS];
 const groupIds = ['litter', ...plotIds];
+const validGroupId = (id, week) => groupIds.includes(id) || (week > SEASON_WEEKS && FARTHER_PLOT_IDS.includes(id));
 const penStatuses = ['wooded', 'cleared', 'fenced'];
 const spareStatuses = ['locked', 'available', ...penStatuses];
-const plotStatuses = { '1': penStatuses, '2': [...spareStatuses, 'grazing'], '3': spareStatuses };
+const plotStatuses = { '1': penStatuses, '2': [...spareStatuses, 'grazing'], '3': spareStatuses,
+  '4': ['available', ...penStatuses], '5': ['available', ...penStatuses] };
 const pastureStatuses = ['active', 'ready', 'exhausted', 'resting'];
 const ledgerLabels = {
   opening: 'Opening balance',
@@ -40,8 +43,8 @@ function validFeeding(value, week, endWeek) {
   const totals = ['demand', 'forage', 'forageCapacity', 'grainAvailable', 'grainNeeded', 'grainUsed',
     'grainRemaining', 'litterGrain', 'shortfall'];
   return record(value) && value.week === week && totals.every(key => whole(value[key])) &&
-    Array.isArray(value.groups) && value.groups.length <= groupIds.length &&
-    value.groups.every(group => record(group) && groupIds.includes(group.id) &&
+    Array.isArray(value.groups) && value.groups.length <= 1 + (week > SEASON_WEEKS ? growthPlotIds.length : plotIds.length) &&
+    value.groups.every(group => record(group) && validGroupId(group.id, week) &&
       whole(group.pigs, 1, PEN_CAPACITY) && whole(group.fedWeeks, 0, endWeek + 1) &&
       ['forage', 'grain', 'missing'].every(key => whole(group[key], 0, group.pigs)) &&
       typeof group.grew === 'boolean' && whole(group.fedWeeksAfter, 0, endWeek + 1));
@@ -53,12 +56,14 @@ function validEntry(entry, throughWeek) {
 
   // Ledger labels and group identifiers are interpolated by the game views.
   if (entry.type === 'kit') {
-    return ['2', '3'].includes(entry.id) && entry.label === `Pen kit for Plot ${entry.id}` &&
-      entry.quantity === undefined;
+    const farther = FARTHER_PLOT_IDS.includes(entry.id);
+    const label = farther ? `Land and pen kit for Plot ${entry.id}` : `Pen kit for Plot ${entry.id}`;
+    return (farther ? entry.week > SEASON_WEEKS : ['2', '3'].includes(entry.id)) &&
+      entry.label === label && entry.quantity === undefined;
   }
   if (!Object.hasOwn(ledgerLabels, entry.type) || entry.label !== ledgerLabels[entry.type]) return false;
   if (['starter', 'feeder', 'market'].includes(entry.type)) {
-    return groupIds.includes(entry.id) && whole(entry.quantity, 1, PEN_CAPACITY);
+    return validGroupId(entry.id, entry.week) && whole(entry.quantity, 1, PEN_CAPACITY);
   }
   if (entry.type === 'grain') return whole(entry.quantity, 1);
   return entry.quantity === undefined;
@@ -119,8 +124,9 @@ function validFarm(state) {
   if (!whole(state.week, startWeek, endWeek) ||
     !Number.isSafeInteger(state.cash) || !whole(state.grain)) return false;
 
-  return Array.isArray(state.plots) && state.plots.length === plotIds.length &&
-    plotIds.every((id, index) => validPlot(state.plots[index], id, endWeek)) &&
+  const expectedPlots = state.chapter === 'growth' ? growthPlotIds : plotIds;
+  return Array.isArray(state.plots) && state.plots.length === expectedPlots.length &&
+    expectedPlots.every((id, index) => validPlot(state.plots[index], id, endWeek)) &&
     record(state.litter) && state.litter.id === 'litter' && whole(state.litter.pigs, 0, 3) &&
     whole(state.litter.fedWeeks, 0, endWeek) && typeof state.litterBorn === 'boolean' &&
     record(state.breeders) && state.breeders.boar === 1 && state.breeders.sow === 1 &&
@@ -143,14 +149,17 @@ function decode(raw) {
     const stored = JSON.parse(raw);
     if (!record(stored) || ![1, version].includes(stored.version) || !record(stored.state)) return null;
     // Keep the raw storage value as the write guard until the player next changes progress.
-    const saved = stored.version === 1
+    let saved = stored.version === 1
       ? { ...stored, version, state: { ...stored.state, chapter: 'first', firstMilestone: null } }
       : stored;
     if (saved.state.lastOutcome === undefined) saved.state.lastOutcome = null;
+    if (saved.state.chapter === 'growth' && Array.isArray(saved.state.plots) && saved.state.plots.length === plotIds.length) {
+      saved = { ...saved, state: { ...saved.state, plots: [...saved.state.plots, ...fartherPlots()] } };
+    }
     if (validFarm(saved.state) &&
       typeof saved.place === 'string' && Object.hasOwn(placeNames, saved.place) &&
       typeof saved.previousPlace === 'string' && Object.hasOwn(placeNames, saved.previousPlace) &&
-      saved.previousPlace !== 'map' && (saved.selectedPlot === null || plotIds.includes(saved.selectedPlot)) &&
+      saved.previousPlace !== 'map' && (saved.selectedPlot === null || saved.state.plots.some(plot => plot.id === saved.selectedPlot)) &&
       typeof saved.bucketArrived === 'boolean' && (!saved.bucketArrived || saved.state.bucket !== null) &&
       Array.isArray(saved.seenStories) && saved.seenStories.length <= SEASON_WEEKS &&
       saved.seenStories.every(week => whole(week, 1, Math.min(SEASON_WEEKS, saved.state.week)))) return saved;

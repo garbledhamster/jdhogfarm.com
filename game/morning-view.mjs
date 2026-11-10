@@ -1,7 +1,7 @@
 import { openingArt } from './opening-art.mjs';
 import { mapPlaceArt } from './map-art.mjs';
 import { herdDetails, renderCommerceDecision, renderCommercePlace, spareGrassDetail } from './commerce-view.mjs';
-import { applyFarmAction, feedForecast, saleGroups, SEASON_GOAL } from './morning.mjs';
+import { applyFarmAction, FARTHER_PLOT_IDS, feedForecast, saleGroups, SEASON_GOAL } from './morning.mjs';
 import { renderChoreDecision, renderChorePlace, renderPastureGate } from './chores-view.mjs';
 import { renderOfficeDecision, renderOfficePlace } from './office-view.mjs';
 
@@ -91,10 +91,14 @@ function mapView(state, { previousPlace, route, deliveryStage }) {
     const cue = cues[place];
     const remainingShort = place === 'barn' && cue === 'Grain ready' && !state.feeding && forecast.shortfall
       ? ` · short by ${forecast.shortfall}` : '';
+    const fartherLand = place === 'pasture' ? state.plots.filter(plot => FARTHER_PLOT_IDS.includes(plot.id)).map(plot =>
+      plot.status === 'fenced' ? `Pen ${plot.id}: ${plot.pigs ? `${plot.pigs} ${plot.pigs === 1 ? 'pig' : 'pigs'}` : 'empty'}`
+        : `Plot ${plot.id}: ${plot.status}`) : [];
+    const description = [cue && cue + remainingShort, ...fartherLand].filter(Boolean).join('. ');
     return `<div class="farm-map-stop">
       ${mapPlaceArt(place, { plots: state.plots, deliveryStage: state.shipment && (deliveryStage || 'arriving') })}
       <button class="farm-map-pin" type="button" data-place="${place}"
-        aria-label="${placeNames[place]}"${place === 'pasture' ? pasture?.attributes ?? '' : ''}${cue ? ` data-map-cue="${place}" aria-description="${cue}${remainingShort}"` : ''}>
+        aria-label="${placeNames[place]}"${place === 'pasture' ? pasture?.attributes ?? '' : ''}${cue ? ` data-map-cue="${place}"` : ''}${description ? ` aria-description="${description}"` : ''}>
         <span>${placeNames[place]}</span>${cue ? `<small>${cue}${remainingShort}</small>` : ''}
       </button>
     </div>`;
@@ -130,7 +134,9 @@ function plotControl(state, plot, selected) {
     fenced: !plot.pigs ? '<button class="farm-primary-action" type="button" data-place="supply">Go to Farm Supply</button>'
       : state.week === 1 && !state.feeding ? '<button class="farm-primary-action" type="button" data-place="barn">Go to Barn</button>' : '',
     grazing: '<button class="farm-small-button" type="button" data-place="supply">Review pen conversion</button>',
-    available: '<button class="farm-small-button" type="button" data-place="supply">Review land use at Farm Supply</button>'
+    available: FARTHER_PLOT_IDS.includes(plot.id)
+      ? `<button class="farm-small-button" type="button" data-open="kit" data-target="${plot.id}">Preview Plot ${plot.id}</button>`
+      : '<button class="farm-small-button" type="button" data-place="supply">Review land use at Farm Supply</button>'
   };
   return next[plot.status] ? `<div class="farm-stage-controls">${next[plot.status]}</div>` : '';
 }
@@ -149,7 +155,9 @@ function plotDetail(state, plot, selected) {
     case 'grazing':
       return 'Plot 2 is open for spare grazing. Review the forecast before converting it to a pen.';
     default:
-      return `Plot ${plot.id} is available. Check Farm Supply for the land-use choices.`;
+      return FARTHER_PLOT_IDS.includes(plot.id)
+        ? `Plot ${plot.id} is available. Check what it would cost to turn it into a pen.`
+        : `Plot ${plot.id} is available. Check Farm Supply for the land-use choices.`;
   }
 }
 

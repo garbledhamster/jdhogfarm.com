@@ -39,6 +39,50 @@
   color: #7a0000;
 }
 
+[data-view='supply'] .farm-commerce-controls[data-growth] {
+  max-block-size: calc(100% - 1rem);
+  padding: 0.2rem;
+  overflow: auto;
+  pointer-events: auto;
+  overscroll-behavior: contain;
+}
+
+.farm-panel:has(.farm-farther-preview) {
+  gap: 0.3rem;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.farm-panel:has(.farm-farther-preview) .farm-decision-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.farm-farther-preview {
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+}
+
+.farm-expansion-plan {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3.5rem;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.farm-expansion-plan input[type='number'] {
+  inline-size: 100%;
+}
+
+.farm-farther-figures .farm-expansion-figures {
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  align-content: start;
+  gap: 0.25rem 0.4rem;
+  padding-block: 0.25rem;
+}
+
 .farm-pickup-hogs {
   transform: translate(150px, -10px);
   animation: farm-hogs-at-gate 950ms ease-out both;
@@ -100,6 +144,25 @@
     inset-block-end: 0.5rem;
     max-inline-size: min(44%, 24rem);
     justify-content: end;
+  }
+
+  .farm-panel:has(.farm-farther-preview) {
+    width: min(37rem, 100% - 1.1rem);
+  }
+
+  .farm-panel:has(.farm-farther-preview) .farm-panel-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.75fr);
+    gap: 0.6rem;
+  }
+
+  .farm-farther-figures {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 0.6rem;
+  }
+
+  .farm-panel:has(.farm-farther-preview) .farm-decision-actions {
+    display: flex;
   }
 
   .farm-panel[data-decision-key^='starters:'] {

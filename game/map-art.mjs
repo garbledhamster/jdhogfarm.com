@@ -1,3 +1,4 @@
+import { FARTHER_PLOT_IDS } from './morning.mjs';
 import { creekBridge, penGate, pigletPen, supplyShop } from './landmark-art.mjs';
 
 function barn(deliveryStage) {
@@ -12,9 +13,27 @@ function barn(deliveryStage) {
   return `<use href="#jd-grain-barn" transform="translate(65 37) scale(.44)"/>${truck}`;
 }
 
+function fartherPlotArt(plot) {
+  const fill = { available: '#a1ac58', wooded: '#829446', cleared: '#d6aa69', fenced: '#c28f57' }[plot.status];
+  const fence = plot.status === 'fenced' ? '#704426' : '#e2ce86';
+  const x = plot.id === '4' ? 21 : 175;
+  const rails = plot.status === 'fenced'
+    ? '<path d="M5 16v-5l18-10 21 12v6M23 1v7m11-1v6" fill="none" stroke="#704426" stroke-width="2.5"/>' : '';
+  const woods = plot.status === 'wooded' ? '<use href="#jd-oak-art" transform="translate(12 5) scale(.25)"/>' : '';
+  const pig = plot.pigs ? '<image href="game/art/pig.svg" x="20" y="6" width="31" height="23"/>' : '';
+  return `<g data-map-plot="${plot.id}" data-stage="${plot.status}" data-pigs="${plot.pigs}"
+    transform="translate(${x} 9)">
+    <path d="M0 17 23 3 48 17 23 32Z" fill="${fill}" stroke="${fence}" stroke-width="3"/>
+    ${rails}${woods}${pig}
+    <rect x="0" y="16" width="24" height="24" rx="4" fill="#583b28" stroke="#ffedc0" stroke-width="1.5"/>
+    <text x="12" y="34" text-anchor="middle" fill="#ffedc0" font-size="21" font-weight="700">${plot.id}</text>
+  </g>`;
+}
+
 function pasture(plots) {
   const first = plots[0].status;
-  const extra = plots.slice(1).filter(plot => plot.status !== 'locked').map((plot, index) => {
+  const farther = plots.filter(plot => FARTHER_PLOT_IDS.includes(plot.id));
+  const extra = plots.slice(1).filter(plot => !FARTHER_PLOT_IDS.includes(plot.id) && plot.status !== 'locked').map((plot, index) => {
     const fill = plot.status === 'grazing' ? '#a1bc68' : plot.status === 'available' ? '#a1ac58' : '#c28f57';
     const fence = plot.status === 'fenced' ? '#704426' : '#e2ce86';
     return `<path data-map-plot="${plot.id}" data-stage="${plot.status}" transform="translate(${137 + index * 20} ${35 + index * 21})"
@@ -26,6 +45,7 @@ function pasture(plots) {
   return `<g${plots.some(plot => plot.status === 'grazing') ? ' data-map-spare-grass="true"' : ''}>${extra}
     <path d="M48 67l63-33 62 28-62 39z" fill="${first === 'wooded' ? '#acb65e' : '#bf905c'}" stroke="#e9ce77" stroke-width="3"/>
     ${first === 'wooded' ? wooded : first === 'fenced' ? fence : ''}
+    ${farther.map(fartherPlotArt).join('')}
   </g>`;
 }
 

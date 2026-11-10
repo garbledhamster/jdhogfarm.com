@@ -1,5 +1,5 @@
 import {
-  expansionPreview, feedForecast, formatCash, KIT_COST, PEN_CAPACITY, saleGroups, SALE_AGE, SALE_PRICES, SEASON_GOAL, SPARE_FORAGE, STARTER_COST
+  expansionPreview, FARTHER_PLOT_IDS, feedForecast, formatCash, KIT_COST, PEN_CAPACITY, saleGroups, SALE_AGE, SALE_PRICES, SEASON_GOAL, SPARE_FORAGE, STARTER_COST
 } from './morning.mjs';
 
 import { renderSupplyArt } from './supply-art.mjs';
@@ -13,9 +13,9 @@ function control(label, attrs, primary = false) {
   return `<button class="${primary ? 'farm-primary-action' : 'farm-small-button'}" type="button" ${attrs}>${label}</button>`;
 }
 
-function numericChoice(id, label, max, value, attributes = '') {
+function numericChoice(id, label, max, value, attributes = '', min = 1) {
   return `<label class="farm-commerce-quantity" for="${id}">${label}</label>
-    <input id="${id}" type="number" min="1" max="${max}" step="1" value="${value}" ${attributes}>`;
+    <input id="${id}" type="number" min="${min}" max="${max}" step="1" value="${value}" ${attributes}>`;
 }
 
 function supplyView(state) {
@@ -24,11 +24,13 @@ function supplyView(state) {
   const firstPenBuilt = state.plots[0].status === 'fenced';
   const purchase = state.ledger.at(-1);
   const justStocked = purchase?.type === 'starter' && purchase.week === state.week;
+  const fartherAvailable = state.plots.some(plot => FARTHER_PLOT_IDS.includes(plot.id) && plot.status === 'available');
   const options = pens.map(pen => control(`Buy starters for Pen ${pen.id}`, `data-open="starters" data-target="${pen.id}"`, true));
   if (!state.result) {
     const spare = state.plots.filter(plot => plot.status === 'available' || plot.status === 'grazing');
     for (const plot of spare) {
-      options.push(control(plot.status === 'grazing' ? 'Convert spare grass to Pen 2' : `Preview Pen ${plot.id} kit`,
+      options.push(control(plot.status === 'grazing' ? 'Convert spare grass to Pen 2'
+        : FARTHER_PLOT_IDS.includes(plot.id) ? `Preview Plot ${plot.id}` : `Preview Pen ${plot.id} kit`,
         `data-open="kit" data-target="${plot.id}"`));
       if (plot.id === '2' && plot.status === 'available') {
         options.push(control('Keep the spare grass', 'data-open="grass" data-target="2"'));
@@ -42,11 +44,13 @@ function supplyView(state) {
   const message = !firstPenBuilt ? 'Build the first pen before buying starters.'
     : justStocked ? `${pigLabel(purchase.quantity)} delivered to Pen ${purchase.id}.`
       : canStock ? `Weaned starters cost ${formatCash(STARTER_COST)} each and come with one fed week.`
+        : fartherAvailable ? 'Preview a farther plot to see what the land, kit and pigs would cost, and how much feed they’d need.'
         : state.sales.feeder ? `Pen kits cost ${formatCash(KIT_COST)}. Preview the kit and feed before spending.`
           : 'The fenced pens already have their hogs.';
   return {
     art: renderSupplyArt(),
-    controls: `<div class="farm-stage-controls farm-commerce-controls">${options.join('')}</div>`,
+    controls: `<div class="farm-stage-controls farm-commerce-controls"${state.chapter === 'growth' ? ' data-growth' : ''}
+      role="group" aria-label="Farm Supply options">${options.join('')}</div>`,
     details: `<p>${message}</p>`
   };
 }
@@ -118,17 +122,32 @@ function saleDecision(state, kind, id) {
 
 function expansionFigures(preview, grass) {
   const { cashLeft, demandBefore, demandAfter, forageAfter, forageCapacityAfter, grainNeeded, shortfall,
-    kitCost, hogCost, capacityGained, forageLost, forageCapacityBefore } = preview;
+    landCost, kitCost, hogCost, capacityGained, forageLost, forageCapacityBefore } = preview;
   const forageNote = forageLost ? ` Up to ${forageLost} units from the spare grass will be lost for the season.`
     : forageCapacityAfter > forageCapacityBefore ? ` Spare grass can add up to ${SPARE_FORAGE} units for older hogs.` : '';
+  const warning = preview.error ? `<p class="farm-expansion-warning">${preview.error}</p>` : '';
+  const kit = `<dt>Kit now</dt><dd>${formatCash(kitCost)}</dd>`;
+  const capacity = `<dt>${landCost ? 'Added capacity' : 'Pen capacity gained'}</dt><dd>${pigLabel(capacityGained)}</dd>`;
+  const forecast = `<dt>Next morning demand</dt><dd>${demandBefore} → ${demandAfter} ${landCost ? 'units' : 'feed units'}</dd>
+    <dt>Forage credit</dt><dd>${forageAfter} of ${forageCapacityAfter} ${landCost ? 'units' : 'available units used.'}${forageNote}</dd>
+    <dt>Grain needed</dt><dd>${grainNeeded} units${shortfall ? ` · Short by ${shortfall}` : ''}</dd>`;
+  if (landCost) {
+    return `<div class="farm-farther-figures">
+      <dl class="farm-expansion-figures">
+        <dt>Land now</dt><dd>${formatCash(landCost)}</dd>${kit}
+        <dt>Starters later</dt><dd>${formatCash(hogCost)}</dd>
+        <dt>Due now</dt><dd>${formatCash(landCost + kitCost)}</dd>
+        <dt>Cash left</dt><dd>${formatCash(cashLeft)}</dd>
+        ${capacity}
+      </dl>
+      <dl class="farm-expansion-figures">${forecast}</dl>
+    </div>${warning}`;
+  }
   return `<dl class="farm-expansion-figures">
-    ${grass ? '' : `<dt>Kit now</dt><dd>${formatCash(kitCost)}</dd><dt>Selected starters later</dt><dd>${formatCash(hogCost)}</dd>
-    <dt>Pen capacity gained</dt><dd>${pigLabel(capacityGained)}</dd>`}
+    ${grass ? '' : `${kit}<dt>Selected starters later</dt><dd>${formatCash(hogCost)}</dd>${capacity}`}
     <dt>Expected cash left</dt><dd>${formatCash(cashLeft)}</dd>
-    <dt>Next morning demand</dt><dd>${demandBefore} → ${demandAfter} feed units</dd>
-    <dt>Forage credit</dt><dd>${forageAfter} of ${forageCapacityAfter} available units used.${forageNote}</dd>
-    <dt>Grain needed</dt><dd>${grainNeeded} units${shortfall ? ` · Short by ${shortfall}` : ''}</dd>
-  </dl>${preview.error ? `<p class="farm-expansion-warning">${preview.error}</p>` : ''}`;
+    ${forecast}
+  </dl>${warning}`;
 }
 
 function expansionDecision(state, id, grass) {
@@ -139,18 +158,22 @@ function expansionDecision(state, id, grass) {
   const input = 'farm-expansion-quantity';
   const planned = grass ? 0 : 1;
   const preview = expansionPreview(state, id, planned, { grass });
+  const farther = FARTHER_PLOT_IDS.includes(id);
   const explanation = grass
     ? 'Keep this plot available for older hogs. It grazes for three mornings and then rests for two closed weeks.'
     : plot.status === 'grazing'
       ? 'Buying the kit commits this ground to a pen and removes its forage for the season. Clear and fence the plot before ordering pigs.'
-      : 'Buy the kit now, then clear and fence the plot. Order starters after the pen is ready.';
+      : farther ? 'Clear and fence the plot before buying starters.'
+        : 'Buy the kit now, then clear and fence the plot. Order starters after the pen is ready.';
   return {
-    title: grass ? 'Keep the spare grass' : plot.status === 'grazing' ? 'Convert the spare grass' : `Preview Pen ${id}`,
-    body: `<p>${explanation}</p>
-      ${grass ? '' : numericChoice(input, 'Number of starters to plan for', PEN_CAPACITY, planned, `data-commerce-quantity="kit" data-target="${id}"`)}
-      <div data-expansion-preview aria-live="polite">${expansionFigures(preview, grass)}</div>`,
+    title: grass ? 'Keep the spare grass' : plot.status === 'grazing' ? 'Convert the spare grass' : `Preview ${farther ? 'Plot' : 'Pen'} ${id}`,
+    body: `${farther ? '<div class="farm-farther-preview">' : ''}<p>${explanation}</p>
+      ${farther ? `<p>Cash on hand ${formatCash(state.cash)}.</p><div class="farm-expansion-plan">` : ''}
+      ${grass ? '' : numericChoice(input, farther ? 'Starters to plan for' : 'Number of starters to plan for', PEN_CAPACITY, planned, `data-commerce-quantity="kit" data-target="${id}"`, farther ? 0 : 1)}
+      ${farther ? '</div></div>' : ''}
+      <div data-expansion-preview aria-live="polite"${farther ? ' tabindex="0" role="region" aria-label="Price and feed outlook"' : ''}>${expansionFigures(preview, grass)}</div>`,
     actions: (grass ? control('Confirm grazing', `data-action="keep-grass" data-target="${id}"`, true)
-      : control('Confirm kit purchase', `data-action="buy-kit" data-target="${id}" data-quantity-from="${input}"`, true))
+      : control(farther ? 'Buy land and kit' : 'Confirm kit purchase', `data-action="buy-kit" data-target="${id}" data-quantity-from="${input}"`, true))
       + control('Cancel', 'data-panel-close')
   };
 }

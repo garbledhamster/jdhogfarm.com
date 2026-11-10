@@ -4,6 +4,8 @@ export const OVERHEAD = 80;
 export const STARTER_COST = 100;
 export const PEN_CAPACITY = 4;
 export const KIT_COST = 120;
+export const FARTHER_LAND_COST = 100;
+export const FARTHER_PLOT_IDS = ['4', '5'];
 export const GRAIN_BUNDLE = { units: 4, cost: 100 };
 export const SEASON_GOAL = 'Make a feeder sale and a market hog sale, and have cash left after the last bill.';
 export const SALE_AGE = { feeder: 2, market: 6 };
@@ -62,6 +64,10 @@ export function canContinueFarm(state) {
 
 export function formatCash(cash) {
   return `${cash < 0 ? '-' : ''}$${Math.abs(cash).toLocaleString('en-US')}`;
+}
+
+export function fartherPlots() {
+  return FARTHER_PLOT_IDS.map(id => plot(id, 'available'));
 }
 
 const accept = state => ({ state, error: null });
@@ -313,6 +319,7 @@ function continueFarm(state) {
   return accept({
     ...state,
     chapter: 'growth',
+    plots: [...state.plots, ...fartherPlots()],
     firstMilestone: { result: state.result, ledgerLength: state.ledger.length, sales: state.sales },
     week: SEASON_WEEKS + 1,
     result: null,
@@ -343,12 +350,17 @@ function sell(state, kind, { id, quantity, week, expectedPigs }) {
   return accept({ ...paid, sales: { ...state.sales, [kind]: state.sales[kind] + quantity } });
 }
 
-function kitError(state, plot, quantity) {
+function landCost(id) {
+  return FARTHER_PLOT_IDS.includes(id) ? FARTHER_LAND_COST : 0;
+}
+
+function kitError(state, id, plot, quantity) {
+  if (FARTHER_PLOT_IDS.includes(id) && state.chapter !== 'growth') return 'Farther plots open in the growth chapter.';
   if (!plot || plot.id === '1') return 'Choose a spare plot for the kit.';
   if (!state.sales.feeder) return 'Make a feeder sale to unlock the spare plots.';
   if (plot.status !== 'available' && plot.status !== 'grazing') return 'This plot already has its pen kit.';
   if (quantity !== 0 && !validStarterQuantity(quantity)) return 'Choose one to four starter pigs.';
-  const cost = KIT_COST + quantity * STARTER_COST;
+  const cost = landCost(id) + KIT_COST + quantity * STARTER_COST;
   if (state.cash < cost) return insufficientCash(cost);
   return null;
 }
@@ -362,7 +374,7 @@ function grassError(state, plot) {
 export function expansionPreview(state, id, quantity = 0, { grass = false } = {}) {
   const spare = state.plots.find(plot => plot.id === id);
   const before = feedForecast(state, { next: true });
-  const error = grass ? grassError(state, spare) : kitError(state, spare, quantity);
+  const error = grass ? grassError(state, spare) : kitError(state, id, spare, quantity);
   const land = grass
     ? { ...plot(id, 'grazing'), forage: pasture('active') }
     : plot(id, 'wooded');
@@ -373,11 +385,12 @@ export function expansionPreview(state, id, quantity = 0, { grass = false } = {}
     ? replacePlot(tomorrow, { ...plot(id, 'fenced'), pigs: quantity, fedWeeks: 1 })
     : tomorrow;
   const after = allocateFeed(withStarters);
+  const plotCost = grass ? 0 : landCost(id);
   const kitCost = grass ? 0 : KIT_COST;
   const hogCost = !grass && validStarterQuantity(quantity) ? quantity * STARTER_COST : 0;
 
   return {
-    kitCost, hogCost, cashLeft: state.cash - kitCost - hogCost,
+    landCost: plotCost, kitCost, hogCost, cashLeft: state.cash - plotCost - kitCost - hogCost,
     demandBefore: before.demand, demandAfter: after.demand,
     forageBefore: before.forage, forageAfter: after.forage,
     forageCapacityBefore: before.forageCapacity, forageCapacityAfter: after.forageCapacity,
@@ -409,10 +422,12 @@ export function applyFarmAction(state, action) {
     case 'sell-feeder': return sell(state, 'feeder', action);
     case 'sell-market': return sell(state, 'market', action);
     case 'buy-kit': {
-      const error = kitError(state, pen, quantity ?? 0);
+      const error = kitError(state, id, pen, quantity ?? 0);
       if (error) return reject(state, error);
       const clearedForWork = replacePlot(state, plot(pen.id, 'wooded'));
-      return accept(transaction(clearedForWork, 'kit', `Pen kit for Plot ${pen.id}`, -KIT_COST, { id }));
+      const land = landCost(id);
+      const label = land ? `Land and pen kit for Plot ${id}` : `Pen kit for Plot ${id}`;
+      return accept(transaction(clearedForWork, 'kit', label, -(land + KIT_COST), { id }));
     }
     case 'keep-grass': {
       const error = grassError(state, pen);
